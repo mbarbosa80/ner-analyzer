@@ -1,12 +1,10 @@
 // Site settings. Change these here, nowhere else.
 window.SITE_CONFIG = {
-  // Contact form relay (FormSubmit). The first message sent triggers a one-time
-  // activation e-mail to the address below: open it and click "Activate Form".
-  // After activation FormSubmit gives you a random alias; put it here in place of
-  // the address so the e-mail is not visible in the page source:
-  //   "https://formsubmit.co/ajax/<your-alias>"
-  contactEndpoint: "https://formsubmit.co/ajax/mbfigueiredo80@gmail.com",
+  // Contact form relay (FormSubmit), by the form's alias: the messages reach the
+  // author's mailbox, and the address itself is not in the page source.
+  contactEndpoint: "https://formsubmit.co/ajax/793efc9b7562a71eab5e9d46e84d963a",
 
-  // Used only for the fallback when the relay cannot be reached (opens the visitor's mail app).
-  contactEmail: "mbfigueiredo80@gmail.com"
+  // When the relay cannot be reached, the visitor is offered this instead
+  // (no e-mail address is published on the site).
+  fallbackUrl: "https://www.linkedin.com/in/mbarbosa80/"
 };

@@ -14,7 +14,9 @@
       invalid: "Please fill in your name, a valid e-mail and the message.",
       fail: "The message could not be sent from here. ",
       mailto: "Send it from your e-mail app instead",
-      mailtoTail: " (the text you wrote is already in it)."
+      mailtoTail: " (the text you wrote is already in it).",
+      fallback: "Please send it to me on LinkedIn instead",
+      fallbackTail: "."
     },
     pt: {
       sending: "Enviando…",
@@ -22,7 +24,9 @@
       invalid: "Preencha seu nome, um e-mail válido e a mensagem.",
       fail: "Não foi possível enviar a mensagem por aqui. ",
       mailto: "Envie pelo seu aplicativo de e-mail",
-      mailtoTail: " (o texto que você escreveu já vai preenchido)."
+      mailtoTail: " (o texto que você escreveu já vai preenchido).",
+      fallback: "Por favor, me mande pelo LinkedIn",
+      fallbackTail: "."
     }
   };
 
@@ -151,7 +155,12 @@
         form.reset();
       })
       .catch(function () {
-        show("err", esc(t.fail) + '<a href="' + esc(mailtoHref(d)) + '">' + esc(t.mailto) + "</a>" + esc(t.mailtoTail));
+        if (cfg.contactEmail) {
+          show("err", esc(t.fail) + '<a href="' + esc(mailtoHref(d)) + '">' + esc(t.mailto) + "</a>" + esc(t.mailtoTail));
+        } else {
+          show("err", esc(t.fail) + '<a href="' + esc(cfg.fallbackUrl || "#contact") + '" target="_blank" rel="noopener">' +
+               esc(t.fallback) + "</a>" + esc(t.fallbackTail));
+        }
       })
       .then(function () { if (timer) clearTimeout(timer); sendBtn.disabled = false; });
   });
