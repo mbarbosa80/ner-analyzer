@@ -1,0 +1,17 @@
+NER Spatial Coverage Analyzer
+Copyright 2026 Marcelo Barbosa
+
+Original idea, design and development by Marcelo Barbosa
+(https://www.linkedin.com/in/mbarbosa80/).
+
+The idea was born at the end of a major international multi-sport event
+held in Paris in 2024, from the venue technology planning routine of the
+author, and the tool was developed between 2024 and 2026.
+
+Any redistribution or derived work must keep this NOTICE file, the
+copyright notice and this attribution, as required by section 4 of the
+Apache License, Version 2.0.
+
+The author's photo (assets/img/marcelo.jpg) is not covered by the licence
+and may not be reused. The fonts in assets/fonts are under the SIL Open
+Font License.
