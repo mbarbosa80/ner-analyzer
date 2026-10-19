@@ -2,7 +2,7 @@
 
 Source of the public website of the **NER Spatial Coverage Analyzer**, a free desktop tool for venue technology managers. It crosses venue design drawings with the equipment demand spreadsheet, assigns every space to the network room (NER) that serves it, counts the ports and checks the 90 m / 70 m distance limits, entirely on the user's own computer.
 
-**Site:** published with GitHub Pages from this repository.
+**Site:** https://mbarbosa80.github.io/ner-analyzer/ (GitHub Pages, from this repository)
 
 ## About the site
 
