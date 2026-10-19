@@ -1,0 +1,82 @@
+===============================================================================
+  NER SPATIAL COVERAGE ANALYZER  -  version 4.3.0
+  Installation on a Windows computer
+===============================================================================
+
+  (c) 2026 Marcelo Barbosa. Created by Marcelo Barbosa. Free software under
+  the GNU AGPL-3.0: use, study, change and share it, keeping the credit to
+  the author. See LICENSE.txt and NOTICE.txt.
+
+  The one-page guide is
+      docs\QUICK-INSTALL.html  (or docs\QUICK-INSTALL.pdf)
+  the full installation manual is
+      docs\INSTALL.html      (or docs\INSTALL.pdf)
+  and the user manual
+      docs\MANUAL.html       (or docs\MANUAL.pdf)
+  Open either in a browser; the application does not need to be running.
+
+  ON A MAC (Apple Silicon, macOS 11 or later): the package is
+  ner-analyzer-4.3.0-macos-arm64.zip. Unzip it, open Terminal, type "bash "
+  and drag setup.command into the window, press Return. No administrator
+  password. Details: docs/INSTALL.html, section "Installing on a Mac".
+
+-------------------------------------------------------------------------------
+  IN THREE STEPS
+-------------------------------------------------------------------------------
+
+  0. Nothing has to be installed first. Python comes inside the package
+     (vendor\python) and the installer builds it into the application's
+     .python\ folder. No internet, no change to PATH. The computer only has
+     to be a 64-bit Windows 10/11. Administrator rights are NOT required:
+     with them, run setup.bat; without them, run setup-noadmin.bat (the
+     application installs for your account only, in your own profile).
+
+  1. Unzip this file anywhere (right-click > Extract All; the Downloads
+     folder is fine). Tip: right-click the zip > Properties > tick Unblock
+     BEFORE unzipping, and Windows will not ask before each script.
+
+  2. Right-click  setup.bat  >  Run as administrator  >  Yes
+                                         (2 to 5 minutes, no internet)
+     - or, with no administrator rights:  double-click  setup-noadmin.bat
+
+     A plain double-click on setup.bat also works: it asks Windows for the
+     rights and, if they are refused, offers to install for your account only.
+     Opening install.bat does the same thing: it hands over to setup.bat.
+
+     It installs the application into
+         %LOCALAPPDATA%\Programs\ner-analyzer
+     (that is C:\Users\<you>\AppData\Local\Programs\ner-analyzer),
+     registers the sign-in task and the watchdog, starts the server, opens
+     the browser at http://127.0.0.1:8000, puts an "NER Analyzer" shortcut
+     on the desktop and then DELETES the installation files: the unzipped
+     folder and the zip itself. Only the application is left, running.
+
+     A previous version already installed is backed up and REPLACED: its
+     data is kept, and the old version is moved to
+         %LOCALAPPDATA%\Programs\ner-analyzer.previous
+     (delete that folder once the new version works).
+
+  3. On a new installation, create the first account (an administrator).
+     There is no default password.
+
+  Browsers: Google Chrome, Microsoft Edge or Mozilla Firefox (current
+  versions). Later, open the application from the desktop shortcut; the
+  server starts by itself at every sign-in.
+
+     Another folder:            setup.bat D:\Apps\ner-analyzer
+     Install only, start none:  setup.bat --no-services
+     Keep the package:          setup.bat --keep-installer
+
+  In the installed folder:  stop.bat  ·  backup.bat (backup / --restore)
+                            run-tests.bat (the test suite)  ·  autostart.bat remove
+                            reset-password.bat (forgot a password)
+
+-------------------------------------------------------------------------------
+  WHAT THIS PACKAGE DOES NOT CONTAIN
+-------------------------------------------------------------------------------
+
+  No data: no projects, no drawings, no TEAP, no accounts, no password hashes.
+  It is the application only. To carry projects from another installation,
+  see "Carrying projects from another machine" in docs\INSTALL.html.
+
+===============================================================================

@@ -1,5 +1,5 @@
 NER Spatial Coverage Analyzer
-Copyright 2026 Marcelo Barbosa
+Copyright (C) 2026 Marcelo Barbosa
 
 Original idea, design and development by Marcelo Barbosa
 (https://www.linkedin.com/in/mbarbosa80/).
@@ -8,10 +8,44 @@ The idea was born at the end of a major international multi-sport event
 held in Paris in 2024, from the venue technology planning routine of the
 author, and the tool was developed between 2024 and 2026.
 
-Any redistribution or derived work must keep this NOTICE file, the
-copyright notice and this attribution, as required by section 4 of the
-Apache License, Version 2.0.
+This repository holds the application (app/) and its website (the root).
+Both are free software: you can redistribute them and/or modify them under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option)
+any later version. The full text is in LICENSE.
+
+They are distributed in the hope that they will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.
+
+
+ADDITIONAL TERMS (section 7 of the GNU Affero General Public License)
+---------------------------------------------------------------------
+
+1. Attribution (section 7(b)). Every copy and every modified version must
+   keep this NOTICE file (and app/NOTICE.txt) and the author credit
+   "Created by Marcelo Barbosa" where the program shows it: the sign-in
+   screen, the foot of the sidebar, the stamp on the exported PDF and
+   workbook, and the manuals.
+
+2. Modified versions (section 7(c)). A modified version must be marked as
+   changed, with the name of whoever changed it and the date, and must not
+   be presented as the original program or as made by the original author.
+
+3. Names (section 7(e)). This licence grants no right to use the author's
+   name, or the name "NER Spatial Coverage Analyzer", to endorse or promote
+   a modified version or any product derived from it, beyond the
+   attribution in term 1.
+
+
+EXCEPTIONS
+----------
 
 The author's photo (assets/img/marcelo.jpg) is not covered by the licence
 and may not be reused. The fonts in assets/fonts are under the SIL Open
-Font License.
+Font License (licence files next to them). The components the application
+is built on keep their own licences (app/THIRD-PARTY-NOTICES.txt).
+
+This is an independent project. It is not affiliated with, sponsored or
+endorsed by any event organiser, rights holder, federation, venue owner or
+employer, and it contains no document belonging to any of them.

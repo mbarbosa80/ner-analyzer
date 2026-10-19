@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="description" content="One page: how to install or update the NER Spatial Coverage Analyzer on a Windows computer."/>
+<meta name="author" content="Marcelo Barbosa"/>
+<title>NER Analyzer Quick Install</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+/* ---------------------------------------------------------------------------
+   Palette inherited from the application itself: the analyzer's own tokens are
+   the project's design system, so the manual reads as part of the same tool
+   rather than a document about it. Light mode deepens the accent for contrast
+   on paper-white; the notation hues are lifted in dark mode so a red NER dot
+   stays a red NER dot on both grounds.
+   --------------------------------------------------------------------------- */
+:root {
+  --ground:      #f5f7fa;
+  --surface:     #ffffff;
+  --surface-2:   #eceff5;
+  --line:        #d7dce6;
+  --line-soft:   #e6eaf2;
+  --ink:         #101420;
+  --ink-2:       #485266;
+  --ink-3:       #78829a;
+  --accent:      #2563c4;
+  --accent-soft: #e6eefb;
+  --ok:          #1c7a3c;
+  --warn:        #9a5406;
+  --bad:         #b01717;
+  --ter:         #0000cc;
+  --ner-c:       #cc0000;
+  --ner-n:       #9a7a00;
+  --idf:         #7a7a7a;
+  --cow:         #8c5a00;
+  --diva:        #8000a0;
+  --proposed:    #7a009c;
+  --radius:      10px;
+  --shadow:      0 1px 2px rgba(16,20,32,.06), 0 8px 24px rgba(16,20,32,.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0f1117;
+    --surface:     #171a22;
+    --surface-2:   #1e222c;
+    --line:        #2b3040;
+    --line-soft:   #232838;
+    --ink:         #e6e8ee;
+    --ink-2:       #a8b0c1;
+    --ink-3:       #79839a;
+    --accent:      #4a8cff;
+    --accent-soft: #16233a;
+    --ok:          #2ea44f;
+    --warn:        #f28c1a;
+    --bad:         #e05555;
+    --ter:         #6e8cff;
+    --ner-c:       #ff6060;
+    --ner-n:       #e6b800;
+    --proposed:    #c07ae0;
+    --shadow:      0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #0f1117;
+  --surface:     #171a22;
+  --surface-2:   #1e222c;
+  --line:        #2b3040;
+  --line-soft:   #232838;
+  --ink:         #e6e8ee;
+  --ink-2:       #a8b0c1;
+  --ink-3:       #79839a;
+  --accent:      #4a8cff;
+  --accent-soft: #16233a;
+  --ok:          #2ea44f;
+  --warn:        #f28c1a;
+  --bad:         #e05555;
+  --ter:         #6e8cff;
+  --ner-c:       #ff6060;
+  --ner-n:       #e6b800;
+  --proposed:    #c07ae0;
+  --shadow:      0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15.5px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+h1, h2, h3, h4 {
+  font-family: Archivo, "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  text-wrap: balance;
+  margin: 0;
+  line-height: 1.2;
+}
+
+code, .mono, kbd {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.87em;
+}
+
+code {
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 0.08em 0.36em;
+  white-space: nowrap;
+}
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- shell ---------------------------------------------------------------- */
+.wrap {
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 40px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 28px 96px;
+}
+
+.masthead {
+  grid-column: 1 / -1;
+  border-bottom: 1px solid var(--line);
+  padding: 34px 0 22px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px 32px;
+}
+
+.masthead .id { flex: 1 1 340px; min-width: 0; }
+
+.eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+
+h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -0.02em; }
+.masthead p { margin: 10px 0 0; color: var(--ink-2); max-width: 62ch; }
+
+
+/* --- navigation ----------------------------------------------------------- */
+nav {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  font-size: 13.5px;
+  padding-bottom: 20px;
+}
+nav .navgroup {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 22px 0 8px;
+}
+nav .navgroup:first-child { margin-top: 0; }
+nav a {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  padding: 5px 0;
+  color: var(--ink-2);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding-left: 11px;
+  margin-left: -13px;
+}
+nav a:hover { color: var(--ink); border-left-color: var(--line); }
+nav a.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+nav .step {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: var(--ink-3);
+  min-width: 18px;
+  flex: 0 0 auto;
+}
+
+/* --- sections ------------------------------------------------------------- */
+main { min-width: 0; }
+section { margin-bottom: 54px; scroll-margin-top: 24px; }
+section > h2 {
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 4px;
+}
+.screen-step {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+section h3 {
+  font-size: 16.5px;
+  font-weight: 600;
+  margin: 30px 0 10px;
+}
+section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 22px 0 8px;
+  color: var(--ink-2);
+}
+p { margin: 12px 0; max-width: 68ch; }
+ul, ol { margin: 12px 0; padding-left: 22px; max-width: 68ch; }
+li { margin: 5px 0; }
+
+.lede { font-size: 17px; color: var(--ink-2); max-width: 66ch; }
+
+/* --- tables --------------------------------------------------------------- */
+.tablewrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin: 16px 0;
+  box-shadow: var(--shadow);
+}
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; vertical-align: top; border-bottom: 1px solid var(--line-soft); }
+thead th {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; }
+td:first-child { white-space: normal; }
+.ctrl { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink); white-space: nowrap; }
+.ctrl-kind {
+  display: block;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* --- callouts ------------------------------------------------------------- */
+.note {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 14px 18px;
+  margin: 18px 0;
+}
+.note.warn { border-left-color: var(--warn); }
+.note.bad  { border-left-color: var(--bad); }
+.note p:first-child { margin-top: 0; }
+.note p:last-child { margin-bottom: 0; }
+.note .tag {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 5px;
+}
+.note.warn .tag { color: var(--warn); }
+.note.bad .tag  { color: var(--bad); }
+
+.disclaimer {
+  grid-column: 1 / -1;
+  border: 1px solid var(--warn);
+  background: var(--surface);
+  background: color-mix(in srgb, var(--warn) 8%, var(--surface));
+  border-radius: var(--radius);
+  padding: 13px 18px;
+  font-size: 13.5px;
+  color: var(--ink);
+  margin-bottom: 34px;
+}
+
+/* --- swatches ------------------------------------------------------------- */
+.swatch {
+  display: inline-block;
+  width: 13px; height: 13px;
+  border-radius: 3px;
+  vertical-align: -2px;
+  margin-right: 8px;
+  border: 1px solid rgba(128,128,128,.35);
+}
+.dot { border-radius: 50%; }
+.dash { background: transparent !important; border: 2px dashed var(--proposed); }
+
+.pill {
+  display: inline-block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.pathline {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 15px;
+  margin: 14px 0;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ink-2);
+}
+
+.rule { height: 1px; background: var(--line); border: 0; margin: 40px 0; }
+
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: 1fr; gap: 0; padding: 0 18px 70px; }
+  nav {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 22px;
+    margin-bottom: 30px;
+    columns: 2;
+    column-gap: 26px;
+  }
+  nav a { break-inside: avoid; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+<style>
+/* --- additions for the 2.0 manuals ------------------------------------- */
+.legal {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-top: 12px;
+  max-width: 72ch;
+}
+kbd {
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 5px;
+  background: var(--surface);
+  font-size: 0.85em;
+}
+.steps { counter-reset: step; list-style: none; padding-left: 0; }
+.steps > li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 40px;
+  margin: 10px 0;
+}
+.steps > li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 2px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font: 600 12px/26px "IBM Plex Mono", monospace;
+  text-align: center;
+}
+.small { font-size: 13px; color: var(--ink-3); }
+@media print {
+  nav { display: none !important; }
+  .wrap { display: block; max-width: none; padding: 0; }
+  .masthead { padding-top: 0; }
+  section { margin-bottom: 30px; }
+  .tablewrap { overflow: visible; box-shadow: none; }
+  table { font-size: 11.5px; }
+  th, td { padding: 6px 8px; }
+  body { font-size: 12.5px; }
+  h2 { break-after: avoid; }
+  tr, .note { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap" style="grid-template-columns: 1fr; max-width: 860px;">
+<header class="masthead">
+<div class="id">
+<div class="eyebrow">NER Spatial Coverage Analyzer · version 4.3.0 · Windows · macOS</div>
+<h1>Quick install</h1>
+
+<p>One page. Five minutes, no internet, nothing to install first — Python comes inside the package. The full installation manual (<code>docs\INSTALL.html</code>) covers backups, updates, another port, uninstalling and every message the installer can print.</p>
+
+<p class="legal"><strong>Created by Marcelo Barbosa.</strong> © 2026 Marcelo Barbosa. Free software under the GNU AGPL-3.0 (<code>LICENSE.txt</code>): anyone may use, copy, change and share the application and its documentation, with no authorisation needed, as long as the author credit is kept (<code>NOTICE.txt</code>). <code>THIRD-PARTY-NOTICES.txt</code> lists every component's licence.</p>
+</div>
+</header>
+<main>
+<section id="need">
+<h2>What you need</h2>
+<ul>
+<li><strong>Windows 10 or 11, 64-bit</strong>, with about 1 GB of free disk.</li>
+<li><strong>Administrator rights are not required.</strong> With them, run <code>setup.bat</code>; without them (a managed computer where IT will not grant them), run <code>setup-noadmin.bat</code> instead — the application installs for your account only, in your own profile, and nothing is written outside it. If IT offers to type an administrator's password for you, decline: the application would be installed into <em>their</em> profile, and the installer refuses it.</li>
+<li>A current <strong>Google Chrome, Microsoft Edge or Mozilla Firefox</strong>.</li>
+<li>The file <code>ner-analyzer-4.3.0-windows.zip</code> (about 100 MB), downloaded from the link you were sent.</li>
+</ul>
+</section>
+<section id="steps">
+<h2>Install it</h2>
+<ol class="steps">
+<li><strong>Unblock the zip</strong> (optional, saves a Windows warning): right-click <code>ner-analyzer-4.3.0-windows.zip</code> → <em>Properties</em> → tick <em>Unblock</em> → <em>OK</em>.</li>
+<li><strong>Unzip it</strong>: right-click → <em>Extract All…</em>. Your Downloads folder is fine — nothing stays there. Do not run anything from inside the zip.</li>
+<li>Open the <code>ner-analyzer</code> folder. <strong>With administrator rights:</strong> right-click <strong><code>setup.bat</code></strong> → <strong>Run as administrator</strong> → <em>Yes</em> (a plain double-click also works: it asks Windows for the rights itself). <strong>Without them:</strong> double-click <strong><code>setup-noadmin.bat</code></strong>. A black window runs through six numbered steps, two to five minutes.</li>
+<li>Your browser opens at <code>http://127.0.0.1:8000</code> and an <strong>NER Analyzer</strong> shortcut appears on the desktop. <strong>Create the first account</strong> — username, name, a password of at least 10 characters. There is no default user or password; the first account is the administrator.</li>
+<li>Back in the black window, press any key. It closes and, a few seconds later, deletes the unzipped folder and the zip. Only the application is left, running.</li>
+</ol>
+<div class="note">
+<span class="tag">Where it went</span>
+<p><code>C:\Users\&lt;you&gt;\AppData\Local\Programs\ner-analyzer</code>. It starts by itself every time you sign in to Windows, with no window; a watchdog restarts it within two minutes if it ever stops. From now on, open it with the desktop shortcut or by typing <code>127.0.0.1:8000</code> into the browser. The application runs only on your computer and makes no connection to the internet.</p>
+</div>
+</section>
+<section id="mac">
+<h2>On a Mac</h2>
+<p>For a MacBook with an <strong>Apple Silicon</strong> processor (M1 or later — Apple menu → <em>About This Mac</em> says <em>Chip Apple M…</em>), macOS 11 or later, about 1 GB free. No administrator password is needed. The file is <code>ner-analyzer-4.3.0-macos-arm64.zip</code> (about 110 MB).</p>
+<ol class="steps">
+<li><strong>Unzip it</strong>: double-click the zip in Downloads. A <code>ner-analyzer</code> folder appears (sometimes inside a folder with the zip's name).</li>
+<li>Open <strong>Terminal</strong> (Spotlight: <kbd>⌘</kbd>+<kbd>Space</kbd>, type <em>Terminal</em>). Type <code>bash</code> and a space, <strong>drag <code>setup.command</code></strong> from the <code>ner-analyzer</code> folder into the Terminal window, and press <kbd>Return</kbd>. Six numbered steps follow, one to three minutes.</li>
+<li>Your browser opens at <code>http://127.0.0.1:8000</code> and an <strong>NER Analyzer</strong> link appears on the Desktop. <strong>Create the first account</strong>, as above.</li>
+<li>Press <kbd>Return</kbd> in Terminal and close it. The unzipped folder and the zip are already gone.</li>
+</ol>
+<div class="note">
+<span class="tag">Where it went</span>
+<p><code>~/Applications/ner-analyzer</code> (your home folder → <em>Applications</em>). It starts by itself when you sign in to the Mac and again if it ever stops. Its <code>mac</code> folder holds <code>stop</code>, <code>start</code>, <code>backup</code> and <code>uninstall</code>. Updating is the same four steps with the new zip: the data is backed up and kept. Double-clicking <code>setup.command</code> also works, but macOS answers <em>Apple could not verify…</em> the first time: click <em>Done</em>, then <em>System Settings → Privacy &amp; Security → Open Anyway</em>. The Terminal way above avoids that.</p>
+</div>
+</section>
+<section id="update">
+<h2>Update to a new version</h2>
+<p>Exactly the same five steps with the new zip. The installer recognises the installed version, backs up its database, keeps every project, account and drawing, and replaces the program files. Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> once in the browser afterwards. The version you replaced is kept next to the new one as <code>ner-analyzer.previous</code> until the next update; delete it once the new version works. No administrator rights are needed for an update either: <code>setup-noadmin.bat</code> (or <code>setup.command</code> on a Mac) installs over the old version for your account and keeps every project.</p>
+</section>
+<section id="help">
+<h2>If something goes wrong</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>You see</th><th>Do this</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">Open File – Security Warning / SmartScreen</td><td>Click <em>More info</em> → <em>Run anyway</em> (or <em>Run</em>). The scripts are plain text — open them in Notepad if you want to read them.</td></tr>
+<tr><td class="ctrl">The administrator rights were not granted</td><td>The Windows prompt was answered <em>No</em>, or your account cannot get them. The window then asks <em>Install without administrator rights, for this account only? [Y/N]</em> — answer <kbd>Y</kbd>. Or close it and double-click <code>setup-noadmin.bat</code>.</td></tr>
+<tr><td class="ctrl">This window runs as another account than the person signed in</td><td>Someone typed another account's password into the prompt. Get the rights on <em>your</em> account, sign in as yourself, run it again.</td></tr>
+<tr><td class="ctrl">The browser says the site cannot be reached</td><td>The server is still starting (20 to 40 seconds after a sign-in). Wait and reload.</td></tr>
+<tr><td class="ctrl">An amber pill in the top bar, or a blank page</td><td>The browser kept an old copy of the interface: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</td></tr>
+<tr><td class="ctrl">Mac: <em>this Mac has an Intel processor</em></td><td>This package is for Apple Silicon (M1 or later). An Intel Mac needs another package — ask Marcelo.</td></tr>
+<tr><td class="ctrl">Mac: <em>Operation not permitted</em> or nothing happens</td><td>A managed Mac (company profile) may block scripts from Downloads. Move the unzipped <code>ner-analyzer</code> folder to your Desktop and repeat step 2; if it still refuses, IT has to allow it.</td></tr>
+<tr><td class="ctrl">Forgot your password</td><td>Ask the administrator to use <em>Reset password</em> in the app. If there is none, or it is you: in the installed folder, double-click <code>reset-password.bat</code> (Mac: <code>mac/reset-password.command</code>), choose the account and type the new password twice.</td></tr>
+<tr><td class="ctrl">Anything else</td><td>Read the message in the black window — it says what stopped and nothing was changed — then check <em>Common problems</em> in <code>docs\INSTALL.html</code> inside the installed folder, or send a screenshot of the window to Marcelo.</td></tr>
+</tbody>
+</table></div>
+</section>
+</main>
+</div>
+</body>
+</html>

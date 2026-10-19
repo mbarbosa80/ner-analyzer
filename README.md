@@ -1,29 +1,29 @@
-# NER Spatial Coverage Analyzer — website
+# NER Spatial Coverage Analyzer
 
-Source of the public website of the **NER Spatial Coverage Analyzer**, a free desktop tool for venue technology managers. It crosses venue design drawings with the equipment demand spreadsheet, assigns every space to the network room (NER) that serves it, counts the ports and checks the 90 m / 70 m distance limits, entirely on the user's own computer.
+A free desktop tool for venue technology managers. It crosses venue design drawings with the equipment demand spreadsheet (TEAP), assigns every space to the network equipment rack (NER) that serves it, counts the ports and checks the 90 m / 70 m distance limits, entirely on the user's own computer. Nothing is sent to the cloud.
 
-**Site:** https://mbarbosa80.github.io/ner-analyzer/ (GitHub Pages, from this repository)
+**Site:** https://mbarbosa80.github.io/ner-analyzer/
+**Download:** [Releases](https://github.com/mbarbosa80/ner-analyzer/releases/latest) — Windows 10/11 (64-bit) and macOS on Apple Silicon. Python comes inside the package; no administrator rights, no internet needed to install.
 
-## About the site
+## What is in this repository
 
-- One static page, English and Portuguese (language switch in the top bar).
-- No framework, no build step, no cookies, no trackers, no third-party fonts.
-- Contact form relayed by [FormSubmit](https://formsubmit.co) (settings in `assets/js/config.js`).
+| Folder | What it is |
+|---|---|
+| `app/` | The application: Python server (FastAPI, PyMuPDF), React interface, tests, installers, manuals (`app/docs`). See [`app/README.md`](app/README.md) and [`app/CHANGELOG.md`](app/CHANGELOG.md). |
+| root (`index.html`, `assets/`) | The website, served by GitHub Pages. One static page, English and Portuguese, no cookies, no trackers. Run it locally with `start-site.bat` / `start-site.command` and open http://localhost:8080. |
 
-Run it locally: `start-site.bat` (Windows) or `start-site.command` (macOS), then open http://localhost:8080.
-
-## The tool
-
-The public edition of the NER Analyzer (Windows and macOS packages, user manual and full source code) will be published in this repository's **Releases**. Until then the download area on the site says *coming soon*.
+The installable packages are published as Release assets, not committed (GitHub refuses files over 100 MB).
 
 ## Licence and credit
 
-Created by **Marcelo Barbosa** ([LinkedIn](https://www.linkedin.com/in/mbarbosa80/)). Licensed under the Apache License 2.0 (see `LICENSE` and `NOTICE.txt`). Any copy or derived work must keep the copyright notice and the attribution to the original author.
+Created by **Marcelo Barbosa** ([LinkedIn](https://www.linkedin.com/in/mbarbosa80/)). Free software under the [GNU AGPL-3.0](LICENSE): use it, study it, change it and share it, keeping the credit to the author — an additional term of the licence, see [`NOTICE.txt`](NOTICE.txt). The AGPL is also the licence of PyMuPDF, the library that reads the drawings. The components the application is built on keep their own licences ([`app/THIRD-PARTY-NOTICES.txt`](app/THIRD-PARTY-NOTICES.txt)).
 
-Exceptions: the fonts in `assets/fonts/` are under the SIL Open Font License (licence files next to them); the author's photo (`assets/img/marcelo.jpg`) is not licensed for reuse.
+Exceptions: the fonts in `assets/fonts/` are under the SIL Open Font License; the author's photo (`assets/img/marcelo.jpg`) is not licensed for reuse.
 
-This is an independent project. It is not affiliated with, sponsored or endorsed by any event organiser, rights holder, federation or employer.
+This is an independent project. It is not affiliated with, sponsored or endorsed by any event organiser, rights holder, federation, venue owner or employer, and it contains no document belonging to any of them.
+
+This tool supports the design process. It does not replace engineering approval, a site survey, cable route validation or physical inspection.
 
 ---
 
-**PT-BR:** Código do site do NER Spatial Coverage Analyzer, criado por Marcelo Barbosa. Site estático bilíngue, sem cookies nem rastreadores. A edição pública da ferramenta (pacotes Windows e macOS, manual e código-fonte) será publicada em *Releases* deste repositório.
+**PT-BR:** Ferramenta gratuita para gestores de tecnologia de venues: cruza os desenhos de design da venue com a planilha de demanda de equipamentos (TEAP), define qual rack de equipamentos de rede (NER) atende cada espaço, conta os pontos e confere os limites de 90 m / 70 m, tudo no próprio computador. Criada por Marcelo Barbosa. Software livre sob a GNU AGPL-3.0, mantendo o crédito ao autor (`NOTICE.txt`). Pacotes para Windows e Mac em *Releases*; o código está em `app/` e o site na raiz.

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="description" content="How to install, update, back up and remove the NER Spatial Coverage Analyzer on Windows."/>
+<meta name="author" content="Marcelo Barbosa"/>
+<title>NER Analyzer Installation</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+/* ---------------------------------------------------------------------------
+   Palette inherited from the application itself: the analyzer's own tokens are
+   the project's design system, so the manual reads as part of the same tool
+   rather than a document about it. Light mode deepens the accent for contrast
+   on paper-white; the notation hues are lifted in dark mode so a red NER dot
+   stays a red NER dot on both grounds.
+   --------------------------------------------------------------------------- */
+:root {
+  --ground:      #f5f7fa;
+  --surface:     #ffffff;
+  --surface-2:   #eceff5;
+  --line:        #d7dce6;
+  --line-soft:   #e6eaf2;
+  --ink:         #101420;
+  --ink-2:       #485266;
+  --ink-3:       #78829a;
+  --accent:      #2563c4;
+  --accent-soft: #e6eefb;
+  --ok:          #1c7a3c;
+  --warn:        #9a5406;
+  --bad:         #b01717;
+  --ter:         #0000cc;
+  --ner-c:       #cc0000;
+  --ner-n:       #9a7a00;
+  --idf:         #7a7a7a;
+  --cow:         #8c5a00;
+  --diva:        #8000a0;
+  --proposed:    #7a009c;
+  --radius:      10px;
+  --shadow:      0 1px 2px rgba(16,20,32,.06), 0 8px 24px rgba(16,20,32,.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0f1117;
+    --surface:     #171a22;
+    --surface-2:   #1e222c;
+    --line:        #2b3040;
+    --line-soft:   #232838;
+    --ink:         #e6e8ee;
+    --ink-2:       #a8b0c1;
+    --ink-3:       #79839a;
+    --accent:      #4a8cff;
+    --accent-soft: #16233a;
+    --ok:          #2ea44f;
+    --warn:        #f28c1a;
+    --bad:         #e05555;
+    --ter:         #6e8cff;
+    --ner-c:       #ff6060;
+    --ner-n:       #e6b800;
+    --proposed:    #c07ae0;
+    --shadow:      0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #0f1117;
+  --surface:     #171a22;
+  --surface-2:   #1e222c;
+  --line:        #2b3040;
+  --line-soft:   #232838;
+  --ink:         #e6e8ee;
+  --ink-2:       #a8b0c1;
+  --ink-3:       #79839a;
+  --accent:      #4a8cff;
+  --accent-soft: #16233a;
+  --ok:          #2ea44f;
+  --warn:        #f28c1a;
+  --bad:         #e05555;
+  --ter:         #6e8cff;
+  --ner-c:       #ff6060;
+  --ner-n:       #e6b800;
+  --proposed:    #c07ae0;
+  --shadow:      0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15.5px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+h1, h2, h3, h4 {
+  font-family: Archivo, "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  text-wrap: balance;
+  margin: 0;
+  line-height: 1.2;
+}
+
+code, .mono, kbd {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.87em;
+}
+
+code {
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 0.08em 0.36em;
+  white-space: nowrap;
+}
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- shell ---------------------------------------------------------------- */
+.wrap {
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 40px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 28px 96px;
+}
+
+.masthead {
+  grid-column: 1 / -1;
+  border-bottom: 1px solid var(--line);
+  padding: 34px 0 22px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px 32px;
+}
+
+.masthead .id { flex: 1 1 340px; min-width: 0; }
+
+.eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+
+h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -0.02em; }
+.masthead p { margin: 10px 0 0; color: var(--ink-2); max-width: 62ch; }
+
+
+/* --- navigation ----------------------------------------------------------- */
+nav {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  font-size: 13.5px;
+  padding-bottom: 20px;
+}
+nav .navgroup {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 22px 0 8px;
+}
+nav .navgroup:first-child { margin-top: 0; }
+nav a {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  padding: 5px 0;
+  color: var(--ink-2);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding-left: 11px;
+  margin-left: -13px;
+}
+nav a:hover { color: var(--ink); border-left-color: var(--line); }
+nav a.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+nav .step {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: var(--ink-3);
+  min-width: 18px;
+  flex: 0 0 auto;
+}
+
+/* --- sections ------------------------------------------------------------- */
+main { min-width: 0; }
+section { margin-bottom: 54px; scroll-margin-top: 24px; }
+section > h2 {
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 4px;
+}
+.screen-step {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+section h3 {
+  font-size: 16.5px;
+  font-weight: 600;
+  margin: 30px 0 10px;
+}
+section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 22px 0 8px;
+  color: var(--ink-2);
+}
+p { margin: 12px 0; max-width: 68ch; }
+ul, ol { margin: 12px 0; padding-left: 22px; max-width: 68ch; }
+li { margin: 5px 0; }
+
+.lede { font-size: 17px; color: var(--ink-2); max-width: 66ch; }
+
+/* --- tables --------------------------------------------------------------- */
+.tablewrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin: 16px 0;
+  box-shadow: var(--shadow);
+}
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; vertical-align: top; border-bottom: 1px solid var(--line-soft); }
+thead th {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; }
+td:first-child { white-space: normal; }
+.ctrl { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink); white-space: nowrap; }
+.ctrl-kind {
+  display: block;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* --- callouts ------------------------------------------------------------- */
+.note {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 14px 18px;
+  margin: 18px 0;
+}
+.note.warn { border-left-color: var(--warn); }
+.note.bad  { border-left-color: var(--bad); }
+.note p:first-child { margin-top: 0; }
+.note p:last-child { margin-bottom: 0; }
+.note .tag {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 5px;
+}
+.note.warn .tag { color: var(--warn); }
+.note.bad .tag  { color: var(--bad); }
+
+.disclaimer {
+  grid-column: 1 / -1;
+  border: 1px solid var(--warn);
+  background: var(--surface);
+  background: color-mix(in srgb, var(--warn) 8%, var(--surface));
+  border-radius: var(--radius);
+  padding: 13px 18px;
+  font-size: 13.5px;
+  color: var(--ink);
+  margin-bottom: 34px;
+}
+
+/* --- swatches ------------------------------------------------------------- */
+.swatch {
+  display: inline-block;
+  width: 13px; height: 13px;
+  border-radius: 3px;
+  vertical-align: -2px;
+  margin-right: 8px;
+  border: 1px solid rgba(128,128,128,.35);
+}
+.dot { border-radius: 50%; }
+.dash { background: transparent !important; border: 2px dashed var(--proposed); }
+
+.pill {
+  display: inline-block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.pathline {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 15px;
+  margin: 14px 0;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ink-2);
+}
+
+.rule { height: 1px; background: var(--line); border: 0; margin: 40px 0; }
+
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: 1fr; gap: 0; padding: 0 18px 70px; }
+  nav {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 22px;
+    margin-bottom: 30px;
+    columns: 2;
+    column-gap: 26px;
+  }
+  nav a { break-inside: avoid; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+<style>
+/* --- additions for the 2.0 manuals ------------------------------------- */
+.legal {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-top: 12px;
+  max-width: 72ch;
+}
+kbd {
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 5px;
+  background: var(--surface);
+  font-size: 0.85em;
+}
+.steps { counter-reset: step; list-style: none; padding-left: 0; }
+.steps > li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 40px;
+  margin: 10px 0;
+}
+.steps > li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 2px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font: 600 12px/26px "IBM Plex Mono", monospace;
+  text-align: center;
+}
+.small { font-size: 13px; color: var(--ink-3); }
+@media print {
+  nav { display: none !important; }
+  .wrap { display: block; max-width: none; padding: 0; }
+  .masthead { padding-top: 0; }
+  section { margin-bottom: 30px; }
+  .tablewrap { overflow: visible; box-shadow: none; }
+  table { font-size: 11.5px; }
+  th, td { padding: 6px 8px; }
+  body { font-size: 12.5px; }
+  h2 { break-after: avoid; }
+  tr, .note { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+<div class="id">
+<div class="eyebrow">NER Spatial Coverage Analyzer · version 4.3.0 · Windows · macOS</div>
+<h1>Installation manual</h1>
+
+<p>What to install on a new computer, in what order, and how to know it worked — before opening the application for the first time. Once installed, how it works screen by screen is in the <strong>User manual</strong> (<code>docs\MANUAL.html</code>).</p>
+
+<p class="legal"><strong>Created by Marcelo Barbosa.</strong> © 2026 Marcelo Barbosa. The application and its manuals are free software under the GNU AGPL-3.0 (<code>LICENSE.txt</code>): anyone may use, copy, change and share them, with no authorisation needed, as long as the author credit is kept (<code>NOTICE.txt</code>).</p>
+</div>
+
+</header>
+<div class="disclaimer">
+
+<strong>Ten minutes, no internet, nothing to install first, and no administrator rights needed.</strong> Python comes inside the package, along with everything else; the computer only has to be a 64-bit Windows — or an Apple Silicon Mac, with its own package (<a href="#mac">Installing on a Mac</a>). With administrator rights run <code>setup.bat</code>; without them, <code>setup-noadmin.bat</code> — the same installation, for your account only.
+</div>
+<nav aria-label="Contents" id="toc">
+<div class="navgroup">Before installing</div>
+<a href="#pacote">What is in the package</a>
+<a href="#requisitos">What the computer needs</a>
+<a href="#python">Python comes in the package</a>
+<div class="navgroup">Installing</div>
+<a href="#setup">Installing: setup.bat</a>
+<a href="#instalar">install.bat and start.bat</a>
+<a href="#mac">Installing on a Mac</a>
+<a href="#primeiro">First sign-in</a>
+<a href="#autostart">Starting by itself, and the watchdog</a>
+<a href="#conferir">Checking it works</a>
+<div class="navgroup">Maintaining</div>
+<a href="#dados">Where the data lives</a>
+<a href="#backup">Backup and restore</a>
+<a href="#migrar">Carrying projects from another machine</a>
+<a href="#atualizar">Updating to a new version</a>
+<a href="#desinstalar">Uninstalling</a>
+<a href="#problemas">Common problems</a>
+<div class="navgroup">For the maintainer</div>
+<a href="#gerar">Building the package</a>
+<a href="#sobre">Version and licence</a>
+</nav>
+<main>
+<!-- ================================================================== -->
+<section id="pacote">
+<h2>What is in the package</h2>
+
+<p class="lede">One file: <code>ner-analyzer-4.3.0-windows.zip</code>, about 100 MB, accompanied by <code>ner-analyzer-4.3.0-windows.zip.sha256</code> to check the copy.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Inside the zip</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">setup.bat</td><td>The installer, and the only file to run: installs into a folder of its own, replaces a previous version keeping its data, registers the tasks, starts the server, opens the browser and then deletes the unzipped package and the zip. Section <a href="#setup">Installing</a>.</td></tr>
+<tr><td class="ctrl">setup-noadmin.bat</td><td>The same installer without the Windows administrator prompt (<code>setup.bat --no-admin</code>): for a managed computer where the rights cannot be granted. It installs for the account signed in, in that account's profile, and nothing else differs.</td></tr>
+<tr><td class="ctrl">install.bat · start.bat · stop.bat</td><td>The pieces <code>setup.bat</code> runs underneath. Opening <code>install.bat</code> in the unzipped package hands over to <code>setup.bat</code>, so it does the same thing.</td></tr>
+<tr><td class="ctrl">autostart.bat</td><td>Start at sign-in and install the watchdog; <code>autostart.bat remove</code> undoes it.</td></tr>
+<tr><td class="ctrl">backup.bat · run-tests.bat · build_package.bat</td><td>Backup and restore; the test suite; building a new package from this installation.</td></tr>
+<tr><td class="ctrl">reset-password.bat</td><td>A new password for an account that forgot it, on this computer (Mac: <code>mac/reset-password.command</code>). See <a href="#problemas">Common problems</a>.</td></tr>
+<tr><td class="ctrl">backend\ · frontend\ · tests\ · tools\</td><td>The application: server, compiled screens (<code>backend\app\static</code>), tests and operating scripts.</td></tr>
+<tr><td class="ctrl">vendor\python\</td><td>Python 3.12 itself (64-bit): the official python.org <em>embeddable package</em>, 11 MB, signed by the Python Software Foundation. The installer unpacks it into <code>.python\</code>. It is what makes installing Python unnecessary.</td></tr>
+<tr><td class="ctrl">vendor\wheels\</td><td>Every Python package the application depends on, already downloaded, built for that Python 3.12 on 64-bit Windows — and <code>pip</code> itself, which the installer uses to install them. It is what makes the internet unnecessary.</td></tr>
+<tr><td class="ctrl">docs\</td><td>This manual, the one-page <em>Quick install</em> (<code>QUICK-INSTALL.html</code>) and the User manual (HTML and PDF), the project history and the technical notes.</td></tr>
+<tr><td class="ctrl">VERSION · CHANGELOG.md · PACKAGE.txt · MANIFEST.txt</td><td>The version, what changed in each version, the package's record (version, date, counts) and the file list with each file's hash.</td></tr>
+<tr><td class="ctrl">LICENSE.txt · NOTICE.txt · THIRD-PARTY-NOTICES.txt</td><td>The licence (GNU AGPL-3.0, full text); the author credit <em>Created by Marcelo Barbosa</em>, kept as an additional term of the licence (section 7(b)); and the licence of every third-party component the package carries.</td></tr>
+<tr><td class="ctrl">data\</td><td>Empty, holding only a <code>.keep</code> marker. It is where the database and the uploaded documents will be born. <code>setup.bat</code> does not copy it into the target folder.</td></tr>
+</tbody>
+</table></div>
+<div class="note warn">
+<span class="tag">The package carries no data</span>
+
+<p>No projects, no drawings, no TEAP, no accounts and no password hashes. That is a security property, not tidiness: the builder <strong>refuses</strong> a package that includes the <code>data</code> folder, and checks the file list before writing the zip. The practical consequence: the USB stick with the package is just software, and can travel like any installer and be shared freely under the licence (<a href="#sobre">Version and licence</a>).</p>
+</div>
+</section>
+<!-- ================================================================== -->
+<section id="requisitos">
+<h2>What the computer needs</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Item</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">Windows 10 / 11, 64-bit</td><td>The compiled packages in the zip are for 64-bit Windows. (A Mac with Apple Silicon has its own package: section <a href="#mac">Installing on a Mac</a>.)</td></tr>
+<tr><td class="ctrl">Visual C++ runtime</td><td>The numeric packages use Microsoft's <code>msvcp140.dll</code>, which virtually every Windows already has (any <em>Microsoft Visual C++ Redistributable 2015–2022</em> installs it, and almost every program brings one). When it is missing, the installer places the copy bundled inside the packages next to Python, with no administrator — and says on screen which of the two happened. There is nothing to install beforehand.</td></tr>
+<tr><td class="ctrl">~1 GB of disk</td><td>About 350 MB of that is the private Python (<code>.python\</code>) the installer builds inside the folder; the rest is the package and room for the first books.</td></tr>
+<tr><td class="ctrl">Administrator rights</td><td><strong>Not required.</strong> Nothing in the installation needs them: the application goes into the person's own profile, its two scheduled tasks are per-user, the server listens on <code>127.0.0.1</code> only. <code>setup.bat</code> asks Windows for them when it starts, because on some managed computers a script run without them is refused by policy before it starts; when they are refused — or cannot be granted at all — it offers to install <strong>for this account only</strong>, which is exactly what it does with them. <code>setup-noadmin.bat</code> (or <code>setup.bat --no-admin</code>) skips the question. If they are granted, they must belong to <strong>the person who will use the application</strong>, signed in as themselves: typing another account's administrator name and password into the prompt would install the application in that other account's profile, and setup refuses it (section <a href="#problemas">Common problems</a>).</td></tr>
+<tr><td class="ctrl">A browser</td><td>Google Chrome, Microsoft Edge or Mozilla Firefox, in a current version. Safari and Internet Explorer are not supported.</td></tr>
+<tr><td class="ctrl">Memory</td><td>8 GB works; 16 GB leaves room to export a 75-page book with the browser and Outlook open.</td></tr>
+</tbody>
+</table></div>
+
+<p>That is the list. <strong>No Python installed</strong>, no internet, no database server, no web server, no Node.js, no Docker — and no artificial intelligence of any kind: nothing in the folder calls out to any model, service or account.</p>
+</section>
+<!-- ================================================================== -->
+<section id="python">
+<h2>Python comes in the package</h2>
+
+<p class="lede">There is nothing to install before the application. The Python it uses lives inside its own folder.</p>
+
+<p>The application is a server written in Python. Rather than require every computer to have Python installed — a download, an installer, a PATH option to tick — the package carries in <code>vendor\python\</code> the official python.org <strong>embeddable package</strong>: the complete Python 3.12 for 64-bit Windows, in an 11 MB zip made precisely to be shipped inside a program. <code>install.bat</code> unpacks it into <code>.python\</code>, beside <code>backend\</code>, and installs the packages from <code>vendor\wheels</code> into it.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Consequence</th><th>In practice</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">Nothing outside the folder</td><td>That Python is not added to PATH, does not appear in <em>Programs and Features</em>, does not touch the registry. Deleting the folder deletes the Python with it.</td></tr>
+<tr><td class="ctrl">Isolated from the rest of the machine</td><td>The file <code>.python\python312._pth</code> is that Python's entire search path: the standard library, the packages installed in <code>.python\Lib\site-packages</code> and the application's <code>backend\</code>. Another Python installed on the machine, environment variables such as <code>PYTHONPATH</code> and user packages are ignored. Two Pythons on the same machine never see each other.</td></tr>
+<tr><td class="ctrl">If a Python is already there</td><td>A Python installed on the machine is not used, not changed and not required: with <code>vendor\python\</code> in the package, the installer always uses the embedded Python. A <code>.python\</code> already in the folder (a previous installation) is deleted and unpacked again from the package's zip; if the server has it in use, the installer stops with <code>The previous runtime is in use</code> — <code>stop.bat</code> and run it again. (<code>setup.bat</code> never meets this: in <em>update</em> mode it stops the server and moves the whole old installation aside before installing.)</td></tr>
+<tr><td class="ctrl">Provenance checked</td><td>The package builder only accepts the python.org zip whose SHA-256 is pinned in <code>tools\make_package.py</code>, and the installer checks the digital signature of <code>python.exe</code> (<em>Python Software Foundation</em>) after unpacking, printing the publisher on screen.</td></tr>
+<tr><td class="ctrl">Fixed version: 3.12.10</td><td>The packages in <code>vendor\wheels</code> are built for Python 3.12, and 3.12.10 (April 2025) is the last 3.12 published with Windows binaries — later ones are source-only security releases. Changing the Python means changing the whole package set, and is a new version of the application, not a file swap.</td></tr>
+</tbody>
+</table></div>
+<div class="note">
+<span class="tag">For the developer</span>
+
+<p>A copy of the code without <code>vendor\python\</code> (a development checkout) makes <code>install.bat</code> use the Python installed on the machine (3.11 or newer, 64-bit, preferably 3.12) and build a virtual environment in <code>.venv\</code>. Every script looks for <code>.python\</code> first and <code>.venv\</code> second, so the two arrangements coexist and the package built on a development machine always carries the embedded Python.</p>
+</div>
+</section>
+<!-- ================================================================== -->
+<section id="setup">
+<h2>Installing: setup.bat</h2>
+
+<p class="lede">Unzip the file anywhere, right-click <code>setup.bat</code> and choose <em>Run as administrator</em> — or, on a computer where you cannot get administrator rights, double-click <code>setup-noadmin.bat</code>. When it finishes, the application is installed in a folder of its own and running, the browser is open on it, and the installation files (the unzipped folder and the zip itself) are gone. Only the application is left.</p>
+<ol class="steps">
+<li><strong>Unblock the zip</strong> (optional, but it saves a Windows prompt per script): right-click <code>ner-analyzer-4.3.0-windows.zip</code> → <em>Properties</em> → tick <em>Unblock</em> at the bottom → <em>OK</em>. Without it, Windows may show <em>Open File – Security Warning</em> before the script runs; click <em>Run</em>.</li>
+<li><strong>Unzip</strong> the file: right-click → <em>Extract All…</em>. Where does not matter: the Downloads folder is fine, because nothing will stay there. Do not run anything from inside the zip without extracting it. You get a <code>ner-analyzer</code> folder with <code>setup.bat</code> inside.</li>
+<li>Right-click <strong><code>setup.bat</code></strong> → <strong>Run as administrator</strong>, and answer <em>Yes</em> to the Windows prompt. A plain double-click works too: setup notices it has no administrator rights, asks Windows for them, and carries on in a new window. <strong>Without administrator rights</strong> — a managed computer where they cannot be granted — double-click <strong><code>setup-noadmin.bat</code></strong> instead: the same installation, for your account only, with no prompt. The window shows the source folder, the target folder and the mode (<em>install</em> or <em>update</em>), then runs by itself through six numbered steps. Two to five minutes, no internet.</li>
+<li>The browser opens at <code>http://127.0.0.1:8000</code> as soon as the server answers, and an <strong>NER Analyzer</strong> shortcut appears on the desktop. On a new installation, create the first account (section <a href="#primeiro">First sign-in</a>).</li>
+<li>The last screen reads <code>Installed - version 4.3.0</code> and the folder the application went to; on an update, also the version it replaced and where the old one was kept. Press a key: the window closes and, about three seconds later, the unzipped package and the zip are deleted.</li>
+</ol>
+<div class="tablewrap"><table>
+<thead><tr><th>Step</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">before [1/6]</td><td>Two checks. <strong>Administrator rights</strong>: without them, <code>Administrator rights are needed. Windows will ask for them now...</code>, the Windows prompt, and the setup continues in a new window (<code>The setup continues in the new window. This one can be closed.</code>). If the prompt is refused: <code>[X] The administrator rights were not granted.</code> and the question <code>Install without administrator rights, for this account only? [Y/N]</code> — <kbd>Y</kbd> carries on in this window, for this account (<code>Installing without administrator rights, for this account only.</code>); <kbd>N</kbd> installs nothing. With <code>--no-admin</code>, or from <code>setup-noadmin.bat</code>, the prompt is skipped and the same line is shown. <strong>The right person</strong>: if the window runs as another account than the person signed in (someone typed an administrator's name and password into the prompt), setup stops with <code>[X] This window runs as another account than the person signed in.</code> and installs nothing.</td></tr>
+<tr><td class="ctrl">[1/6]</td><td><code>New installation.</code>, or <code>Replacing version 2.x.y - its data is kept.</code> when the target folder already holds an installation (recognised by <code>.python\python.exe</code>, <code>.venv\Scripts\python.exe</code> or <code>data\ner.sqlite3</code>). When replacing, in this order: both scheduled tasks are disabled, so that neither starts the old version while it is being replaced; the database is backed up (<code>Backup of the database first (backup.bat)...</code>) into <code>data\backup-YYYYMMDD-HHMMSS\</code>; the server is stopped; the <strong>old installation is moved aside, whole</strong>, to <code>ner-analyzer.previous</code> next to it (a <code>.previous</code> left by an earlier update is removed first); and its <code>data\</code> folder is moved into the new, empty installation folder. No file of the old version survives into the new one, and nothing of the old version is deleted. If the backup fails, or the old folder cannot be moved because something still has it open, setup stops with an <code>[X]</code>, says <code>Nothing was changed.</code> and re-enables the tasks.</td></tr>
+<tr><td class="ctrl">[2/6]</td><td><code>Copying the package into the target folder...</code>: everything but <code>setup.bat</code> and <code>setup-noadmin.bat</code> themselves and the zip's empty <code>data\</code> folder. The copied files lose the Windows "downloaded from the internet" mark, so the installed scripts run without a security prompt.</td></tr>
+<tr><td class="ctrl">[3/6]</td><td><code>Installing (install.bat in the target)...</code>: <code>install.bat</code> runs <em>in the target folder</em> and shows its own steps, also numbered <code>[1/6]</code> to <code>[6/6]</code>: the package's Python unpacked into <code>.python\</code>, <code>pip</code>, the packages from <code>vendor\wheels</code>, and the proof that every component loads (<code>all components load</code>). It is section <a href="#python">Python comes in the package</a>, with nothing to do by hand.</td></tr>
+<tr><td class="ctrl">[4/6]</td><td><code>Registering the sign-in task and the watchdog (autostart.bat)...</code>: the sign-in task <strong>NER Spatial Coverage Analyzer</strong> and the watchdog <strong>NER Analyzer watchdog</strong>, both for the person signed in and both set to survive a laptop on battery (section <a href="#autostart">Starting by itself, and the watchdog</a>). With <code>--no-services</code> the line reads <code>No scheduled task and no server: --no-services.</code> and setup goes straight to <code>[6/6]</code>. If <code>autostart.bat</code> reports a problem, <code>[*] autostart.bat reported a problem (above).</code>: the application stays installed and setup moves on to <code>[6/6]</code>.</td></tr>
+<tr><td class="ctrl">[5/6]</td><td><code>Starting the server through the scheduled task...</code> (not from the setup window, so closing it does not bring the server down), then up to 90 seconds of waiting for <code>http://127.0.0.1:8000/healthz</code>. When it answers, the default browser opens on it, as the person signed in and not with the setup window's administrator rights, and the <strong>NER Analyzer</strong> desktop shortcut is written. If the server does not answer in time, <code>[*] The server did not answer within 90 s.</code>; the shortcut is written all the same.</td></tr>
+<tr><td class="ctrl">[6/6]</td><td><code>Removing the installation files...</code>: first <code>vendor\</code> inside the installed folder (about 100 MB of packages and the Python zip, which the running application never reads), always; then, once the window closes, every file of the unzipped package (by the package's own <code>MANIFEST.txt</code> list, never a whole folder), its <code>vendor\</code> folder, the folders left empty, and <code>ner-analyzer-4.3.0-windows.zip</code> with its <code>.sha256</code>, wherever they are: in the unzipped folder, one or two levels up, or in Downloads.</td></tr>
+</tbody>
+</table></div>
+<div class="note warn">
+<span class="tag">If a step fails after the old version was moved aside</span>
+
+<p>The copy, <code>install.bat</code> or the runtime check failing in <em>update</em> mode puts everything back: the <code>data\</code> folder returns to the old installation, the half-built new folder is removed, <code>ner-analyzer.previous</code> is moved back to <code>ner-analyzer</code>, the tasks are re-enabled and the old server is started (<code>Version 2.x.y is back in …, with its data.</code>). The data is never deleted at any point: it moves with the installation, and its backup is inside it. If even the move back fails, setup says where each part is and deletes nothing.</p>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th>How to call it</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">setup.bat</td><td>Installs into <code>%LOCALAPPDATA%\Programs\ner-analyzer</code>, that is <code>C:\Users\&lt;you&gt;\AppData\Local\Programs\ner-analyzer</code>: the folder Windows reserves for per-user programs, never synced by OneDrive.</td></tr>
+<tr><td class="ctrl">setup.bat D:\Apps\ner-analyzer</td><td>Installs into the given folder (from a Command Prompt run as administrator, in the unzipped folder). Keep it outside OneDrive, Dropbox and network drives: for OneDrive and Dropbox setup shows a <code>[*]</code> warning, but does not refuse. To update an installation made this way, give the same folder again.</td></tr>
+<tr><td class="ctrl">setup.bat --no-services</td><td>Installs and cleans up, but registers no task, starts nothing and writes no desktop shortcut. For whoever will start with <code>start.bat</code>, or to test an installation without touching the tasks of another one under the same user (the task names are fixed). Tasks that already existed and were disabled at <code>[1/6]</code> are re-enabled as they were.</td></tr>
+<tr><td class="ctrl">setup.bat --keep-installer</td><td>Does everything, but leaves the unzipped package and the zip where they are. The <code>vendor\</code> inside the installed folder is removed all the same.</td></tr>
+<tr><td class="ctrl">setup.bat --no-admin<br/>setup-noadmin.bat</td><td>Does not ask Windows for administrator rights: installs for this account only, in the person's own profile, with the sign-in task and the watchdog registered for that account. For a managed computer where the rights cannot be granted. Everything else is as with <code>setup.bat</code>; <code>setup-noadmin.bat</code> is the double-click form of it and passes any other option along.</td></tr>
+<tr><td class="ctrl">setup.bat --help</td><td>Shows the options (also <code>-h</code> and <code>/?</code>) and installs nothing. The options can be combined, in any order, with the target folder.</td></tr>
+</tbody>
+</table></div>
+<div class="note">
+<span class="tag">What it refuses</span>
+
+<p>Running from a copy that is not a built package (no <code>MANIFEST.txt</code>, or no Python under <code>vendor\python</code>). Installing into the unzipped folder itself, inside it, or into a folder that contains it (the unzipped folder is deleted at the end). Running as another account than the person signed in. When a step stops with an <code>[X]</code> message, <strong>the package is not deleted</strong>: the message says why, the tasks held in <em>update</em> mode are re-enabled, and the package can be run again once the cause is fixed (<a href="#problemas">Common problems</a>). The <code>[*]</code> warnings of steps <code>[4/6]</code> and <code>[5/6]</code> do not stop the installation.</p>
+</div>
+<div class="note">
+<span class="tag">Why the clean-up</span>
+
+<p>Deleting the zip and the unzipped folder keeps the machine tidy: one installed copy, and no stale installer left behind to be run again by mistake. It is not there to stop copies: anyone may copy and share the package under the licence (<code>LICENSE.txt</code>, <code>NOTICE.txt</code> and section <a href="#sobre">Version and licence</a>). To keep the package, run <code>setup.bat --keep-installer</code>.</p>
+</div>
+<div class="note warn">
+<span class="tag">After setup.bat there is no vendor\ in the installed folder</span>
+
+<p>Deleted on purpose: it is installation weight, not application weight. The consequence: the installed folder's <code>install.bat</code> <strong>cannot</strong> rebuild <code>.python\</code> on its own; do not run it there. To repair or update an installation, run the <code>setup.bat</code> of a package (the same version or a newer one). A record of what <code>setup.bat</code> did is in <code>data\setup.log</code>.</p>
+</div>
+</section>
+<!-- ================================================================== -->
+<section id="instalar">
+<h2>install.bat and start.bat</h2>
+
+<p class="lede">In the installation package, <code>install.bat</code> is not a second way in: opening it hands over to <code>setup.bat</code> (<code>This is the installation package: handing over to setup.bat…</code>), so whoever opens it by habit gets the same installation, in the same folder, with the same clean-up.</p>
+
+<p><code>install.bat</code> installs in place only where there is no <code>setup.bat</code> beside it, or no <code>MANIFEST.txt</code>: in a development checkout, where it builds a <code>.venv\</code> with the Python installed on the machine (section <a href="#python">Python comes in the package</a>, <em>For the developer</em>), and when <code>setup.bat</code> itself calls it in the target folder. It writes nothing outside its folder, and it can be run again at any time with the server stopped: it rebuilds the private Python from scratch and never touches <code>data\</code>.</p>
+
+<p><code>start.bat</code> is not needed after <code>setup.bat</code>: the server is already running with no window, and starts by itself at every sign-in. It stays in the installed folder for whoever wants the server in a console window (closing the window stops it), for example to watch it start after a problem.</p>
+</section>
+<!-- ================================================================== -->
+<section id="mac">
+<h2>Installing on a Mac</h2>
+<p class="lede">The same application, packaged for <strong>Apple Silicon</strong> (M1 or later) on <strong>macOS 11 or later</strong>: <code>ner-analyzer-4.3.0-macos-arm64.zip</code>, about 110 MB, with <code>ner-analyzer-4.3.0-macos-arm64.zip.sha256</code> to check the copy (<code>shasum -a 256</code> in Terminal). No administrator password, no internet, nothing to install first.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>In the package</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">setup.command</td><td>The installer — the macOS twin of <code>setup.bat</code>.</td></tr>
+<tr><td class="ctrl">vendor/python/</td><td>A standalone CPython 3.12.15 for Apple Silicon (python-build-standalone, release 20261009), pinned by its SHA-256 when the package is built.</td></tr>
+<tr><td class="ctrl">vendor/wheels/</td><td>The same 48 Python packages, at the same versions, as the Windows package, built for macOS on Apple Silicon (<code>requirements-lock-mac.txt</code>).</td></tr>
+<tr><td class="ctrl">mac/</td><td><code>start.command</code>, <code>stop.command</code>, <code>backup.command</code>, <code>run-tests.command</code>, <code>autostart.command</code>, <code>uninstall.command</code> — they stay in the installed folder.</td></tr>
+</tbody>
+</table></div>
+<h3>Steps</h3>
+<ol class="steps">
+<li>Double-click the zip in Downloads (Archive Utility unzips it).</li>
+<li>Open <strong>Terminal</strong>, type <code>bash</code> and a space, drag <code>setup.command</code> from the unzipped <code>ner-analyzer</code> folder into the window, press <kbd>Return</kbd>. To choose another folder, add it after the script: <code>bash …/setup.command ~/Documents/ner-analyzer</code>.</li>
+<li>The browser opens at <code>http://127.0.0.1:8000</code>; create the first account (<a href="#primeiro">First sign-in</a>).</li>
+</ol>
+<p>Double-clicking <code>setup.command</code> in Finder works too, but a file downloaded from the internet that Apple has not notarised is held back the first time: macOS says it <em>could not verify</em> the developer. Click <em>Done</em>, open <em>System Settings → Privacy &amp; Security</em>, scroll to the message about <code>setup.command</code> and click <em>Open Anyway</em>. Running it through <code>bash</code> in Terminal, as above, does not ask.</p>
+<h3>What setup.command does</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>Step</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">[1/6]</td><td>Checks the Mac (Apple Silicon, macOS 11 or later) and the package, and takes the downloaded-from-the-internet mark off the unzipped files (they are your own files: no password). Default folder <code>~/Applications/ner-analyzer</code>. An existing installation there means <em>update</em>.</td></tr>
+<tr><td class="ctrl">[2/6]</td><td>On an update: backs up the database into the installation's <code>data/backup-…</code>, stops its server, moves it aside to <code>ner-analyzer.previous</code> and carries its <code>data</code> folder into the new one. If anything later fails, the previous version is put back, data first.</td></tr>
+<tr><td class="ctrl">[3/6]</td><td>Copies the application (never a <code>data</code> folder, never the installer itself).</td></tr>
+<tr><td class="ctrl">[4/6]</td><td>Unpacks Python into <code>.python/</code> and installs the bundled packages into it, offline (<code>pip --no-index --no-deps</code>, the user's own Python packages ignored), then checks every component loads.</td></tr>
+<tr><td class="ctrl">[5/6]</td><td>Registers a <strong>launch agent</strong> for your account (<code>~/Library/LaunchAgents/com.marcelobarbosa.ner-analyzer.plist</code>): the server starts now, at every sign-in, and again if it stops on its own — on a Mac launchd does what the watchdog task does on Windows. Waits for <code>/healthz</code>, opens the browser, writes <code>NER Analyzer.webloc</code> on the Desktop. With <code>--no-services</code> nothing is started.</td></tr>
+<tr><td class="ctrl">[6/6]</td><td>Removes <code>vendor/</code> from the installation and <code>ner-analyzer.previous</code>, then the unzipped package and <code>ner-analyzer-4.3.0-macos-arm64.zip</code> with its <code>.sha256</code> (beside it, one level up, or in Downloads). <code>--keep-installer</code> keeps them. The log is <code>data/setup.log</code>.</td></tr>
+</tbody>
+</table></div>
+<h3>Afterwards</h3>
+<p>Stop the server with <code>mac/stop.command</code> (it starts again at the next sign-in), start it with <code>mac/start.command</code>, back up with <code>mac/backup.command</code> (the same tool as <code>backup.bat</code>), run the tests with <code>mac/run-tests.command</code>. <code>mac/uninstall.command</code> stops it, removes the launch agent and the Desktop link, and deletes the application — the <code>data</code> folder only if you type <code>delete</code>. The data, the backups and the restore work exactly as on Windows: see <a href="#dados">Where the data lives</a> and <a href="#backup">Backup and restore</a>. A backup made on Windows restores on a Mac and the other way round.</p>
+<div class="note warn">
+<span class="tag">Not tested on a Mac by the builder</span>
+<p>The macOS package was built and its installer rehearsed end to end on Linux (same shell steps, a Linux runtime in place of the Mac one: install, update with backup, a broken package rolled back, tests passing in the installed copy, the server answering). The first install on a real Mac is the remaining check: if a step stops, the window says which and <code>data/setup.log</code> has the detail. A company-managed Mac may forbid scripts from Downloads or launch agents; IT has to allow them.</p>
+</div>
+</section>
+
+<section id="primeiro">
+<h2>First sign-in</h2>
+<ol class="steps">
+<li>At the end of <code>setup.bat</code> the browser is already open at <code>http://127.0.0.1:8000</code>. Later, open it with the <strong>NER Analyzer</strong> shortcut on the desktop, or type that address into Chrome, Edge or Firefox. Right after a reboot, give the server 20 to 40 seconds to start.</li>
+<li>The first screen is <strong>Create the first account</strong>: username, display name, password (at least <strong>10 characters</strong>; a phrase you remember beats a scramble of symbols) and the password again. That account is an administrator and creates the others. <strong>There is no default user and no default password.</strong></li>
+<li>You land on the <code>Projects</code> tab. The <code>PT-BR</code> / <code>EN</code> button in the top bar switches the interface language. From here on, the <strong>User manual</strong>.</li>
+</ol>
+<div class="note">
+<span class="tag">Another port</span>
+
+<p>If port 8000 is already taken by another program, <code>start.bat --port 8080</code> starts on another one. For the sign-in task and the watchdog, set the environment variable <code>NER_PORT</code> to the same port before running <code>autostart.bat</code>. The desktop shortcut always points at port 8000.</p>
+</div>
+</section>
+<!-- ================================================================== -->
+<section id="autostart">
+<h2>Starting by itself, and the watchdog</h2>
+
+<p>Optional, but this is how the application behaves on a working machine: no window, up after any reboot, and back within two minutes should it ever stop answering.</p>
+<ol class="steps">
+<li>Double-click <strong><code>autostart.bat</code></strong>. It creates two Windows scheduled tasks for the person signed in (<code>setup.bat</code> runs it for you): <strong>NER Spatial Coverage Analyzer</strong> (at that person's sign-in, starts the server with no window; log in <code>data\server.log</code>) and <strong>NER Analyzer watchdog</strong> (every two minutes, checks that the server answers and starts it again if not; log in <code>data\watchdog.log</code>). Neither needs administrator rights.</li>
+<li>To start it now without signing out: <code>schtasks /run /tn "NER Spatial Coverage Analyzer"</code> in a Command Prompt — or simply wait for the watchdog, which starts it within two minutes.</li>
+<li>To stop the server: <code>stop.bat</code>. To undo both tasks: <code>autostart.bat remove</code>.</li>
+</ol>
+
+<p>The task fires <em>at sign-in</em>, not at boot: the application reads and writes a folder in your profile, so it runs as you and needs no stored password. It fires at <em>your</em> sign-in only — it is registered for the account that ran <code>autostart.bat</code> (<code>tools\signin-task.ps1</code>), which is what lets an account without administrator rights create it; a task for every user of the computer is an administrator's to create. The watchdog goes through a <code>.vbs</code> precisely so that no black window ever flashes on screen every two minutes.</p>
+
+<p>Should Windows refuse the sign-in task all the same, <code>autostart.bat</code> says so (<code>[*] Windows refused the sign-in task</code>) and installs the watchdog regardless. The application then still comes up by itself: the watchdog starts the server within two minutes of signing in, and keeps it up.</p>
+</section>
+<!-- ================================================================== -->
+<section id="conferir">
+<h2>Checking it works</h2>
+
+<p>With the server running, open <code>http://127.0.0.1:8000</code> and confirm:</p>
+<ul>
+<li>the sign-in screen appears, with the <em>Where this data lives</em> statement and <em>version 4.3.0</em> under the title;</li>
+<li>you create the administrator account and reach the <code>Projects</code> tab;</li>
+<li>the left-hand navigation lists the steps from <code>Import</code> to <code>Reports</code>, and the sidebar reads <code>version 4.3.0</code>;</li>
+<li><code>http://127.0.0.1:8000/healthz</code> answers <code>{"status":"ok","version":"4.3.0"}</code>.</li>
+</ul>
+
+<p>For a deeper check, double-click <strong><code>run-tests.bat</code></strong>: around 900 tests, one to two minutes. All passing (<em>All tests passed</em>), the installation is sound — every component loads, the rules compute what the manual says, the exports have the shape the manual describes.</p>
+</section>
+<hr class="rule"/>
+<!-- ================================================================== -->
+<section id="dados">
+<h2>Where the data lives</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Path</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">data\ner.sqlite3<br/>data\ner.sqlite3-wal<br/>data\ner.sqlite3-shm</td><td>The database: projects, spaces, NERs, matches, analyses, accounts and audit log. The <code>-wal</code> and <code>-shm</code> files hold recent changes while the server runs — copying just the <code>.sqlite3</code> by hand silently loses work; use <code>backup.bat</code>.</td></tr>
+<tr><td class="ctrl">data\uploads\project_&lt;id&gt;\</td><td>The PDF books and TEAP workbooks exactly as they were uploaded.</td></tr>
+<tr><td class="ctrl">data\criticality-matrix.xlsx</td><td>The criticality matrix, on an installation where one was loaded: one file for the whole installation, outside any project. Most installations have none.</td></tr>
+<tr><td class="ctrl">data\exports\project_&lt;id&gt;\</td><td>The generated reports (marked-up PDF, workbook, CSV). They can be deleted; they are regenerable.</td></tr>
+<tr><td class="ctrl">data\server.log · data\watchdog.log · data\watchdog-heartbeat.txt</td><td>The server log, the watchdog log (failures only) and the watchdog heartbeat (one line, rewritten every two minutes).</td></tr>
+<tr><td class="ctrl">data\setup.log</td><td>What <code>setup.bat</code> did: mode, source folder, target folder, services, what was deleted. Only on installations it made.</td></tr>
+<tr><td class="ctrl">data\backup-…\</td><td>The backups made by <code>backup.bat</code>.</td></tr>
+<tr><td class="ctrl">.python\</td><td>The installation's private Python, with the packages installed. The installer rebuilds it from <code>vendor\</code>; on an installation made by <code>setup.bat</code>, which keeps no <code>vendor\</code>, a package's <code>setup.bat</code> rebuilds it. To carry the application to another machine, carry the zip, not this folder. (On a development checkout the folder is <code>.venv\</code>.)</td></tr>
+</tbody>
+</table></div>
+
+<p>Everything stays inside the application folder. The server listens on <code>127.0.0.1</code> only, makes no outbound connection, and there is no encryption at rest: the database is protected exactly as far as this machine's disk and Windows account are. The full statement is on the application's sign-in screen.</p>
+</section>
+<!-- ================================================================== -->
+<section id="backup">
+<h2>Backup and restore</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Command</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">backup.bat</td><td>Writes <code>data\backup-YYYYMMDD-HHMMSS\</code> with a <strong>consistent</strong> copy of the database (through SQLite's backup API — valid even while the server is running), the <code>uploads</code> folder and, when the installation has one, <code>criticality-matrix.xlsx</code>. A <code>BACKUP.txt</code> inside says the version, the time, the size and whether the matrix is in it.</td></tr>
+<tr><td class="ctrl">backup.bat --to D:\NER-backups</td><td>The same, into a folder or drive of your choice — which is what makes the backup survive the disk.</td></tr>
+<tr><td class="ctrl">backup.bat --restore data\backup-…</td><td>Puts a backup back. <strong>With the server stopped</strong> (<code>stop.bat</code>) — the script refuses while it is answering. The database and uploads that were there are moved to <code>data\replaced-…\</code>, not deleted; delete that folder once you are sure. The installation's own criticality matrix is replaced only when the backup carries one. The next time the server starts, it points the record of every uploaded file at this installation's <code>data\uploads</code>, whichever folder the backup was taken in.</td></tr>
+</tbody>
+</table></div>
+
+<p>When: before deleting a project, before installing a new version, and periodically to an external drive. Backups under <code>data\</code> accumulate; delete old ones from time to time.</p>
+</section>
+<!-- ================================================================== -->
+<section id="migrar">
+<h2>Carrying projects from another machine</h2>
+
+<p><strong>The recommended way</strong> is to export from the other side (the <code>Reports</code> tab: the workbook, the CSV and the marked-up PDF) and re-import the VDB and the TEAP on the new machine. The new installation is clean, its history belongs to it, and the decisions are retaken with the drawing in front of you.</p>
+
+<p><strong>Copying everything</strong> is possible, and it is what you do to change computers without losing anything:</p>
+<ol class="steps">
+<li>On the source machine, <code>backup.bat --to E:\</code> (a USB stick or a network folder). The backup holds the database, the uploads and the criticality matrix when there is one.</li>
+<li>On the new machine, install the application (sections above) and do <strong>not</strong> create the first account yet — or do; it will be replaced by the accounts in the backup.</li>
+<li>With the server stopped, <code>backup.bat --restore E:\backup-…</code>. Start it. The database migration, if the new version needs one, runs by itself on first start — and on that start the server points the record of every drawing and TEAP at this installation's own <code>data\uploads</code>, so the folder, the drive and the Windows account need not be the ones of the source machine. Each record is moved only when the file is here and is the same file (same SHA-256); each move is written to the project's audit log.</li>
+</ol>
+<div class="note bad">
+<span class="tag">Two things before copying the database</span>
+
+
+<p>First: the copy carries <strong>the accounts with their password hashes</strong>, along with every project, drawing and the audit log. The USB stick becomes the database — treat it as one, and wipe it afterwards.</p>
+<p>Second: from then on there are <strong>two databases that do not talk</strong>. Work done on one is invisible to the other and there is no merge. Decide which machine is authoritative <em>before</em> anyone starts working, not after.</p>
+</div>
+</section>
+<!-- ================================================================== -->
+<section id="atualizar">
+<h2>Updating to a new version</h2>
+
+<p>A new version arrives as another zip, with another number (<code>ner-analyzer-4.3.0-windows.zip</code>). The <code>CHANGELOG.md</code> inside says what changed. Install it exactly like the first time: unzip, right-click <code>setup.bat</code> → <em>Run as administrator</em>, or double-click <code>setup-noadmin.bat</code> (with the same target folder, if you chose one).</p>
+<ol class="steps">
+<li>Setup recognises the installation and says <code>Replacing version 3.x.y - its data is kept.</code> No administrator rights are needed: <code>setup-noadmin.bat</code> updates an installation made with or without them, for the account signed in, and keeps every project, account and drawing.</li>
+<li>It holds both tasks, backs up the database into <code>data\backup-…\</code>, stops the server, moves the old installation aside to <code>ner-analyzer.previous</code> and moves its <code>data\</code> into the new folder.</li>
+<li>It installs the new version in the now-empty folder, registers the tasks again, starts the server, opens the browser and deletes the package. The database migration, if the new version needs one, runs by itself on first start.</li>
+<li>In the browser, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> once: the sidebar shows the new number and the amber <em>the application was updated…</em> pill goes.</li>
+<li>Once the new version works, delete <code>%LOCALAPPDATA%\Programs\ner-analyzer.previous</code>. The next update removes it anyway before keeping the one it replaces.</li>
+</ol>
+
+<p>To go back to the previous version by hand: <code>stop.bat</code>, rename <code>ner-analyzer</code> to anything else, rename <code>ner-analyzer.previous</code> to <code>ner-analyzer</code>, and move the <code>data\</code> folder from the first into the second. If the database was already migrated by the new version, restore the backup setup took (<code>backup.bat --restore data\backup-…</code>) instead of using the migrated one.</p>
+</section>
+<!-- ================================================================== -->
+<section id="desinstalar">
+<h2>Uninstalling</h2>
+<ol class="steps">
+<li>If you want to keep the data: <code>backup.bat --to</code> a folder outside the application.</li>
+<li>In the installed folder, <code>autostart.bat remove</code> (removes both scheduled tasks) and <code>stop.bat</code>.</li>
+<li>Delete the <code>ner-analyzer</code> folder (<code>%LOCALAPPDATA%\Programs\ner-analyzer</code> on an installation made by <code>setup.bat</code>), the <code>ner-analyzer.previous</code> folder beside it if there is one, and the <strong>NER Analyzer</strong> desktop shortcut. There is nothing else: no registry entry, no service, no file outside those folders. The application's Python lived inside it and goes with it.</li>
+</ol>
+</section>
+<!-- ================================================================== -->
+<section id="problemas">
+<h2>Common problems</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">Forgot the password</td><td>An administrator resets it in the app (<em>Account &amp; security</em> → <code>Reset password</code>). With no administrator — or when the administrator is the one who forgot — run <code>reset-password.bat</code> in the installed folder (Mac: <code>mac/reset-password.command</code>): it lists the accounts, asks which one and the new password twice, enables the account if it was disabled and signs out its open sessions. It works with the server running.</td></tr>
+<tr><td class="ctrl">Could not unpack python-3.12.10-embed-amd64.zip</td><td>The zip arrived incomplete or corrupted. Check it with <code>certutil -hashfile … SHA256</code> against the <code>.sha256</code> file and copy it again.</td></tr>
+<tr><td class="ctrl">The bundled Python could not start</td><td>A security policy (AppLocker, application control) blocks programs in that folder. Try <code>C:\NER</code>; if it persists, the machine's administrator has to allow the folder — <code>python.exe</code> is signed by the Python Software Foundation, which is usually enough for a publisher rule.</td></tr>
+<tr><td class="ctrl">DLL load failed while importing …</td><td>The Visual C++ runtime (<code>msvcp140.dll</code>) is missing and the fallback copy could not be used. Install Microsoft's <em>Visual C++ Redistributable 2015–2022 (x64)</em> (<code>vc_redist.x64.exe</code>; that one does need an administrator) and run <code>install.bat</code> again.</td></tr>
+<tr><td class="ctrl">The previous runtime is in use</td><td>The server is running from <code>.python\</code>. <code>stop.bat</code>, then <code>install.bat</code>.</td></tr>
+<tr><td class="ctrl">Python 3.11 or newer was not found</td><td>Only on a copy <em>without</em> <code>vendor\python\</code> (a development checkout). Use the installation package, which carries Python, or install 64-bit Python 3.12 on the development machine.</td></tr>
+<tr><td class="ctrl">Could not create the environment</td><td>A development checkout in a OneDrive, Dropbox or network-drive folder. Move it to <code>C:\NER</code>.</td></tr>
+<tr><td class="ctrl">The browser says the site cannot be reached</td><td>The server is not running, or is still starting (20 to 40 s). Wait and reload; if it persists, <code>start.bat</code> and read <code>data\server.log</code>.</td></tr>
+<tr><td class="ctrl">is already serving — nothing to do</td><td>In the log: another server is already on the port. Not an error; the second copy exits quietly.</td></tr>
+<tr><td class="ctrl">Port 8000 taken by another program</td><td><code>start.bat --port 8080</code>; for the tasks, <code>NER_PORT</code>.</td></tr>
+<tr><td class="ctrl">A blank page, or an amber pill in the top bar</td><td>The browser cached an older interface: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>. If the page stays white, press <kbd>F12</kbd> and look at the <em>Console</em> tab: the red message says what the browser refused. The server states the type of the interface files itself (<code>.js</code> as JavaScript), without relying on the Windows registry, which on many machines says <code>text/plain</code> and would make the browser refuse the interface silently.</td></tr>
+<tr><td class="ctrl">MANIFEST.txt is missing: this folder is not an installation package</td><td><code>setup.bat</code> was run from a copy of the code that is not a built package (a development checkout, or a hand-made zip). Use the package from <code>build_package.bat</code>, or <code>install.bat</code> in the folder itself.</td></tr>
+<tr><td class="ctrl">The target is inside the unzipped package · The unzipped package is inside the target folder</td><td>The target folder and the unzipped folder cannot contain one another, because the unzipped one is deleted at the end. Unzip into Downloads and run again, or give another target folder.</td></tr>
+<tr><td class="ctrl">[*] Windows refused the sign-in task</td><td>A policy of the machine does not let this account register even its own sign-in task; the line above the message is what Windows answered. The watchdog was installed all the same and starts the server within two minutes of every sign-in — nothing else to do. <code>schtasks /query /tn "NER Analyzer watchdog"</code> shows it.</td></tr>
+<tr><td class="ctrl">Could not create the watchdog task</td><td>Windows refused the watchdog (the line above says why — most often a task of that name made earlier from an administrator window, which this account may not replace). Run <code>autostart.bat</code> once from a window opened with <em>Run as administrator</em>, or delete the old task in Task Scheduler. Until then, <code>start.bat</code> starts the application by hand.</td></tr>
+<tr><td class="ctrl">A drawing does not open after a restore</td><td>The backup's <code>uploads</code> folder did not come with the database, or a file in it is not the one the project recorded. The server moves a record only to a file that is in this installation's <code>data\uploads</code> and is the same file; otherwise it leaves the record as it was and says so in <code>data\server.log</code> (<code>upload paths: …</code>). Restore the complete backup folder.</td></tr>
+<tr><td class="ctrl">The server did not answer within 90 s</td><td><code>setup.bat</code> installed and registered the tasks, but the server was not answering yet. Almost always a slow cold start: wait another minute and open <code>http://127.0.0.1:8000</code>; the watchdog keeps trying every two minutes. If it does not come, <code>data\server.log</code> in the installed folder says why.</td></tr>
+<tr><td class="ctrl">The unzipped folder is still there, empty</td><td>A Command Prompt or an Explorer window was open inside it when <code>setup.bat</code> finished; Windows does not remove a folder in use. The files were deleted; delete the folder.</td></tr>
+<tr><td class="ctrl">Windows SmartScreen or <em>Open File – Security Warning</em> before a <code>.bat</code></td><td>The zip was downloaded, and Windows marks everything unzipped from it. Click <em>More info</em> → <em>Run anyway</em> (or <em>Run</em>). To avoid it, unblock the zip before unzipping: right-click → <em>Properties</em> → <em>Unblock</em>. The scripts are plain text; open them in Notepad to read what they do.</td></tr>
+<tr><td class="ctrl">The administrator rights were not granted</td><td>The Windows prompt was answered <em>No</em>, closed, or the account cannot get them. Setup then asks <em>Install without administrator rights, for this account only? [Y/N]</em>: answer <kbd>Y</kbd> and it carries on in the same window. <kbd>N</kbd> installs nothing — run <code>setup.bat</code> as administrator, or <code>setup-noadmin.bat</code>, later.</td></tr>
+<tr><td class="ctrl">This window runs as another account than the person signed in</td><td>Someone typed another account's administrator name and password into the Windows prompt. The window then runs as that account, and the application would be installed in its profile, where the person at the keyboard cannot use it. The line under the message shows both accounts. Grant administrator rights to the person who will use the application (temporarily is enough), sign in as that person, and run setup again.</td></tr>
+<tr><td class="ctrl">The old installation could not be moved</td><td>On an update, something still has a file of the installed folder open: the server that did not stop, an Explorer window or a Command Prompt inside the folder, an editor. Close it and run setup again; nothing was changed. <code>… could not be removed</code> is the same for the <code>ner-analyzer.previous</code> folder an earlier update left: close what has it open, or delete it by hand.</td></tr>
+<tr><td class="ctrl">The page does not work in one browser</td><td>Chrome, Edge and Firefox in a current version are supported. Update the browser, then <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>. Safari and Internet Explorer are not supported.</td></tr>
+<tr><td class="ctrl">The server vanishes with no message</td><td>A process killed from outside: memory during a large export, the laptop leaving Modern Standby, or a policy of the machine itself. The watchdog starts it again within two minutes and records in <code>data\watchdog.log</code> the machine's memory and the standby and power events of the previous half hour — which is what says which of the three it was. Close the browser and Outlook before exporting a whole book.</td></tr>
+<tr><td class="ctrl">ModuleNotFoundError: pymupdf (or another package) after a successful install</td><td>Another Python on the machine left packages under <code>%APPDATA%\Python\Python312\site-packages</code> (a <code>pip install --user</code> at some point), and the installer's pip took them as “already satisfied” while the server, which reads only <code>.python\</code>, never saw them. The installer runs pip without the user site and reinstalls every package into the runtime regardless, so this does not happen on a fresh install. On an installation that already shows it: <code>stop.bat</code>, then from the installed folder <code>.python\python.exe -s -m pip install --no-index --find-links vendor\wheels --no-deps --ignore-installed -r requirements-lock-win.txt</code> (with the package's <code>vendor\wheels</code> unzipped beside it), then <code>start.bat</code>. Deleting the stray <code>%APPDATA%\Python</code> folder is optional and harmless to this application.</td></tr>
+<tr><td class="ctrl">A black window flashes every two minutes</td><td>The watchdog was registered by hand with <code>powershell.exe</code> instead of through <code>autostart.bat</code>. Run <code>autostart.bat</code> again: it registers the task through the <code>.vbs</code>, with no console.</td></tr>
+</tbody>
+</table></div>
+</section>
+<hr class="rule"/>
+<!-- ================================================================== -->
+<section id="gerar">
+<h2>Building the package</h2>
+
+<p class="lede">For whoever maintains the application: how to produce a version's zip from the development installation.</p>
+<ol class="steps">
+<li>The version is in <code>VERSION</code>, in <code>frontend\package.json</code> and at the top of <code>CHANGELOG.md</code> — all three equal. <code>run-tests.bat</code> refuses a mismatch.</li>
+<li>The compiled screens must carry that version: <code>cd frontend &amp;&amp; npm run build</code> (only the development machine needs Node.js).</li>
+<li>Double-click <strong><code>build_package.bat</code></strong>. It needs the internet <em>once</em>: it downloads into <code>vendor\wheels</code> the Python packages of <code>requirements-lock-win.txt</code> for Python 3.12 / 64-bit Windows (~100 MB, <code>pip</code> included) and calls <code>tools\make_package.py</code>, which fetches the python.org <em>embeddable package</em> into <code>vendor\python</code> (11 MB, once) and writes <code>dist\ner-analyzer-&lt;version&gt;-windows.zip</code> and the <code>.sha256</code>. <code>build_package.bat --keep</code> reuses the packages already downloaded.</li>
+</ol>
+
+<p>The builder <strong>refuses</strong> to build when: the <code>data</code> folder or any database, log or upload would enter the package; a file carries a personal Windows path (<code>C:\Users\…</code>); the compiled screens or the manuals do not carry the version in <code>VERSION</code>; the Python zip does not match the SHA-256 pinned in <code>tools\make_package.py</code>; the <code>pip</code> or <code>numpy</code> wheel is missing from <code>vendor\wheels</code>; or a required file is missing. The unpacked <code>.python\</code> folder never enters the package — only the zip it is born from. The single-machine diagnostic scripts under <code>tools\</code> stay out by list; only the operating ones travel. <code>setup.bat</code> and <code>setup-noadmin.bat</code> are required in the package.</p>
+<p><strong>The macOS package</strong> is built by the same packager, on any system: <code>python tools/make_package.py --platform mac</code> → <code>dist/ner-analyzer-&lt;version&gt;-macos-arm64.zip</code>. It needs <code>vendor/python-mac/cpython-3.12.15+20261009-aarch64-apple-darwin-install_only.tar.gz</code> (fetched once from GitHub and refused unless it hashes to the pinned value) and <code>vendor/wheels-mac/</code>, filled with <code>pip download --platform macosx_11_0_arm64 --platform macosx_11_0_universal2 --python-version 3.12 --implementation cp --only-binary=:all: --no-deps -r requirements-lock-mac.txt -d vendor/wheels-mac</code>. It refuses a Windows wheel, a pin without exactly one macOS wheel, and a <code>requirements-lock-mac.txt</code> that drifts from the Windows lock. Every <code>.command</code> is written with its executable bit, so Archive Utility restores it.</p>
+<h3>Two editions</h3>
+<p>Both are built from the same source by <code>tools\make_package.py</code>. The <strong>team edition</strong> (the default) carries the private reference material of the folder <code>backend\app\reference_private\</code>: a client's list of space names and naming table, when the builder has them. The <strong>public edition</strong> — <code>python tools/make_package.py --public</code>, written as <code>ner-analyzer-&lt;version&gt;-public-windows.zip</code> or <code>ner-analyzer-&lt;version&gt;-public-macos-arm64.zip</code> — leaves that folder out (only its <code>README.md</code> travels) along with the archived manual under <code>docs\history\</code>, and refuses to build while any shipped text names an event, an organiser, a venue or an employer. The application works the same without the private material: the TEAP names alone filter the name-only room labels, and the <em>Naming</em> panel shows the application's own naming rule.</p>
+</section>
+<!-- ================================================================== -->
+<section id="sobre">
+<h2>Version and licence</h2>
+
+<p>This manual accompanies <strong>version 4.3.0</strong> of the NER Spatial Coverage Analyzer. Versions follow <em>MAJOR.MINOR.PATCH</em>: a correction that changes no screen and no file bumps the last number (2.0.1); a new feature that keeps everything valid bumps the middle one (2.1.0); a change an existing installation cannot absorb without intervention bumps the first (3.0.0). <code>CHANGELOG.md</code> records each one.</p>
+
+<p class="legal"><strong>Created by Marcelo Barbosa.</strong> © 2026 Marcelo Barbosa. The application and its manuals are free software under the GNU Affero General Public License, version 3 (<code>LICENSE.txt</code>): anyone may use, study, copy, change and share them, and no written authorisation is needed. The author credit <em>Created by Marcelo Barbosa</em> is an additional term of the licence (section 7(b), in <code>NOTICE.txt</code>): every copy and every modified version keeps it. <code>THIRD-PARTY-NOTICES.txt</code> lists every component's licence. Third-party components (Python under <code>vendor\python</code>, under the Python Software Foundation licence; the Python packages under <code>vendor\wheels</code>; the JavaScript libraries compiled into the interface) remain under their own licences.</p>
+</section>
+</main>
+</div>
+<script>
+(function () {
+  // Highlight the section currently in view in the table of contents.
+  var links = Array.prototype.slice.call(document.querySelectorAll("#toc a"));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+
+  if ("IntersectionObserver" in window) {
+    var seen = {};
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { seen[e.target.id] = e.isIntersecting; });
+      var current = null;
+      document.querySelectorAll("main section").forEach(function (s) {
+        if (seen[s.id] && !current) current = s.id;
+      });
+      links.forEach(function (a) { a.classList.remove("on"); });
+      if (current && byId[current]) byId[current].classList.add("on");
+    }, { rootMargin: "-10% 0px -70% 0px" });
+    document.querySelectorAll("main section").forEach(function (s) { obs.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

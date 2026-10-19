@@ -1,0 +1,5 @@
+# Windows scripts keep their CRLF line endings exactly as committed
+*.bat -text
+*.cmd -text
+*.ps1 -text
+*.vbs -text

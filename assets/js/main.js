@@ -4,8 +4,8 @@
   var cfg = window.SITE_CONFIG || {};
 
   var TITLES = {
-    en: "NER Analyzer — Every space, served from the right network room",
-    pt: "NER Analyzer — Cada espaço, atendido pela sala de rede certa"
+    en: "NER Analyzer — Every space, served from the right network rack",
+    pt: "NER Analyzer — Cada espaço, atendido pelo rack de rede certo"
   };
   var MSG = {
     en: {

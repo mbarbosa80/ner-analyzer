@@ -1,0 +1,142 @@
+THIRD-PARTY NOTICES
+===================
+
+The NER Spatial Coverage Analyzer is free software under the GNU AGPL-3.0
+(LICENSE.txt). It is built on the free and open-source components below,
+each under its own licence, which this program does not change. The
+licence texts travel with each component (inside each Python wheel's
+dist-info folder, and in each JavaScript library's own repository).
+
+Python runtime
+--------------
+Python 3.12 (CPython), Python Software Foundation — PSF-2.0
+  https://www.python.org/  (Windows: the python.org embeddable package;
+  macOS: a python-build-standalone build, https://github.com/astral-sh/python-build-standalone)
+
+Python packages (bundled as wheels for the offline installation)
+-----------------------------------------------------------------
+absl-py 2.5.0 — Apache-2.0
+  https://github.com/abseil/abseil-py
+annotated-doc 0.0.5 — MIT
+  https://github.com/fastapi/annotated-doc
+annotated-types 0.8.0 — MIT
+  https://github.com/annotated-types/annotated-types
+anyio 4.14.2 — MIT
+  https://github.com/agronholm/anyio
+certifi 2026.7.22 — MPL-2.0
+  https://github.com/certifi/python-certifi
+click 8.4.2 — BSD-3-Clause
+  https://github.com/pallets/click/
+colorama 0.4.6 — BSD License
+  https://github.com/tartley/colorama
+et_xmlfile 2.0.0 — MIT
+  https://foss.heptapod.net/openpyxl/et_xmlfile
+fastapi 0.141.1 — MIT
+  https://github.com/fastapi/fastapi
+greenlet 3.5.5 — MIT AND PSF-2.0
+  https://greenlet.readthedocs.io
+h11 0.16.0 — MIT
+  https://github.com/python-hyper/h11
+httpcore 1.0.9 — BSD-3-Clause
+  https://www.encode.io/httpcore/
+httptools 0.8.0 — MIT
+  https://github.com/MagicStack/httptools
+httpx 0.28.1 — BSD-3-Clause
+  https://github.com/encode/httpx
+idna 3.19 — BSD-3-Clause
+  https://github.com/kjd/idna
+immutabledict 4.3.1 — MIT
+  https://github.com/corenting/immutabledict
+iniconfig 2.3.0 — MIT
+  https://github.com/pytest-dev/iniconfig
+networkx 3.6.1 — BSD-3-Clause
+  https://networkx.org/
+numpy 2.5.2 — BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+  https://numpy.org
+openpyxl 3.1.5 — MIT
+  https://openpyxl.readthedocs.io
+ortools 9.15.6755 — Apache 2.0
+  https://developers.google.com/optimization/
+packaging 26.3 — Apache-2.0 OR BSD-2-Clause
+  https://github.com/pypa/packaging
+pandas 3.0.5 — BSD License
+  https://pandas.pydata.org
+pip 26.2.1 — MIT
+  https://pip.pypa.io/
+pluggy 1.6.0 — MIT
+protobuf 6.33.6 — 3-Clause BSD License
+  https://developers.google.com/protocol-buffers/
+pydantic 2.13.4 — MIT
+  https://github.com/pydantic/pydantic
+pydantic-settings 2.15.0 — MIT
+  https://github.com/pydantic/pydantic-settings
+pydantic_core 2.46.4 — MIT
+  https://github.com/pydantic/pydantic
+Pygments 2.21.0 — BSD-2-Clause
+  https://pygments.org
+pymupdf 1.28.2 — Dual Licensed - GNU AFFERO GPL 3.0 or Artifex Commercial License
+  https://github.com/pymupdf/pymupdf
+pytest 9.1.1 — MIT
+  https://docs.pytest.org/en/latest/
+python-dateutil 2.9.0.post0 — Dual License
+  https://github.com/dateutil/dateutil
+python-dotenv 1.2.3 — BSD-3-Clause
+  https://github.com/theskumar/python-dotenv
+python-multipart 0.0.32 — Apache-2.0
+  https://github.com/Kludex/python-multipart
+PyYAML 6.0.3 — MIT
+  https://pyyaml.org/
+RapidFuzz 3.14.5 — MIT
+  https://github.com/rapidfuzz/RapidFuzz
+shapely 2.1.2 — BSD 3-Clause
+  https://github.com/shapely/shapely
+six 1.17.0 — MIT
+  https://github.com/benjaminp/six
+SQLAlchemy 2.0.52 — MIT
+  https://www.sqlalchemy.org
+starlette 1.6.0 — BSD-3-Clause
+  https://github.com/Kludex/starlette
+typing-inspection 0.4.4 — MIT
+  https://github.com/pydantic/typing-inspection
+typing_extensions 4.16.0 — PSF-2.0
+  https://github.com/python/typing_extensions
+tzdata 2026.3 — Apache-2.0
+  https://github.com/python/tzdata
+uvicorn 0.52.4 — BSD-3-Clause
+  https://uvicorn.dev/
+watchfiles 1.2.0 — MIT
+  https://github.com/samuelcolvin/watchfiles
+websockets 17.0.1 — BSD-3-Clause
+  https://github.com/python-websockets/websockets
+xlrd 2.0.2 — BSD
+  http://www.python-excel.org/
+
+JavaScript libraries (compiled into the interface)
+--------------------------------------------------
+@types/react-reconciler 0.28.9 — MIT
+  https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-reconciler
+its-fine 1.2.5 — MIT
+  https://github.com/pmndrs/its-fine
+js-tokens 4.0.0 — MIT
+  lydell/js-tokens
+konva 9.3.22 — MIT
+  http://konvajs.org/
+loose-envify 1.4.0 — MIT
+  https://github.com/zertosh/loose-envify
+pdfjs-dist 4.10.38 — Apache-2.0
+  https://mozilla.github.io/pdf.js/
+react 18.3.1 — MIT
+  https://reactjs.org/
+react-dom 18.3.1 — MIT
+  https://reactjs.org/
+react-konva 18.2.16 — MIT
+  git@github.com:konvajs/react-konva.git
+react-reconciler 0.29.2 — MIT
+  https://reactjs.org/
+scheduler 0.23.2 — MIT
+  https://reactjs.org/
+
+PyMuPDF and MuPDF are copyright Artifex Software, Inc., and are available
+under the GNU AGPL-3.0 or a commercial licence; this program uses them under
+the GNU AGPL-3.0. Artifex, MuPDF and PyMuPDF are trademarks of Artifex
+Software, Inc.

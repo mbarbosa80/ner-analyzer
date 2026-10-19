@@ -1,0 +1,10 @@
+services:
+  ner-analyzer:
+    build: .
+    ports: ["8000:8000"]
+    volumes: ["ner-data:/data"]
+    environment:
+      NER_DATA_DIR: /data
+      NER_DATABASE_URL: sqlite:////data/ner.sqlite3
+volumes:
+  ner-data:
