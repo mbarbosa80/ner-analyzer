@@ -70,6 +70,20 @@ export default function App() {
   //  the manual tells people to press after an update, and until now it also
   //  sent them back to the Projects list.
   const [restoredProject, setRestoredProject] = useState(false);
+  //: The menu folds to a narrow rail of step numbers (4.4.0), remembered per
+  //  browser — the drawing gets the width back on a laptop screen. Marcelo,
+  //  22 Oct 2026: "o menu da esquerda também poderia ser retrátil, para
+  //  aumentar a tela de trabalho no mapa".
+  const [navOpen, setNavOpen] = useState<boolean>(() => {
+    try { return localStorage.getItem("ner.sidebar") !== "closed"; }
+    catch { return true; }
+  });
+  const toggleNav = () => setNavOpen((open) => {
+    const next = !open;
+    try { localStorage.setItem("ner.sidebar", next ? "open" : "closed"); }
+    catch { /* private window */ }
+    return next;
+  });
   const [msg, setMsg] = useState<{ text: string; kind: "ok" | "err" } | null>(null);
 
   const reload = useCallback(async () => {
@@ -195,7 +209,28 @@ export default function App() {
 
   return (
     <div className="app">
+      {!navOpen ? (
+      <aside className="sidebar rail">
+        <button className="rail-toggle" onClick={toggleNav} title={t("Show the menu")}
+                aria-label={t("Show the menu")}>»</button>
+        <nav className="nav">
+          {TABS.map((x) => (
+            <button
+              key={x.key}
+              className={tab === x.key ? "active" : ""}
+              disabled={x.needsProject && projectId == null}
+              title={t(x.label)}
+              onClick={() => setTab(x.key)}
+            >
+              {x.step ?? (x.aside ? "⚙" : "▤")}
+            </button>
+          ))}
+        </nav>
+      </aside>
+      ) : (
       <aside className="sidebar">
+        <button className="rail-toggle open" onClick={toggleNav} title={t("Hide the menu")}
+                aria-label={t("Hide the menu")}>«</button>
         <h1>{t("NER Spatial Coverage Analyzer")}</h1>
         <div className="sub">{t("TER / NER placement and coverage study")}</div>
         <div className="sub version" title={`${t("interface")} ${__APP_VERSION__}`}>
@@ -230,6 +265,7 @@ export default function App() {
         </nav>
         {auth.copyright && <div className="copyright">{auth.copyright}</div>}
       </aside>
+      )}
 
       <main className="main">
         <div className="topbar">

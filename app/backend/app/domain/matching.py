@@ -58,6 +58,11 @@ METHOD_BASE_CONFIDENCE: dict[MatchMethod, float] = {
     MatchMethod.NONE: 0.0,
 }
 
+#: An identical name on a TEAP line that carries no space code (4.4.0) — the
+#: best evidence such a line can have, so it clears ``auto_confirm_threshold``
+#: like an exact code does. Ambiguity and placeholder caps still apply.
+EXACT_NAME_NO_CODE_CONFIDENCE = 0.97
+
 PLACEHOLDER_CODE_RX = re.compile(r"\.(DUM|DUMMY|TBC|TBD|XXX)\b", re.IGNORECASE)
 SPACE_CODE_RX = re.compile(r"\b([A-Z]{2,4})\.(\d{2,3})(?:[.\-](\d{1,3}))?(?:[.\-](\d{1,3}))?\b")  # 1–3 digits (4.2.0), as pdf_ingest
 
@@ -376,8 +381,17 @@ def match_spaces(teap_spaces: Sequence[tuple[str, Optional[str], str, Optional[s
             for ds in by_norm.get(nn, []):
                 same_raw = str(ds.name).strip().lower() == str(name).strip().lower()
                 method = MatchMethod.EXACT_NAME if same_raw else MatchMethod.NORMALISED_NAME
+                conf = METHOD_BASE_CONFIDENCE[method]
+                # An identical name is an exact match when the TEAP line has no
+                # space code to go by (4.4.0): it is signed like an exact code,
+                # unless another room answers to it (the ambiguity cap below
+                # lowers it again). A line WITH a code the drawing does not
+                # carry stays for review — the name alone may be the room
+                # next door.
+                if same_raw and not nc and not placeholder:
+                    conf = EXACT_NAME_NO_CODE_CONFIDENCE
                 cands.append(MatchCandidate(
-                    ds, method, 100.0, METHOD_BASE_CONFIDENCE[method],
+                    ds, method, 100.0, conf,
                     "identical name" if same_raw
                     else f"names match after normalisation ('{name}' ~ '{ds.name}')"))
         # 4) fuzzy

@@ -124,6 +124,12 @@ MARKER_LABEL_SIZE = 9.0
 #: from across a key plan (Marcelo, 14 Oct 2026); the viewer does the same.
 REFERENCE_LABEL_SIZE = MARKER_LABEL_SIZE + 2.0
 MARKER_LABEL_FONT = "hebo"          # Helvetica-Bold, one of PyMuPDF's base-14 names
+#: A Wi-Fi point on the exported PDF (4.4.0): the sign a little larger and its
+#: name at the NERs' size, in a darker blue than the sign on a white tag —
+#: the 6.5 pt cyan name straight on the linework was reported unreadable.
+WIFI_SIGN_SIZE = 16.0
+WIFI_LABEL_SIZE = MARKER_LABEL_SIZE
+WIFI_LABEL_INK = (0.0, 0.33, 0.50)
 
 # The colour a marker's *name* is written in, which is not always the colour of
 # its dot. Non-critical yellow is a good fill and a bad ink: #e6b800 text on the
@@ -636,9 +642,21 @@ def export_marked_pdf(
                     sp.circle(p.x, p.y, 5.0, color=colour, fill=colour,
                               fill_opacity=0.35, width=0.6)
                     wcol = COLOURS[ElementKind.WIRELESS]
-                    _draw_wifi(sp, p.x, p.y, 14.0, wcol)
-                    sp.text(p.x + 8, p.y + 9, a.space_name, fontsize=6.5,
-                            fontname=MARKER_LABEL_FONT, color=wcol)
+                    _draw_wifi(sp, p.x, p.y, WIFI_SIGN_SIZE, wcol)
+                    # The name on a white tag under the sign, the way a NER's
+                    # name is written (4.4.0). It was 6.5 pt in the sign's own
+                    # cyan straight on the linework, and the team found it
+                    # small and unreadable on the exported PDF.
+                    wl = a.space_name or ""
+                    if wl:
+                        tw = pymupdf.get_text_length(wl, fontname=MARKER_LABEL_FONT,
+                                                     fontsize=WIFI_LABEL_SIZE)
+                        tx = p.x - tw / 2
+                        ty = p.y + WIFI_LABEL_SIZE + 5
+                        sp.box(tx - 2.5, ty - WIFI_LABEL_SIZE * 0.78 - 1.5, tx + tw + 2.5, ty + 3,
+                               color=wcol, fill=(1, 1, 1), fill_opacity=0.85, width=0.4)
+                        sp.text(tx, ty, wl, fontsize=WIFI_LABEL_SIZE,
+                                fontname=MARKER_LABEL_FONT, color=WIFI_LABEL_INK)
                     ner = next((n for n in ners if n.key == a.ner_key), None)
                     npt = _point_on(ner, sk, p)
                     if draw_links and npt is not None:

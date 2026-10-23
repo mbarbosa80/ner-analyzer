@@ -416,7 +416,7 @@ kbd {
 <div class="wrap">
 <header class="masthead">
 <div class="id">
-<div class="eyebrow">NER Spatial Coverage Analyzer · version 4.3.0 · Windows · macOS</div>
+<div class="eyebrow">NER Spatial Coverage Analyzer · version 4.4.0 · Windows · macOS</div>
 <h1>Installation manual</h1>
 
 <p>What to install on a new computer, in what order, and how to know it worked — before opening the application for the first time. Once installed, how it works screen by screen is in the <strong>User manual</strong> (<code>docs\MANUAL.html</code>).</p>
@@ -457,7 +457,7 @@ kbd {
 <section id="pacote">
 <h2>What is in the package</h2>
 
-<p class="lede">One file: <code>ner-analyzer-4.3.0-windows.zip</code>, about 100 MB, accompanied by <code>ner-analyzer-4.3.0-windows.zip.sha256</code> to check the copy.</p>
+<p class="lede">One file: <code>ner-analyzer-4.4.0-windows.zip</code>, about 100 MB, accompanied by <code>ner-analyzer-4.4.0-windows.zip.sha256</code> to check the copy.</p>
 <div class="tablewrap"><table>
 <thead><tr><th>Inside the zip</th><th>What it is</th></tr></thead>
 <tbody>
@@ -528,11 +528,11 @@ kbd {
 
 <p class="lede">Unzip the file anywhere, right-click <code>setup.bat</code> and choose <em>Run as administrator</em> — or, on a computer where you cannot get administrator rights, double-click <code>setup-noadmin.bat</code>. When it finishes, the application is installed in a folder of its own and running, the browser is open on it, and the installation files (the unzipped folder and the zip itself) are gone. Only the application is left.</p>
 <ol class="steps">
-<li><strong>Unblock the zip</strong> (optional, but it saves a Windows prompt per script): right-click <code>ner-analyzer-4.3.0-windows.zip</code> → <em>Properties</em> → tick <em>Unblock</em> at the bottom → <em>OK</em>. Without it, Windows may show <em>Open File – Security Warning</em> before the script runs; click <em>Run</em>.</li>
+<li><strong>Unblock the zip</strong> (optional, but it saves a Windows prompt per script): right-click <code>ner-analyzer-4.4.0-windows.zip</code> → <em>Properties</em> → tick <em>Unblock</em> at the bottom → <em>OK</em>. Without it, Windows may show <em>Open File – Security Warning</em> before the script runs; click <em>Run</em>.</li>
 <li><strong>Unzip</strong> the file: right-click → <em>Extract All…</em>. Where does not matter: the Downloads folder is fine, because nothing will stay there. Do not run anything from inside the zip without extracting it. You get a <code>ner-analyzer</code> folder with <code>setup.bat</code> inside.</li>
 <li>Right-click <strong><code>setup.bat</code></strong> → <strong>Run as administrator</strong>, and answer <em>Yes</em> to the Windows prompt. A plain double-click works too: setup notices it has no administrator rights, asks Windows for them, and carries on in a new window. <strong>Without administrator rights</strong> — a managed computer where they cannot be granted — double-click <strong><code>setup-noadmin.bat</code></strong> instead: the same installation, for your account only, with no prompt. The window shows the source folder, the target folder and the mode (<em>install</em> or <em>update</em>), then runs by itself through six numbered steps. Two to five minutes, no internet.</li>
 <li>The browser opens at <code>http://127.0.0.1:8000</code> as soon as the server answers, and an <strong>NER Analyzer</strong> shortcut appears on the desktop. On a new installation, create the first account (section <a href="#primeiro">First sign-in</a>).</li>
-<li>The last screen reads <code>Installed - version 4.3.0</code> and the folder the application went to; on an update, also the version it replaced and where the old one was kept. Press a key: the window closes and, about three seconds later, the unzipped package and the zip are deleted.</li>
+<li>The last screen reads <code>Installed - version 4.4.0</code> and the folder the application went to; on an update, also the version it replaced and where the old one was kept. Press a key: the window closes and, about three seconds later, the unzipped package and the zip are deleted.</li>
 </ol>
 <div class="tablewrap"><table>
 <thead><tr><th>Step</th><th>What happens</th></tr></thead>
@@ -543,7 +543,7 @@ kbd {
 <tr><td class="ctrl">[3/6]</td><td><code>Installing (install.bat in the target)...</code>: <code>install.bat</code> runs <em>in the target folder</em> and shows its own steps, also numbered <code>[1/6]</code> to <code>[6/6]</code>: the package's Python unpacked into <code>.python\</code>, <code>pip</code>, the packages from <code>vendor\wheels</code>, and the proof that every component loads (<code>all components load</code>). It is section <a href="#python">Python comes in the package</a>, with nothing to do by hand.</td></tr>
 <tr><td class="ctrl">[4/6]</td><td><code>Registering the sign-in task and the watchdog (autostart.bat)...</code>: the sign-in task <strong>NER Spatial Coverage Analyzer</strong> and the watchdog <strong>NER Analyzer watchdog</strong>, both for the person signed in and both set to survive a laptop on battery (section <a href="#autostart">Starting by itself, and the watchdog</a>). With <code>--no-services</code> the line reads <code>No scheduled task and no server: --no-services.</code> and setup goes straight to <code>[6/6]</code>. If <code>autostart.bat</code> reports a problem, <code>[*] autostart.bat reported a problem (above).</code>: the application stays installed and setup moves on to <code>[6/6]</code>.</td></tr>
 <tr><td class="ctrl">[5/6]</td><td><code>Starting the server through the scheduled task...</code> (not from the setup window, so closing it does not bring the server down), then up to 90 seconds of waiting for <code>http://127.0.0.1:8000/healthz</code>. When it answers, the default browser opens on it, as the person signed in and not with the setup window's administrator rights, and the <strong>NER Analyzer</strong> desktop shortcut is written. If the server does not answer in time, <code>[*] The server did not answer within 90 s.</code>; the shortcut is written all the same.</td></tr>
-<tr><td class="ctrl">[6/6]</td><td><code>Removing the installation files...</code>: first <code>vendor\</code> inside the installed folder (about 100 MB of packages and the Python zip, which the running application never reads), always; then, once the window closes, every file of the unzipped package (by the package's own <code>MANIFEST.txt</code> list, never a whole folder), its <code>vendor\</code> folder, the folders left empty, and <code>ner-analyzer-4.3.0-windows.zip</code> with its <code>.sha256</code>, wherever they are: in the unzipped folder, one or two levels up, or in Downloads.</td></tr>
+<tr><td class="ctrl">[6/6]</td><td><code>Removing the installation files...</code>: first <code>vendor\</code> inside the installed folder (about 100 MB of packages and the Python zip, which the running application never reads), always; then, once the window closes, every file of the unzipped package (by the package's own <code>MANIFEST.txt</code> list, never a whole folder), its <code>vendor\</code> folder, the folders left empty, and <code>ner-analyzer-4.4.0-windows.zip</code> with its <code>.sha256</code>, wherever they are: in the unzipped folder, one or two levels up, or in Downloads.</td></tr>
 </tbody>
 </table></div>
 <div class="note warn">
@@ -591,7 +591,7 @@ kbd {
 <!-- ================================================================== -->
 <section id="mac">
 <h2>Installing on a Mac</h2>
-<p class="lede">The same application, packaged for <strong>Apple Silicon</strong> (M1 or later) on <strong>macOS 11 or later</strong>: <code>ner-analyzer-4.3.0-macos-arm64.zip</code>, about 110 MB, with <code>ner-analyzer-4.3.0-macos-arm64.zip.sha256</code> to check the copy (<code>shasum -a 256</code> in Terminal). No administrator password, no internet, nothing to install first.</p>
+<p class="lede">The same application, packaged for <strong>Apple Silicon</strong> (M1 or later) on <strong>macOS 11 or later</strong>: <code>ner-analyzer-4.4.0-macos-arm64.zip</code>, about 110 MB, with <code>ner-analyzer-4.4.0-macos-arm64.zip.sha256</code> to check the copy (<code>shasum -a 256</code> in Terminal). No administrator password, no internet, nothing to install first.</p>
 <div class="tablewrap"><table>
 <thead><tr><th>In the package</th><th>What it is</th></tr></thead>
 <tbody>
@@ -617,7 +617,7 @@ kbd {
 <tr><td class="ctrl">[3/6]</td><td>Copies the application (never a <code>data</code> folder, never the installer itself).</td></tr>
 <tr><td class="ctrl">[4/6]</td><td>Unpacks Python into <code>.python/</code> and installs the bundled packages into it, offline (<code>pip --no-index --no-deps</code>, the user's own Python packages ignored), then checks every component loads.</td></tr>
 <tr><td class="ctrl">[5/6]</td><td>Registers a <strong>launch agent</strong> for your account (<code>~/Library/LaunchAgents/com.marcelobarbosa.ner-analyzer.plist</code>): the server starts now, at every sign-in, and again if it stops on its own — on a Mac launchd does what the watchdog task does on Windows. Waits for <code>/healthz</code>, opens the browser, writes <code>NER Analyzer.webloc</code> on the Desktop. With <code>--no-services</code> nothing is started.</td></tr>
-<tr><td class="ctrl">[6/6]</td><td>Removes <code>vendor/</code> from the installation and <code>ner-analyzer.previous</code>, then the unzipped package and <code>ner-analyzer-4.3.0-macos-arm64.zip</code> with its <code>.sha256</code> (beside it, one level up, or in Downloads). <code>--keep-installer</code> keeps them. The log is <code>data/setup.log</code>.</td></tr>
+<tr><td class="ctrl">[6/6]</td><td>Removes <code>vendor/</code> from the installation and <code>ner-analyzer.previous</code>, then the unzipped package and <code>ner-analyzer-4.4.0-macos-arm64.zip</code> with its <code>.sha256</code> (beside it, one level up, or in Downloads). <code>--keep-installer</code> keeps them. The log is <code>data/setup.log</code>.</td></tr>
 </tbody>
 </table></div>
 <h3>Afterwards</h3>
@@ -662,10 +662,10 @@ kbd {
 
 <p>With the server running, open <code>http://127.0.0.1:8000</code> and confirm:</p>
 <ul>
-<li>the sign-in screen appears, with the <em>Where this data lives</em> statement and <em>version 4.3.0</em> under the title;</li>
+<li>the sign-in screen appears, with the <em>Where this data lives</em> statement and <em>version 4.4.0</em> under the title;</li>
 <li>you create the administrator account and reach the <code>Projects</code> tab;</li>
-<li>the left-hand navigation lists the steps from <code>Import</code> to <code>Reports</code>, and the sidebar reads <code>version 4.3.0</code>;</li>
-<li><code>http://127.0.0.1:8000/healthz</code> answers <code>{"status":"ok","version":"4.3.0"}</code>.</li>
+<li>the left-hand navigation lists the steps from <code>Import</code> to <code>Reports</code>, and the sidebar reads <code>version 4.4.0</code>;</li>
+<li><code>http://127.0.0.1:8000/healthz</code> answers <code>{"status":"ok","version":"4.4.0"}</code>.</li>
 </ul>
 
 <p>For a deeper check, double-click <strong><code>run-tests.bat</code></strong>: around 900 tests, one to two minutes. All passing (<em>All tests passed</em>), the installation is sound — every component loads, the rules compute what the manual says, the exports have the shape the manual describes.</p>
@@ -728,7 +728,7 @@ kbd {
 <section id="atualizar">
 <h2>Updating to a new version</h2>
 
-<p>A new version arrives as another zip, with another number (<code>ner-analyzer-4.3.0-windows.zip</code>). The <code>CHANGELOG.md</code> inside says what changed. Install it exactly like the first time: unzip, right-click <code>setup.bat</code> → <em>Run as administrator</em>, or double-click <code>setup-noadmin.bat</code> (with the same target folder, if you chose one).</p>
+<p>A new version arrives as another zip, with another number (<code>ner-analyzer-4.4.0-windows.zip</code>). The <code>CHANGELOG.md</code> inside says what changed. Install it exactly like the first time: unzip, right-click <code>setup.bat</code> → <em>Run as administrator</em>, or double-click <code>setup-noadmin.bat</code> (with the same target folder, if you chose one).</p>
 <ol class="steps">
 <li>Setup recognises the installation and says <code>Replacing version 3.x.y - its data is kept.</code> No administrator rights are needed: <code>setup-noadmin.bat</code> updates an installation made with or without them, for the account signed in, and keeps every project, account and drawing.</li>
 <li>It holds both tasks, backs up the database into <code>data\backup-…\</code>, stops the server, moves the old installation aside to <code>ner-analyzer.previous</code> and moves its <code>data\</code> into the new folder.</li>
@@ -804,7 +804,7 @@ kbd {
 <section id="sobre">
 <h2>Version and licence</h2>
 
-<p>This manual accompanies <strong>version 4.3.0</strong> of the NER Spatial Coverage Analyzer. Versions follow <em>MAJOR.MINOR.PATCH</em>: a correction that changes no screen and no file bumps the last number (2.0.1); a new feature that keeps everything valid bumps the middle one (2.1.0); a change an existing installation cannot absorb without intervention bumps the first (3.0.0). <code>CHANGELOG.md</code> records each one.</p>
+<p>This manual accompanies <strong>version 4.4.0</strong> of the NER Spatial Coverage Analyzer. Versions follow <em>MAJOR.MINOR.PATCH</em>: a correction that changes no screen and no file bumps the last number (2.0.1); a new feature that keeps everything valid bumps the middle one (2.1.0); a change an existing installation cannot absorb without intervention bumps the first (3.0.0). <code>CHANGELOG.md</code> records each one.</p>
 
 <p class="legal"><strong>Created by Marcelo Barbosa.</strong> © 2026 Marcelo Barbosa. The application and its manuals are free software under the GNU Affero General Public License, version 3 (<code>LICENSE.txt</code>): anyone may use, study, copy, change and share them, and no written authorisation is needed. The author credit <em>Created by Marcelo Barbosa</em> is an additional term of the licence (section 7(b), in <code>NOTICE.txt</code>): every copy and every modified version keeps it. <code>THIRD-PARTY-NOTICES.txt</code> lists every component's licence. Third-party components (Python under <code>vendor\python</code>, under the Python Software Foundation licence; the Python packages under <code>vendor\wheels</code>; the JavaScript libraries compiled into the interface) remain under their own licences.</p>
 </section>

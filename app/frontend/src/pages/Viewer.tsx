@@ -150,6 +150,16 @@ export function Viewer({ ctx }: { ctx: Ctx }) {
     catch { /* private window */ }
     return next;
   });
+  const [legendOpen, setLegendOpen] = useState<boolean>(() => {
+    try { return localStorage.getItem("ner.legend") !== "closed"; }
+    catch { return true; }
+  });
+  const toggleLegend = () => setLegendOpen((open) => {
+    const next = !open;
+    try { localStorage.setItem("ner.legend", next ? "open" : "closed"); }
+    catch { /* private window */ }
+    return next;
+  });
   const p = ctx.project;
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ w: 900, h: 640 });
@@ -164,6 +174,12 @@ export function Viewer({ ctx }: { ctx: Ctx }) {
     try { saved = Number(localStorage.getItem(`ner.viewer.page.${p?.id}`)) || 0; }
     catch { saved = 0; }
     const pages = p?.pages || [];
+    // Sent here by a page button (4.4.0): that sheet wins over the last one.
+    const sent = HANDOFF.viewerAt?.page;
+    if (sent != null && pages.some((x: any) => x.number === sent)) {
+      try { localStorage.setItem(`ner.viewer.page.${p?.id}`, String(sent)); } catch { /* */ }
+      return sent;
+    }
     if (pages.some((x: any) => x.number === saved)) return saved;
     return pages.length ? pages[0].number : 1;
   });
@@ -440,6 +456,22 @@ export function Viewer({ ctx }: { ctx: Ctx }) {
     const id = setTimeout(() => setFocus(null), 6000);
     return () => clearTimeout(id);
   }, [focus]);
+  // Sent here by a page button (4.4.0): centre the point it named and ring
+  // it, once the canvas has its size. The page itself was chosen above.
+  const pendingAt = useRef(HANDOFF.viewerAt);
+  useEffect(() => { HANDOFF.viewerAt = null; }, []);
+  useEffect(() => {
+    const at = pendingAt.current;
+    const w = wrapRef.current?.clientWidth || 0, h = wrapRef.current?.clientHeight || 0;
+    if (!at || w < 50 || h < 50) return;
+    pendingAt.current = null;
+    if (at.x == null || at.y == null) return;
+    const z = Math.max(zoom, 1.4);
+    setZoom(z);
+    setPan({ x: w / 2 - at.x * z, y: h / 2 - at.y * z });
+    setFocus({ page: at.page, x: at.x, y: at.y });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [size.w, size.h]);
   // Sent here from another screen: go straight to the best hit.
   useEffect(() => {
     if (!autoJump.current || !searchIndex.length) return;
@@ -1282,8 +1314,20 @@ export function Viewer({ ctx }: { ctx: Ctx }) {
           </Layer>
         </Stage>
 
+        {/* The legend folds to a small tab (4.4.0), remembered per browser:
+            on a laptop screen it sat over the corner of the sheet. Marcelo,
+            22 Oct 2026: "a legenda que fica do lado direito abaixo poderia
+            ser retrátil". */}
+        {!legendOpen ? (
+          <button type="button" className="legend-reopen" onClick={toggleLegend}
+                  title={t("Show the legend")}>{t("LEGEND")} ▴</button>
+        ) : (
         <div className="legend">
-          <strong style={{ fontSize: 11 }}>{t("LEGEND")}</strong>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <strong style={{ fontSize: 11, flex: 1 }}>{t("LEGEND")}</strong>
+            <button type="button" className="linkish legend-fold" onClick={toggleLegend}
+                    title={t("Hide the legend")}>{t("hide")} ▾</button>
+          </div>
           {LEGEND_ROWS.map((r) => (
             <div className="lg-row" key={r.label}>
               {/* The swatch is drawn the way the plan draws the thing: a dot
@@ -1324,6 +1368,7 @@ export function Viewer({ ctx }: { ctx: Ctx }) {
           </div>
           <div className="foot">{t(DISCLAIMER)}</div>
         </div>
+        )}
       </div>
 
       {!inspectorOpen && (

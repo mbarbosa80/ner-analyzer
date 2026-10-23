@@ -1556,4 +1556,16 @@ export const PT: Record<string, string> = {
   "No naming reference is bundled with this copy. A team can add its own naming document to the package's private reference folder; it is shown here for reference only.":
     "Nenhuma referência de nomes vem com esta cópia. Uma equipe pode acrescentar o próprio documento de nomes na pasta de referência privada do pacote; ele aparece aqui só para consulta.",
   "Loading…": "Carregando…",
+  "in the Drawing viewer": "no Drawing viewer",
+  "Show the legend": "Mostrar a legenda",
+  "Hide the legend": "Recolher a legenda",
+  "hide": "recolher",
+  "Show the menu": "Mostrar o menu",
+  "Hide the menu": "Recolher o menu",
+  "Already set to — none —; Undo takes it back": "Já está como — none —; o Undo desfaz",
+  "This space is not on this drawing — set it to — none —": "Este espaço não está neste desenho — marcar como — none —",
+  "identical name, confirmed by the matcher": "nome idêntico, confirmado pelo matcher",
+  "Confirmed by you": "Confirmado por você",
+  "Confirmed by the matcher — an exact match": "Confirmado pelo matcher — correspondência exata",
+  "exact": "exato",
 };

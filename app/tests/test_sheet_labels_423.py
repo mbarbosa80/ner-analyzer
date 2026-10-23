@@ -129,8 +129,15 @@ def _src(name: str) -> str:
 
 
 def test_the_ners_screen_formats_also_on():
-    line = next(l for l in _src("NerRegister.tsx").splitlines() if 't("also on")' in l)
-    assert ".map((x: number) => sheetNo(p, x)).join(" in line, line
+    # 4.4.0: each "also on" sheet is a PageButton (a link to the sheet), and
+    # the button writes its number with sheetNo — so the label stays formatted.
+    src = _src("NerRegister.tsx")
+    i = src.index('t("also on")')
+    block = src[i:i + 900]
+    assert "<PageButton ctx={ctx} page={x}" in block, block
+    pb = _src("panels.tsx")
+    j = pb.index("export function PageButton")
+    assert "sheetNo(p, page)" in pb[j:j + 1200]
 
 
 @pytest.mark.parametrize("name", ["NerRegister.tsx", "panels.tsx", "Viewer.tsx"])

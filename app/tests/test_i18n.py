@@ -97,6 +97,8 @@ def test_every_translated_server_message_still_exists_on_the_server():
 # Interface copy that happens to start lower case. Listed explicitly so the
 # test above stays strict about everything else.
 _INTERFACE_LOWER_CASE = {
+    # 4.4.0
+    "identical name, confirmed by the matcher", "in the Drawing viewer",
     # 4.2.0
     "change(s) after the last run", "changed since the last run",
     "is already the name of another NER", "the analysis was run again first:",

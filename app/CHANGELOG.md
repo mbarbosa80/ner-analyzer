@@ -41,6 +41,37 @@ package.
 
 ---
 
+## 4.4.0 — 2026-10-22
+
+MINOR: fewer clicks between screens, a worklist that puts the rows needing a
+look first, and a Wi-Fi name that can be read on the exported PDF. No file
+shape changes; every project, export and workflow stays valid.
+
+- **The menu folds.** `«` at the top of the left-hand menu shrinks it to a
+  rail of step numbers; `»` opens it again. Remembered per browser.
+- **The viewer's legend folds** to a small `LEGEND ▴` tab (`hide ▾` on the
+  legend). Remembered per browser.
+- **Page numbers are buttons.** On *NERs* — the page pill, every *also on*
+  sheet and every marker's page under *Details* — and in the *Page* column of
+  *TEAP × drawing*: one click opens the *Drawing viewer* on that sheet, zoomed
+  in on the NER or the room and ringed in orange.
+- **`none` beside the room list** on *TEAP × drawing* sets `— none —` in one
+  click (it sits at the top of a list of hundreds of rooms).
+- **Confirm only where it is still a question.** A row already confirmed shows
+  `✓ exact` (the matcher) or `✓ confirmed` (you) instead of the button, and the
+  worklist lists the rows that still need a look first, the settled ones after
+  (dimmed), each group largest demand first.
+- **An identical name is an exact match** when the TEAP line carries no space
+  code and only one room on the drawing answers to it: the matcher confirms it
+  like an exact code (`EXACT_NAME_NO_CODE_CONFIDENCE` = 0.97). A line with a
+  code the drawing does not print, and a name two rooms answer to, still wait
+  for a person. Takes effect at the next *Run matching*; decisions are kept.
+- **Wi-Fi name on the marked-up PDF**: 9 pt bold (the NERs' size, was 6.5 pt),
+  dark blue on a white tag under a slightly larger sign (16, was 14). The team
+  reported the old cyan name on the linework as small and unreadable.
+- Tests: `tests/test_workflow_shortcuts_440.py` (12);
+  `test_sheet_labels_423.py` follows the page buttons.
+
 ## 4.3.0 — 2026-10-19
 
 MINOR: Wi-Fi points instead of access points, the legend on the first page

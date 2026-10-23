@@ -901,6 +901,10 @@ type TileKey = "all" | "matched" | "no_room";
 const inStudy = (m: any) => m.in_scope !== false;
 const hasRoom = (m: any) => !!m.drawing_space_id && !m.rejected;
 
+/** A row nobody needs to look at again: confirmed (by the matcher or by you)
+ *  with its room, or set to — none — by you. */
+const isSettled = (m: any) => (!!m.confirmed && hasRoom(m)) || m.locked === "rejected";
+
 const TILE_ROWS: [TileKey, string, (m: any) => boolean][] = [
   ["all", "TEAP spaces", inStudy],
   ["matched", "matched", (m) => inStudy(m) && hasRoom(m)],
@@ -929,6 +933,7 @@ export function MatchingPanel({ ctx }: { ctx: Ctx }) {
   //  Marcelo, 29 Sep 2026: "already tied ou não isso não importa, deixa
   //  tudo em ordem alfabética".
   const spaceOptions = useMemo(() => sortedSpaces(spaces, p), [spaces, p]);
+  const spaceById = useMemo(() => new Map((spaces || []).map((x: any) => [x.id, x])), [spaces]);
 
   // One figure per tile, from the rows themselves.
   const counts = useMemo(() => {
@@ -938,9 +943,15 @@ export function MatchingPanel({ ctx }: { ctx: Ctx }) {
   }, [matches]);
   // Largest demand first. This is the ordering the old alias worklist used and
   // the reason it existed; the queue inherits it rather than repeating it.
+  //: Rows that still need a look come first (4.4.0) — a room not chosen, or
+  //  chosen and not confirmed — and then the rows already settled: confirmed
+  //  by the matcher (an exact match), by you, or set to — none — by you.
+  //  Marcelo, 22 Oct 2026: "eu deveria gastar meu tempo só olhando para
+  //  aqueles que realmente precisam de atenção".
   const rows = useMemo(() => {
     const pred = TILE_ROWS.find(([k]) => k === tile)![2];
-    return matches.filter(pred).sort((a, b) => (b.ports || 0) - (a.ports || 0));
+    return matches.filter(pred).sort((a, b) =>
+      Number(isSettled(a)) - Number(isSettled(b)) || (b.ports || 0) - (a.ports || 0));
   }, [matches, tile]);
   const unresolved = rows.filter((m) => !m.drawing_space_id);
   // A row set to "— none —" is a decision already taken: it is not waiting.
@@ -1101,18 +1112,29 @@ export function MatchingPanel({ ctx }: { ctx: Ctx }) {
             </thead>
             <tbody>
               {sw.apply(rows).map((m: any) => (
-                <tr key={m.id} className={m.drawing_space_id ? "" : "row-unresolved"}>
+                <tr key={m.id} className={m.drawing_space_id ? (isSettled(m) ? "row-decided" : "") : "row-unresolved"}>
                   <td><strong>{m.ports ?? "—"}</strong></td>
                   <td className="mono">{m.teap_code || "—"}</td>
                   <td>{m.teap_name}</td>
                   <td style={{ minWidth: 210 }}>
-                    <select value={m.drawing_space_id || ""}
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                    <select value={m.drawing_space_id || ""} style={{ flex: 1, minWidth: 0 }}
                             onChange={(e) => choose(m, e.target.value ? Number(e.target.value) : null)}>
                       <option value="">{m.locked === "rejected" ? t("— none (your choice) —") : t("— none —")}</option>
                       {spaceOptions.map((o) => (
                         <option key={o.key} value={o.key}>{o.label}</option>
                       ))}
                     </select>
+                    {/* — none — in one click (4.4.0): it sits at the very top
+                        of a list of hundreds of rooms, and getting back up
+                        there was a long scroll every time. */}
+                    <button type="button" className="small none-btn"
+                            disabled={m.locked === "rejected"}
+                            title={m.locked === "rejected"
+                              ? t("Already set to — none —; Undo takes it back")
+                              : t("This space is not on this drawing — set it to — none —")}
+                            onClick={() => choose(m, null)}>{t("none")}</button>
+                    </div>
                     {m.scope_note && (
                       <div className="small" style={{ color: "var(--warn)", marginTop: 2 }}>{m.scope_note}</div>
                     )}
@@ -1139,11 +1161,19 @@ export function MatchingPanel({ ctx }: { ctx: Ctx }) {
                         as "confirmed by me". */}
                     {!m.locked && m.confirmed && m.drawing_space_id && (
                       <div className="small muted" style={{ marginTop: 2 }}>
-                        {t("exact code, confirmed by the matcher")}
+                        {m.method === "exact_name" ? t("identical name, confirmed by the matcher")
+                          : t("exact code, confirmed by the matcher")}
                       </div>
                     )}
                   </td>
-                  <td>{m.page != null ? sheetNo(p, m.page) : "—"}</td>
+                  <td>
+                    {(() => {
+                      // The page is the way to the sheet (4.4.0), centred on
+                      // the room this row is tied to.
+                      const ds: any = spaceById.get(m.drawing_space_id);
+                      return <PageButton ctx={ctx} page={m.page} x={ds?.x} y={ds?.y} />;
+                    })()}
+                  </td>
                   {/* Confirm, and Undo beside it on a row you decided. Reject
                       went on 2 Sep 2026: choosing the room settles the row and
                       choosing a different one settles it again; a TEAP line
@@ -1151,9 +1181,20 @@ export function MatchingPanel({ ctx }: { ctx: Ctx }) {
                       takes back whatever you decided — room, confirmation or
                       rejection — and shows the matcher's own answer again. */}
                   <td style={{ whiteSpace: "nowrap" }}>
-                    <button className="small primary" disabled={!m.drawing_space_id || (m.confirmed && !!m.confirmed_by)}
+                    {/* Confirm only where it means something (4.4.0): a row
+                        already confirmed — an exact match the matcher signed,
+                        or one you signed — shows a tick, not a button to press
+                        as a formality. */}
+                    {m.confirmed && hasRoom(m) ? (
+                      <span className="small" style={{ color: "var(--ok)" }}
+                            title={m.confirmed_by ? t("Confirmed by you") : t("Confirmed by the matcher — an exact match")}>
+                        ✓ {m.confirmed_by ? t("confirmed") : t("exact")}
+                      </span>
+                    ) : (
+                    <button className="small primary" disabled={!m.drawing_space_id}
                             title={m.drawing_space_id ? "" : t("Choose the room first")}
                             onClick={() => confirmRow(m)}>{t("Confirm")}</button>
+                    )}
                     {m.undo_available && (
                       <button className="small" style={{ marginLeft: 6 }}
                               title={m.auto_ready
@@ -1293,7 +1334,39 @@ const EXTRA_FILTERS: Record<string, (s: any, i: any) => boolean> = {
  * Exceptions step opens the viewer searched for one name. Module state, read
  * once by the screen that opens — there is one browser tab and one person.
  */
-export const HANDOFF: { demand: string; viewer: string } = { demand: "", viewer: "" };
+export const HANDOFF: {
+  demand: string;
+  viewer: string;
+  /** A sheet to open the viewer on, and the point to centre and ring there
+   *  (4.4.0) — what a page button on NERs and TEAP × drawing sends. */
+  viewerAt: { page: number; x?: number | null; y?: number | null } | null;
+} = { demand: "", viewer: "", viewerAt: null };
+
+/** Open the Drawing viewer on this sheet, centred on this point when given. */
+export function openViewerAt(ctx: Ctx, page: number, x?: number | null, y?: number | null) {
+  HANDOFF.viewerAt = { page, x, y };
+  ctx.go("viewer");
+}
+
+/**
+ * A page number that is also the way to the sheet (4.4.0). Marcelo, 22 Oct
+ * 2026: the page shown on NERs and on TEAP × drawing should take him straight
+ * to the drawing, "assim a movimentação entre telas ficaria mais ágil".
+ */
+export function PageButton({ ctx, page, x, y, pill = false, title }: {
+  ctx: Ctx; page: number | null | undefined; x?: number | null; y?: number | null;
+  pill?: boolean; title?: string;
+}) {
+  if (page == null) return <>—</>;
+  const p = ctx.project;
+  return (
+    <button type="button" className={`linkish mono page-link${pill ? " pill" : ""}`}
+            title={title || `${t("Open")} ${pageName(p, page)} ${t("in the Drawing viewer")}`}
+            onClick={() => openViewerAt(ctx, page, x, y)}>
+      {pill ? "p. " : ""}{sheetNo(p, page)}
+    </button>
+  );
+}
 
 /** Open Demand per space with the search box set to this space. */
 export function openInDemand(ctx: Ctx, query: string) {

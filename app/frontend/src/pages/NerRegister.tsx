@@ -33,7 +33,7 @@ import { NamingReference } from "../components/NamingReference";
 import { DISCLAIMER, KIND_COLOUR, KIND_LABEL, REFERENCE_KINDS, VISUAL_ONLY_KINDS } from "../lib/notation";
 import { t } from "../lib/i18n";
 import { useSort } from "../components/useSort";
-import { pageName, sheetNo } from "./panels";
+import { PageButton, pageName, sheetNo } from "./panels";
 import { nerNameKey } from "./Viewer";
 
 function Pill({ text, colour }: { text: string; colour?: string }) {
@@ -445,16 +445,25 @@ function NerRow({ ctx, r, sameName = [], allRows = [], busy, act, expanded, togg
     <>
       <tr className={editable ? "" : "row-closed"}>
         <td style={{ whiteSpace: "nowrap" }}>
+          {/* The page is the way to the sheet (4.4.0): one click opens the
+              Drawing viewer on it, centred on this NER and ringed. */}
           {r.canonical?.page != null ? (
-            <span className="pill mono" title={t("Page in the drawing")}>
-              p. {sheetNo(p, r.canonical.page)}
-            </span>
+            <PageButton ctx={ctx} page={r.canonical.page} x={r.canonical.x} y={r.canonical.y} pill />
           ) : (
             <span className="muted small">{t("no position")}</span>
           )}
           {r.pages && r.pages.length > 1 && (
             <div className="small muted">
-              {t("also on")} {r.pages.filter((x: number) => x !== r.canonical?.page).map((x: number) => sheetNo(p, x)).join(", ")}
+              {t("also on")}{" "}
+              {r.pages.filter((x: number) => x !== r.canonical?.page).map((x: number, i: number) => {
+                const o = (r.occurrences || []).find((q: any) => q.page === x);
+                return (
+                  <span key={x}>
+                    {i > 0 && ", "}
+                    <PageButton ctx={ctx} page={x} x={o?.x} y={o?.y} />
+                  </span>
+                );
+              })}
             </div>
           )}
         </td>
@@ -683,7 +692,7 @@ function NerDetail({ ctx, r, busy, act }: any) {
             <tbody>
               {sdoc.apply(r.occurrences || []).map((o: any) => (
                 <tr key={o.id}>
-                  <td>{sheetNo(p, o.page)}</td>
+                  <td><PageButton ctx={ctx} page={o.page} x={o.x} y={o.y} /></td>
                   <td className="mono small">{o.label}</td>
                   <td>
                     <span style={{ color: KIND_COLOUR[o.kind] }}>

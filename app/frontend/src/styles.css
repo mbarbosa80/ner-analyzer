@@ -438,3 +438,28 @@ th.sorted > button { color: var(--fg, #e8edf5); }
 }
 .viewer-search button.hit:hover, .viewer-search button.hit.first { background: rgba(76, 141, 255, 0.16); }
 .viewer-search .hit .nm { font-weight: 600; }
+
+/* 4.4.0 — the menu folds to a rail of step numbers; the legend folds to a tab;
+   a page number that opens the sheet. */
+.sidebar { position: relative; }
+.sidebar.rail { width: 46px; flex: 0 0 46px; overflow-x: hidden; }
+.sidebar.rail .nav { padding: 0 5px 16px; }
+.sidebar.rail .nav button { justify-content: center; padding: 8px 0; font-size: 12px; }
+.rail-toggle {
+  background: transparent; border: 1px solid var(--line); color: var(--muted);
+  border-radius: 6px; padding: 2px 8px; margin: 10px auto 10px; font-size: 13px; cursor: pointer;
+}
+.rail-toggle.open { position: absolute; top: 10px; right: 8px; margin: 0; }
+.rail-toggle:hover { color: var(--text); border-color: var(--muted); }
+.legend-fold { font-size: 10.5px; }
+.legend-reopen {
+  position: absolute; right: 10px; bottom: 14px; z-index: 5;
+  background: rgba(23, 26, 34, 0.95); border: 1px solid var(--line); border-radius: 8px;
+  padding: 5px 10px; font-size: 11px; font-weight: 600; color: var(--text); cursor: pointer;
+}
+button.linkish.page-link { font-size: 12px; text-decoration: underline dotted; }
+button.linkish.page-link.pill { border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; text-decoration: none; }
+button.linkish.page-link.pill:hover { border-color: var(--accent, #4c8dff); }
+.none-btn { margin-left: 6px; padding: 2px 7px; font-size: 11px; }
+tr.row-decided td { opacity: 0.72; }
+.sidebar:not(.rail) h1 { margin-right: 44px; }
