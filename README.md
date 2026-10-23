@@ -1,6 +1,6 @@
 # NER Spatial Coverage Analyzer
 
-A free desktop tool for venue technology managers. It crosses venue design drawings with the equipment demand spreadsheet (TEAP), assigns every space to the network equipment rack (NER) that serves it, counts the ports and checks the 90 m / 70 m distance limits, entirely on the user's own computer. Nothing is sent to the cloud.
+A free desktop tool for event and venue technology teams. It crosses venue design drawings with the equipment demand spreadsheet (TEAP), assigns every space to the network equipment rack (NER) that serves it, counts the ports and checks the 90 m / 70 m distance limits, entirely on the user's own computer. Nothing is sent to the cloud.
 
 **Site:** https://mbarbosa80.github.io/ner-analyzer/
 **Download:** [Releases](https://github.com/mbarbosa80/ner-analyzer/releases/latest) — Windows 10/11 (64-bit) and macOS on Apple Silicon. Python comes inside the package; no administrator rights, no internet needed to install.
