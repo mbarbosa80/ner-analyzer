@@ -1489,6 +1489,16 @@ export function DemandPanel({ ctx }: { ctx: Ctx }) {
     } catch (e: any) { ctx.notify(e.message, "err"); }
   };
 
+  /** Indoor (covered) or outdoor (open) for one Wi-Fi point (4.5.0) — a
+   *  note for the LLD team, the same field a NER has. No re-run needed: the
+   *  workbook reads it off the point when it is exported. */
+  const setWirelessEnvironment = async (w: any, env: string) => {
+    try {
+      await api.patchElement(p!.id, w.id, { environment: env });
+      await reloadPins();
+    } catch (e: any) { ctx.notify(e.message, "err"); }
+  };
+
   /** Choose (or release) the NER for one wireless point. */
   const serveWireless = async (w: any, nerAssetId: number | null) => {
     try {
@@ -1941,6 +1951,10 @@ export function DemandPanel({ ctx }: { ctx: Ctx }) {
             <table style={{ marginTop: 8 }}>
               <thead>
                 <tr><sw2.Th k="label">{t("Wireless point")}</sw2.Th><sw2.Th k="ap_kind">{t("Type")}</sw2.Th>
+                    <sw2.Th k="environment" get={(w) => w.environment || "~"}
+                            title={t("Where the service is given: indoor (a covered area) or outdoor (an open area). A column of the Wireless points sheet in the workbook.")}>
+                      {t("Indoor / outdoor")}
+                    </sw2.Th>
                     <sw2.Th k="page">{t("Page")}</sw2.Th>
                     <sw2.Th k="space_name">{t("TEAP space")}</sw2.Th>
                     <sw2.Th k="serving_ner">{t("Served by")}</sw2.Th>
@@ -1952,6 +1966,15 @@ export function DemandPanel({ ctx }: { ctx: Ctx }) {
                   <tr key={w.id}>
                     <td className="mono">{w.label}</td>
                     <td>{w.ap_kind || "Wi-Fi"}</td>
+                    <td>
+                      {/* 4.5.0: said by the person, like a NER's. */}
+                      <select className="env-select" value={w.environment || ""}
+                              onChange={(e) => void setWirelessEnvironment(w, e.target.value)}>
+                        <option value="">{t("— not said —")}</option>
+                        <option value="indoor">{t("Indoor")}</option>
+                        <option value="outdoor">{t("Outdoor")}</option>
+                      </select>
+                    </td>
                     <td>{pageName(p, w.page)}</td>
                     <td>{w.space_name
                       ? <>{w.space_name} <span className="muted small">· {w.tie_source === "manual" ? t("tied by you") : w.tie_source === "teap" ? t("from the TEAP") : t("proposed")}</span></>

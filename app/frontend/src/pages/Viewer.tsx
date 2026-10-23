@@ -1519,6 +1519,16 @@ export function Viewer({ ctx }: { ctx: Ctx }) {
                        : t("nearest matched room on this sheet — proposed; change it if the point serves another space"))
                     : (selected.data.tie_source === "manual" ? t("cleared by you — not in the TEAP, no port") : t("no matched room within the limit on this sheet — not in the TEAP, no port"))}
                 </p>
+                {/* 4.5.0: indoor (a covered area) or outdoor (an open area),
+                    said by the person — the same field a NER has. */}
+                <label>{t("Indoor / outdoor")}</label>
+                <select value={selected.data.environment || ""}
+                        title={t("Where the service is given: indoor (a covered area) or outdoor (an open area). A column of the Wireless points sheet in the workbook.")}
+                        onChange={(ev) => void patchSelected({ environment: ev.target.value })}>
+                  <option value="">{t("— not said —")}</option>
+                  <option value="indoor">{t("Indoor")}</option>
+                  <option value="outdoor">{t("Outdoor")}</option>
+                </select>
                 <p className="small">
                   {t("A Wi-Fi point takes no port and is not an access point count: the DWISA line of its TEAP space is the port. It is measured to the NER of its space, or the nearest within the limit.")}<br />
                   {a ? (

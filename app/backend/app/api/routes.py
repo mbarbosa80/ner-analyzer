@@ -623,6 +623,9 @@ class ElementPatch(BaseModel):
     #: string clears the tie by hand (and stops the automatic proposal from
     #: coming back on the next move). ``None`` leaves it alone.
     space_key: Optional[str] = None
+    #: Wireless points only (4.5.0): ``indoor`` (a covered area), ``outdoor``
+    #: (an open area) or an empty string for "not said". ``None`` leaves it.
+    environment: Optional[str] = None
 
 
 @router.get("/projects/{project_id}/elements")
@@ -674,7 +677,8 @@ def list_elements(project_id: int, page: Optional[int] = None,
             # code or a "Network Equipment Rack (NER)" label), and the label.
             "detection_method": e.detection_method,
             "printed_as": e.nearby_text or None,
-            "environment": a.environment if a is not None else None,
+            # A NER's is the room's; a Wi-Fi point's is its own (4.5.0).
+            "environment": a.environment if a is not None else e.environment,
             "pending": list(a.pending_validations or []) if a is not None else [],
         })
     return out
@@ -811,6 +815,28 @@ def update_element(project_id: int, element_id: int, body: ElementPatch,
         e.tie_source = "manual"
         changes["space_key"] = e.space_key
         changes["tie_source"] = "manual"
+
+    # Indoor / outdoor (4.5.0): said by a person for one Wi-Fi point, the way
+    # it is said for a NER on the NERs screen.
+    if "environment" in changes:
+        env = (changes["environment"] or "").strip().lower() or None
+        if e.kind not in DEMAND_KINDS:
+            raise HTTPException(422, "indoor / outdoor is set here for a wireless point only; "
+                                     "a NER's is set on the NERs screen")
+        if env not in (None, "indoor", "outdoor"):
+            raise HTTPException(422, "indoor / outdoor must be “indoor”, “outdoor” or empty")
+        changes.pop("environment")
+        if e.environment != env:
+            # Its own action, neutral to the analysis: nothing the engine
+            # measures changes, and the workbook reads it off the point, so
+            # it must not mark the last run out of date.
+            S.audit(db, project_id, "wireless.environment", entity="element", entity_id=e.id,
+                    justification=justification,
+                    payload={"label": e.label, "from": e.environment, "to": env})
+            e.environment = env
+        if not changes and tie_change is None:
+            db.commit()
+            return {"ok": True}
 
     if "kind" in changes and changes["kind"] not in (
             migrate.ASSET_KINDS + VISUAL_ONLY_KINDS + DEMAND_KINDS + REFERENCE_KINDS
@@ -2242,6 +2268,7 @@ def _wireless_rows(db: Session, p: Project, sc: Optional[Scenario],
         out.append({
             "id": e.id, "label": e.label, "page": SH.key_of(sheet_numbers, e),
             "kind": e.kind, "ap_kind": WIRELESS_NAME.get(e.kind, "Wi-Fi"),
+            "environment": e.environment,
             "space_key": e.space_key, "tie_source": e.tie_source,
             "space_name": space_names.get(e.space_key) if e.space_key else None,
             "sheet": SH.meta_of(sheet_numbers, e) or None,
@@ -2604,6 +2631,7 @@ def _build_report_now(db: Session, p: Project, fmt: str, scenario: str,
                             left_out=left_out, figures=S.coverage_figures(db, p, result),
                             fibre_runs=S.fibre_rule(p), match_rows=S.match_rows_for_export(db, p),
                             venue_code=p.venue_code, ner_info=S.ner_info_for_export(db, p),
+                            wifi_info=S.wifi_info_for_export(db, p),
                             sheet_cell=SH.for_project(db, p.id).cell)
     else:
         out = out_dir / f"{stem}_coverage.csv"

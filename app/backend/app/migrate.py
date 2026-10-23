@@ -153,6 +153,9 @@ ADDED_COLUMNS: list[tuple[str, str, str]] = [
     ("route_segments", "drawing_id", "INTEGER"),
     ("vertical_links", "lower_drawing_id", "INTEGER"),
     ("vertical_links", "upper_drawing_id", "INTEGER"),
+    # 23 Oct 2026 (4.5.0). Indoor (covered) or outdoor (open) Wi-Fi point —
+    # the setting the LLD team designs the access point for. NULL = not said.
+    ("elements", "environment", "VARCHAR(16)"),
 ]
 
 

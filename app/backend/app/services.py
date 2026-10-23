@@ -1756,6 +1756,17 @@ def ner_info_for_export(db: Session, project: Project) -> dict[str, dict]:
                                 .where(NerAsset.project_id == project.id)).scalars()}
 
 
+def wifi_info_for_export(db: Session, project: Project) -> dict[int, dict]:
+    """What the workbook's Wireless points sheet reads from the markers as they
+    are now rather than from the run (4.5.0): indoor / outdoor, by element id.
+    Read live so a point said indoor after the last analysis is exported as
+    indoor, not as the run's "not said"."""
+    return {e.id: {"environment": e.environment}
+            for e in db.execute(select(Element).where(
+                Element.project_id == project.id, Element.scenario_id.is_(None),
+                Element.kind.in_(DEMAND_KINDS))).scalars()}
+
+
 def register_ners(db: Session, project: Project, *, include_suggested: bool = False
                   ) -> list[NER]:
     """The equipment rooms an analysis should consider.
@@ -2235,7 +2246,8 @@ def wireless_point_areas(db: Session, project: Project
                           "ap_kind": WIRELESS_NAME.get(e.kind, "Wi-Fi"),
                           "space_key": e.space_key,
                           "space_name": names.get(e.space_key) if e.space_key else None,
-                          "tie_source": e.tie_source})
+                          "tie_source": e.tie_source,
+                          "environment": e.environment})
         out.append((area, WIRELESS_POINT_PORTS, DemandType.GENERAL, None, True))
     return out
 
@@ -2769,6 +2781,9 @@ _ANALYSIS_NEUTRAL = {
     "report.generated", "scenario.saved", "project.visibility", "teap.uploaded",
     "upload.path_rebased", "ner.locked", "zone.created", "zone.updated", "zone.deleted",
     "matching.decisions_made_durable", "report.analysis_refreshed",
+    # 4.5.0: indoor / outdoor of a Wi-Fi point — read off the point by the
+    # export, measured by nothing.
+    "wireless.environment",
 }
 
 

@@ -797,6 +797,11 @@ NER_SHEET_HEADERS = ["NER", "Full name", "Space code", "Page", "Critical",
                      "of which wireless ports", "Fibre runs to TER", "Notes"]
 NER_COL = {h: i + 1 for i, h in enumerate(NER_SHEET_HEADERS)}
 
+#: "Wireless points", column by column. "Indoor / outdoor" (4.5.0) sits next
+#: to the type, as it does next to "Critical" on the NERs sheet.
+WIFI_SHEET_HEADERS = ["Wireless point", "Type", "Indoor / outdoor", "Page", "Serving NER",
+                      "Distance (m)", "Status", "TEAP space", "Tie", "Notes"]
+
 PENDING_NER_LABEL = "Pending — no NER"
 BY_NER_HEADERS = ["NER", "Critical", "Space code", "Space name", "Product code",
                   "Service / product", "Ports"]
@@ -948,6 +953,7 @@ def export_workbook(
     fibre_runs: tuple[int, int] = (2, 1),
     venue_code: Optional[str] = None,
     ner_info: Optional[dict[str, dict]] = None,
+    wifi_info: Optional[dict[int, dict]] = None,
     sheet_cell=None,
 ) -> str:
     """``demands`` are the TEAP spaces **in scope** — the ones that request
@@ -969,10 +975,15 @@ def export_workbook(
     the analysis does not: ``space_code`` (the AAM / VDB code of the room) and
     ``notes`` (what the person wrote on the NERs screen) — 3.0.0.
 
+    ``wifi_info`` (4.5.0) maps a wireless point's element id to what the
+    marker holds now — ``environment``: indoor (a covered area), outdoor (an
+    open area) or None. Left out, the run's own value is used.
+
     ``sheet_cell`` (4.1.0) turns a sheet key into what a *Page* cell holds:
     left out, the page number as before; in a project with several books, the
     sheet's drawing number (see :mod:`app.sheets`)."""
     ner_info = ner_info or {}
+    wifi_info = wifi_info or {}
     pc = sheet_cell or (lambda p: p)
     scale_for_page = scale_for_page or {}
     wb = openpyxl.Workbook()
@@ -987,6 +998,15 @@ def export_workbook(
     n_critical = sum(1 for i in rooms if i["critical"])
     n_noncritical = len(rooms) - n_critical
     fibre_total = n_critical * fibre_critical + n_noncritical * fibre_noncritical
+    points = [a for a in coverage.assignments if a.kind == "wireless_point"]
+
+    def wifi_env(a) -> str:
+        """Indoor / outdoor of one Wi-Fi point (4.5.0): the marker as it is
+        now, else what the run carried; "" = not said."""
+        eid = a.area.meta.get("element_id")
+        info = wifi_info.get(eid) if eid is not None else None
+        return ((info or {}).get("environment") if info is not None
+                else a.area.meta.get("environment")) or ""
     # Every port is a TEAP port (4.0.0): the DWISA line is the wireless port
     # of its space, and an access point drawn on a sheet adds none. These three
     # lines are the same numbers as "Coverage figures" and the TOTAL row of
@@ -1008,6 +1028,11 @@ def export_workbook(
         ("NERs indoor", sum(1 for i in rooms if i.get("environment") == "indoor")),
         ("NERs outdoor", sum(1 for i in rooms if i.get("environment") == "outdoor")),
         ("NERs indoor/outdoor not said", sum(1 for i in rooms if not i.get("environment"))),
+        # Indoor / outdoor Wi-Fi points (4.5.0): the setting each access point
+        # is proposed for — covered or open.
+        ("Wi-Fi points indoor", sum(1 for a in points if wifi_env(a) == "indoor")),
+        ("Wi-Fi points outdoor", sum(1 for a in points if wifi_env(a) == "outdoor")),
+        ("Wi-Fi points indoor/outdoor not said", sum(1 for a in points if not wifi_env(a))),
     ]
 
     ws = wb.active
@@ -1176,7 +1201,6 @@ def export_workbook(
     # definition that Excel dislikes opens with a repair prompt and loses the
     # table. See _write_teap_by_ner for what it adds over his pivot.
     # ------------------------------------------------------------------
-    points = [a for a in coverage.assignments if a.kind == "wireless_point"]
     _write_teap_by_ner(wb.create_sheet("TEAP by NER"), teap_rows,
                        {i["label"]: i["critical"] for i in rooms})
 
@@ -1258,9 +1282,10 @@ def export_workbook(
     # and the distance say whether the 90 m rule holds where the AP is drawn.
     if points:
         ws = wb.create_sheet("Wireless points")
-        _write_sheet(ws, ["Wireless point", "Type", "Page", "Serving NER",
-                          "Distance (m)", "Status", "TEAP space", "Tie", "Notes"],
-                     ((a.space_name, "Wi-Fi", pc(a.area.page), a.ner_label or "",
+        # "Indoor / outdoor" (4.5.0) beside the type, as on the NERs sheet:
+        # a covered area or an open one, said by the person; blank = not said.
+        _write_sheet(ws, WIFI_SHEET_HEADERS,
+                     ((a.space_name, "Wi-Fi", wifi_env(a), pc(a.area.page), a.ner_label or "",
                        (None if not a.evaluation or a.evaluation.effective_distance_m is None
                         else round(a.evaluation.effective_distance_m, 2)),
                        a.status.value,

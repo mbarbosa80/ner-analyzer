@@ -41,6 +41,32 @@ package.
 
 ---
 
+## 4.5.0 — 2026-10-23
+
+MINOR: each Wi-Fi point can be said to be **indoor** (a covered area) or
+**outdoor** (an open area), the way a NER already can, so the LLD team knows
+the setting each access point is proposed for. Every project stays valid: an
+existing point starts as *not said*.
+
+- **Indoor / outdoor on every Wi-Fi point.** A select in the *Wireless points*
+  table of *Demand per space*, beside *Type* (sortable), and the same select in
+  the viewer's Inspector under *TEAP space*: `Indoor`, `Outdoor` or
+  `— not said —`. Said by a person, never read off the drawing; audited
+  (`element.updated`). No re-run needed.
+- **Workbook.** The *Wireless points* sheet has an `Indoor / outdoor` column
+  beside `Type` (`indoor`, `outdoor`, blank = not said), read off the points
+  when the file is exported, so a value set after the last analysis is in it.
+  The columns after `Type` move one to the right — a filter or a formula
+  someone keyed to a column letter on that sheet needs the new letter. The
+  *Summary* gains three *Totals* lines: Wi-Fi points indoor / outdoor / not
+  said.
+- API: `PATCH /elements/{id}` takes `environment` (`indoor`, `outdoor`, `""`)
+  for a wireless point and refuses it for any other marker (a NER's is the
+  room's, on the NERs screen). Database: `elements.environment`, added on
+  start.
+- Tests: `tests/test_wifi_environment_450.py`; `test_wireless_tie_250.py` and
+  `test_teap_ports_aps_400.py` follow the new column.
+
 ## 4.4.0 — 2026-10-22
 
 MINOR: fewer clicks between screens, a worklist that puts the rows needing a

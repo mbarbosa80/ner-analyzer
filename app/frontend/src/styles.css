@@ -463,3 +463,4 @@ button.linkish.page-link.pill:hover { border-color: var(--accent, #4c8dff); }
 .none-btn { margin-left: 6px; padding: 2px 7px; font-size: 11px; }
 tr.row-decided td { opacity: 0.72; }
 .sidebar:not(.rail) h1 { margin-right: 44px; }
+.env-select { min-width: 110px; }

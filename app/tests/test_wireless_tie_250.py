@@ -437,8 +437,9 @@ def test_the_workbook_filters_every_sheet_and_computes_utilisation_live(client):
     ws = wb["Wireless points"]
     head = [c.value for c in ws[1]]
     # 4.0.0: no Ports column — an access point has no port of its own
-    assert head == ["Wireless point", "Type", "Page", "Serving NER", "Distance (m)",
-                    "Status", "TEAP space", "Tie", "Notes"]
+    # 4.5.0: "Indoor / outdoor" beside the type
+    assert head == ["Wireless point", "Type", "Indoor / outdoor", "Page", "Serving NER",
+                    "Distance (m)", "Status", "TEAP space", "Tie", "Notes"]
     rows = {r[0].value: [c.value for c in r] for r in ws.iter_rows(min_row=2)}
     assert rows["WIFI-1"][1] == "Wi-Fi" and rows["WIFI-2"][1] == "Wi-Fi"
-    assert rows["WIFI-1"][6] == "Office" and rows["WIFI-1"][7] == "proposed"
+    assert rows["WIFI-1"][7] == "Office" and rows["WIFI-1"][8] == "proposed"

@@ -198,6 +198,11 @@ class Element(Base):
     #: = not chosen — the point then follows the NER chosen for the TEAP space
     #: it stands in for, or, with none, the nearest-NER rule.
     assigned_ner_asset_id: Mapped[Optional[int]] = mapped_column(Integer, default=None)
+    #: A wireless point only (4.5.0): where the service is given — ``indoor``
+    #: (a covered area) or ``outdoor`` (an open area); NULL = not said. Said by
+    #: a person, never read off the drawing; it tells the LLD team the setting
+    #: the access point is proposed for, as the same field does for a NER.
+    environment: Mapped[Optional[str]] = mapped_column(String(16), default=None)
 
     # -- V2: this row is a *documental occurrence* of a canonical NER ---------
     #: the physical room this marker draws. NULL only for markers a human has

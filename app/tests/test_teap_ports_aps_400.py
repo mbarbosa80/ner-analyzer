@@ -156,11 +156,11 @@ def test_access_points_are_listed_with_no_port_column(riv):
     _, _, wb = riv
     ws = wb["Wireless points"]
     head = [c.value for c in ws[1]]
-    assert "Ports" not in head and head[6] == "TEAP space"
+    assert "Ports" not in head and head[7] == "TEAP space"     # 4.5.0: + Indoor / outdoor
     rows = [r for r in ws.iter_rows(min_row=2, values_only=True)]
     assert len(rows) == 1 + 1 + 1          # Office 1, Media 1 (one per space, 4.3.0), the hand-drawn one
-    loose = [r for r in rows if not r[6]]
-    assert len(loose) == 1 and "no port counted" in loose[0][8]
+    loose = [r for r in rows if not r[7]]
+    assert len(loose) == 1 and "no port counted" in loose[0][9]
 
 
 def test_tabs_come_in_the_order_of_the_screenshot_with_only_three_coloured(riv):

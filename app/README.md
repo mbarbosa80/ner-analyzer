@@ -1,6 +1,6 @@
 # NER Spatial Coverage Analyzer
 
-**Version 4.4.0** — the number lives in `VERSION`; see `CHANGELOG.md` for the
+**Version 4.5.0** — the number lives in `VERSION`; see `CHANGELOG.md` for the
 numbering rule and the release steps.
 
 A working web application for studying **TER / NER placement and network coverage**

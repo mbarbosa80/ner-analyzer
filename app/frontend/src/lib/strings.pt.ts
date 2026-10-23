@@ -1568,4 +1568,7 @@ export const PT: Record<string, string> = {
   "Confirmed by you": "Confirmado por você",
   "Confirmed by the matcher — an exact match": "Confirmado pelo matcher — correspondência exata",
   "exact": "exato",
+  // 4.5.0 — indoor / outdoor for each Wi-Fi point
+  "Where the service is given: indoor (a covered area) or outdoor (an open area). A column of the Wireless points sheet in the workbook.":
+    "Onde o serviço será prestado: indoor (área coberta) ou outdoor (área aberta). Uma coluna da aba Wireless points da planilha.",
 };
