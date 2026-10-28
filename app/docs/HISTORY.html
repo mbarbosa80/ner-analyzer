@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="description" content="Timeline, decisions and defects of the NER Spatial Coverage Analyzer project."/>
+<meta name="author" content="Marcelo Barbosa"/>
+<title>NER Analyzer History</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+/* ---------------------------------------------------------------------------
+   Palette inherited from the application itself: the analyzer's own tokens are
+   the project's design system, so the manual reads as part of the same tool
+   rather than a document about it. Light mode deepens the accent for contrast
+   on paper-white; the notation hues are lifted in dark mode so a red NER dot
+   stays a red NER dot on both grounds.
+   --------------------------------------------------------------------------- */
+:root {
+  --ground:      #f5f7fa;
+  --surface:     #ffffff;
+  --surface-2:   #eceff5;
+  --line:        #d7dce6;
+  --line-soft:   #e6eaf2;
+  --ink:         #101420;
+  --ink-2:       #485266;
+  --ink-3:       #78829a;
+  --accent:      #2563c4;
+  --accent-soft: #e6eefb;
+  --ok:          #1c7a3c;
+  --warn:        #9a5406;
+  --bad:         #b01717;
+  --ter:         #0000cc;
+  --ner-c:       #cc0000;
+  --ner-n:       #9a7a00;
+  --idf:         #7a7a7a;
+  --cow:         #8c5a00;
+  --diva:        #8000a0;
+  --proposed:    #7a009c;
+  --radius:      10px;
+  --shadow:      0 1px 2px rgba(16,20,32,.06), 0 8px 24px rgba(16,20,32,.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0f1117;
+    --surface:     #171a22;
+    --surface-2:   #1e222c;
+    --line:        #2b3040;
+    --line-soft:   #232838;
+    --ink:         #e6e8ee;
+    --ink-2:       #a8b0c1;
+    --ink-3:       #79839a;
+    --accent:      #4a8cff;
+    --accent-soft: #16233a;
+    --ok:          #2ea44f;
+    --warn:        #f28c1a;
+    --bad:         #e05555;
+    --ter:         #6e8cff;
+    --ner-c:       #ff6060;
+    --ner-n:       #e6b800;
+    --proposed:    #c07ae0;
+    --shadow:      0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #0f1117;
+  --surface:     #171a22;
+  --surface-2:   #1e222c;
+  --line:        #2b3040;
+  --line-soft:   #232838;
+  --ink:         #e6e8ee;
+  --ink-2:       #a8b0c1;
+  --ink-3:       #79839a;
+  --accent:      #4a8cff;
+  --accent-soft: #16233a;
+  --ok:          #2ea44f;
+  --warn:        #f28c1a;
+  --bad:         #e05555;
+  --ter:         #6e8cff;
+  --ner-c:       #ff6060;
+  --ner-n:       #e6b800;
+  --proposed:    #c07ae0;
+  --shadow:      0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15.5px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+h1, h2, h3, h4 {
+  font-family: Archivo, "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  text-wrap: balance;
+  margin: 0;
+  line-height: 1.2;
+}
+
+code, .mono, kbd {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.87em;
+}
+
+code {
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 0.08em 0.36em;
+  white-space: nowrap;
+}
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- shell ---------------------------------------------------------------- */
+.wrap {
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 40px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 28px 96px;
+}
+
+.masthead {
+  grid-column: 1 / -1;
+  border-bottom: 1px solid var(--line);
+  padding: 34px 0 22px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px 32px;
+}
+
+.masthead .id { flex: 1 1 340px; min-width: 0; }
+
+.eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+
+h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -0.02em; }
+.masthead p { margin: 10px 0 0; color: var(--ink-2); max-width: 62ch; }
+
+
+/* --- navigation ----------------------------------------------------------- */
+nav {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  font-size: 13.5px;
+  padding-bottom: 20px;
+}
+nav .navgroup {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 22px 0 8px;
+}
+nav .navgroup:first-child { margin-top: 0; }
+nav a {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  padding: 5px 0;
+  color: var(--ink-2);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding-left: 11px;
+  margin-left: -13px;
+}
+nav a:hover { color: var(--ink); border-left-color: var(--line); }
+nav a.on { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+nav .step {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: var(--ink-3);
+  min-width: 18px;
+  flex: 0 0 auto;
+}
+
+/* --- sections ------------------------------------------------------------- */
+main { min-width: 0; }
+section { margin-bottom: 54px; scroll-margin-top: 24px; }
+section > h2 {
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 4px;
+}
+.screen-step {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+section h3 {
+  font-size: 16.5px;
+  font-weight: 600;
+  margin: 30px 0 10px;
+}
+section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 22px 0 8px;
+  color: var(--ink-2);
+}
+p { margin: 12px 0; max-width: 68ch; }
+ul, ol { margin: 12px 0; padding-left: 22px; max-width: 68ch; }
+li { margin: 5px 0; }
+
+.lede { font-size: 17px; color: var(--ink-2); max-width: 66ch; }
+
+/* --- tables --------------------------------------------------------------- */
+.tablewrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin: 16px 0;
+  box-shadow: var(--shadow);
+}
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; vertical-align: top; border-bottom: 1px solid var(--line-soft); }
+thead th {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; }
+td:first-child { white-space: normal; }
+.ctrl { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink); white-space: nowrap; }
+.ctrl-kind {
+  display: block;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* --- callouts ------------------------------------------------------------- */
+.note {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 14px 18px;
+  margin: 18px 0;
+}
+.note.warn { border-left-color: var(--warn); }
+.note.bad  { border-left-color: var(--bad); }
+.note p:first-child { margin-top: 0; }
+.note p:last-child { margin-bottom: 0; }
+.note .tag {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 5px;
+}
+.note.warn .tag { color: var(--warn); }
+.note.bad .tag  { color: var(--bad); }
+
+.disclaimer {
+  grid-column: 1 / -1;
+  border: 1px solid var(--warn);
+  background: var(--surface);
+  background: color-mix(in srgb, var(--warn) 8%, var(--surface));
+  border-radius: var(--radius);
+  padding: 13px 18px;
+  font-size: 13.5px;
+  color: var(--ink);
+  margin-bottom: 34px;
+}
+
+/* --- swatches ------------------------------------------------------------- */
+.swatch {
+  display: inline-block;
+  width: 13px; height: 13px;
+  border-radius: 3px;
+  vertical-align: -2px;
+  margin-right: 8px;
+  border: 1px solid rgba(128,128,128,.35);
+}
+.dot { border-radius: 50%; }
+.dash { background: transparent !important; border: 2px dashed var(--proposed); }
+
+.pill {
+  display: inline-block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.pathline {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 15px;
+  margin: 14px 0;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ink-2);
+}
+
+.rule { height: 1px; background: var(--line); border: 0; margin: 40px 0; }
+
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: 1fr; gap: 0; padding: 0 18px 70px; }
+  nav {
+    position: static;
+    max-height: none;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 22px;
+    margin-bottom: 30px;
+    columns: 2;
+    column-gap: 26px;
+  }
+  nav a { break-inside: avoid; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+<style>
+/* --- additions for the 2.0 manuals ------------------------------------- */
+.legal {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-top: 12px;
+  max-width: 72ch;
+}
+kbd {
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 5px;
+  background: var(--surface);
+  font-size: 0.85em;
+}
+.steps { counter-reset: step; list-style: none; padding-left: 0; }
+.steps > li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 40px;
+  margin: 10px 0;
+}
+.steps > li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 2px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font: 600 12px/26px "IBM Plex Mono", monospace;
+  text-align: center;
+}
+.small { font-size: 13px; color: var(--ink-3); }
+@media print {
+  nav { display: none !important; }
+  .wrap { display: block; max-width: none; padding: 0; }
+  .masthead { padding-top: 0; }
+  section { margin-bottom: 30px; }
+  .tablewrap { overflow: visible; box-shadow: none; }
+  table { font-size: 11.5px; }
+  th, td { padding: 6px 8px; }
+  body { font-size: 12.5px; }
+  h2 { break-after: avoid; }
+  tr, .note { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="masthead">
+<div class="id">
+<div class="eyebrow">NER Spatial Coverage Analyzer · project record up to version 4.8.1</div>
+<h1>Project history</h1>
+
+<p>Everything that was done, from 26 August 2026 to version 4.7.0 on 27 October 2026: what came in, what went out and why, the defects found and fixed, the decisions that shaped the application. The user manual describes the application as it is; this document describes how it got here. From now on, every version gets an entry in <code>CHANGELOG.md</code>.</p>
+
+<p class="legal"><strong>Author: Marcelo Barbosa.</strong> © 2026 Marcelo Barbosa. Created by Marcelo Barbosa. Free software under the GNU AGPL-3.0 — see LICENSE.txt and NOTICE.txt.</p>
+</div>
+
+</header>
+<nav aria-label="Contents" id="toc">
+<div class="navgroup">The record</div>
+<a href="#metodo">How we worked</a>
+<a href="#linha">Timeline</a>
+<a href="#saiu">What went out, and why</a>
+<a href="#defeitos">Defects found and fixed</a>
+<a href="#decisoes">Decisions that shaped the application</a>
+<a href="#numeros">The numbers</a>
+<a href="#docs">Reference documents</a>
+</nav>
+<main>
+<!-- ================================================================== -->
+<section id="metodo">
+<h2>How we worked</h2>
+
+<p>The application was written by Claude (Anthropic) from the specifications, the real documents and the screen-by-screen reviews of Marcelo Barbosa — the way a text editor is used to write code: the AI took part in <em>writing</em> the application, and is no part of what runs. Nothing inside the application calls out to any model, service or account.</p>
+<ul>
+<li><strong>The specification</strong> came in two master prompts: the first (26 Aug) described the full coverage study — reading the VDB and the TEAP, scale, matching, the 90/70 m rules, coverage, reports — and the second, the same day, “V2”: the register of canonical NERs.</li>
+<li><strong>The reviews</strong> came from Marcelo in three forms: a 14-minute voice note walking the application screen by screen (the 2 Sep simplification), a written list of <em>Melhorias Propostas</em> (the 3 Sep pass) and annotated screenshots (the 10 Sep pass). Every ambiguity went back as a question before it became code.</li>
+<li><strong>The real documents</strong> — the VEE book (34 pages, 38 MB), the <em>TEAP v2.0</em> (15 sheets, 17,496 rows, 96 venues) and later the VFF, VBB, VAA, VJJ, VCC and VDD books — were the yardstick for everything. Several decisions below were made by measuring against them, not by assuming.</li>
+<li><strong>The delivery cycle</strong>: code written and tested in a development environment, packaged, installed on Marcelo's machine, the test suite run <em>on his Python</em>, the server restarted and the manual updated — his rule since 27 Aug: <em>“the manual ships with every change”</em>. Before every large pass, a backup of the database and the code.</li>
+</ul>
+</section>
+<!-- ================================================================== -->
+<section id="linha">
+<h2>Timeline</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Date</th><th>What happened</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">26/08/2026</td><td>
+
+<strong>V1 and V2 on the same day.</strong> The whole application from the master prompt: FastAPI + SQLite on the server, React + PDF.js + Konva on the screens, PyMuPDF to read the books; extraction of scales, spaces and markers; TEAP import with sheet profiling and column mapping; TEAP × drawing matching; demand rules A–D; the coverage engine with the 90/70 m rules, slack factor and routes; a CP-SAT optimiser (OR-Tools) to propose positions; marked-up PDF, workbook and CSV; 130 tests. Measured against the VEE book and the event's TEAP (see <a href="#decisoes">decisions</a>). The same day, <strong>V2</strong>: the canonical NER (the room) separated from the occurrence (the marker on a sheet), the “merge on proof, ask on suspicion” consolidation rule, the idempotent migration and 170 tests; coverage verified identical to V1 (2,873 spaces, 988 served). Also that day, a lesson: the server was started from inside a tool session and died with it — <code>tools\serve.py</code> with its own log was born.
+</td></tr>
+<tr><td class="ctrl">27/08/2026</td><td>
+
+<strong>PT-BR interface</strong> (dictionary keyed by the English text; exports always in English). <strong>Accounts and security</strong>: first account, administrators, private/shared projects, 12-hour sessions, scrypt passwords, the data statement written as verifiable facts rather than compliance. <strong>Scheduled task at sign-in</strong>, no window, no administrator rights. <strong>Offline installer and package</strong> (<code>install.bat</code>, <code>vendor\wheels</code>). <strong>Register snapshot and label retirement</strong>: a rejected NER stops competing for its own name, so a renumber cannot resurrect a removal. The full VDB versioning design was documented in <code>docs\VERSIONING.md</code> and not built, at his request. Space lists alphabetical with numeric ordering. The <strong>venue</strong> finding: the TEAP imported with no filter produced 2,873 matches, of which 74 (2.6%) belonged to the right venue. The <strong>three tie-break fixes</strong> in the matcher (queue 41 → 29 → 31 on VEE; the one that raised the count was the good one). The name <em>TEAP</em> (not CHIP) decided. The rule <em>“the manual ships with every change”</em>.
+</td></tr>
+<tr><td class="ctrl">28–30/08/2026</td><td>
+
+<strong>The server killed by Windows</strong> in the middle of an optimiser run, at 97% commit charge — no traceback, no line in the log. Answer (30 Aug): the <strong>memory guard</strong> (the app refuses a run that does not fit in 70% of what is free, never the last gigabyte; ~1 KB per variable, measured) and the <strong>model ceiling</strong> (<code>MODEL_TOO_LARGE</code>, 250,000 variables); heavy operations became <strong>background jobs</strong> with a progress bar, the stage in words and a cancel button.
+</td></tr>
+<tr><td class="ctrl">31/08/2026</td><td>
+
+A day of corrections against real documents. <strong>Page rotation</strong>: venue sheets carry <code>/Rotate 90</code>, the extracting library returned coordinates in the unrotated box and the drawing one applied the rotation — markers landed in open ground; rotation is now applied at a single point, and room-name recovery went from 38% to 100% on the VCC book. <strong>The same fault in the export</strong>: 4 of 21 NERs and 61 of 253 spaces were written off the sheet; every write into the PDF now goes through one coordinate translation (21 of 21 in place). <strong>Scenario</strong>: <code>Serving NER</code> came out as <code>A7</code>/<code>grid-72-1</code> and <code>NER critical</code> blank. <strong>Re-running the matching erased decisions</strong>: answers now live on the TEAP line itself, and the matching table became derived. <strong>Marked-up PDF 20× faster</strong>: one commit per page instead of one per operation (2.03 s → 0.10 s per page; a 75-page book from 152 s to 7 s). <strong>Black screen</strong>: a screen failing to draw unmounted the whole application; a per-screen error boundary went in. The viewer started drawing register rooms the sheet does not carry. Criticality-matrix tooling (command line) and the sign-in gate. Three database resets for from-scratch tests.
+</td></tr>
+<tr><td class="ctrl">01/09/2026</td><td>
+
+Demand rules A–D named on the <em>Summary</em> sheet; the choice of serving room (<code>Served by</code>) with an audited justification; <strong>sortable headings</strong> on every table (three clicks, blanks last, numbers as numbers); NER proposals from the VDB comments tracker (removed the next day). In the evening, the database wiped keeping the accounts, for a from-scratch run.
+</td></tr>
+<tr><td class="ctrl">02/09/2026</td><td>
+
+<strong>The simplification.</strong> From the voice note: <em>“The application got complex… let's go screen by screen.”</em> Out went the optimiser and the <em>As-Is vs Proposed</em> screen, <em>Suggest NERs for uncovered areas</em>, the tracker proposals, the scale's <code>Set</code> button, the register's own export, the bulk renamer, and sixteen columns across five screens — with the evidence moved to the workbook and the audit log rather than dropped. The workbook gained the flat <em>TEAP and coverage</em> sheet (15 columns, no subtotals). The rule <strong>“only a NER serves”</strong>: TER, IDF and COW became drawing only (COW had been on the serving list, and a temporary cabin could be handed a hundred ports). The black ring on markers and the darker name on non-critical NERs — decided by looking at a real PDF. The audit log moved to <em>Account &amp; security</em>. The <strong>AssignIn</strong> defect (below). <strong>The server fell over</strong> again, with no evidence; the <strong>watchdog</strong> every two minutes was born, recording the memory before restarting, and the <code>server-stop</code> that kills only this server. 401 → 417 tests.
+</td></tr>
+<tr><td class="ctrl">03/09/2026</td><td>
+
+<strong>The second screen-by-screen pass</strong>, from the <em>Melhorias Propostas</em> list. The two NER tabs became <strong>one list</strong> (<em>“what I inherited or drew follows the same principle”</em>), with <code>Lock all</code> and <code>Confirm all</code>; <em>Coverage analysis</em> was folded into <em>Demand per space</em> — 8 steps. The <strong>explicit serving rule</strong>: the TEAP names it → you chose → the nearest with a free port → the next → the nearest anyway, flagged → none, but showing the nearest. Optional <code>serving ner</code> import field. <strong>DIVA node</strong> (purple) read off the VDB and placeable; out went two-point calibration, zones, the cross-venue <code>Remember</code> (<em>“not every venue is the same”</em>) and <code>Confirm all</code> by method (<em>“better by hand, one by one”</em>). <code>Confirm all pages</code> on Scale. The exporter started drawing every marker kind (the legend said TER and the sheet showed none). Verified on the real database that <code>Run matching</code> erases no decision (3 projects, 154 decisions, 0 changed) — the frightening number was counted before laying them back. 438 tests.
+</td></tr>
+<tr><td class="ctrl">10/09/2026</td><td>
+
+<strong>The Demand per space pass</strong>, from screenshots. The <code>Matched to</code> (from → to) column. A <strong>NER on another level</strong> now holds: choosing a room on another page ticks the <code>other level</code> box, the room serves, the ports count against its capacity and the status is <em>Other level — not measured</em> — <em>“it is not 'not analysable', it is on another level and it counts… I verified the shaft exists”</em>. Readable notes (<code>read (n)</code>, <code>open all</code>). On the marked-up PDF, dots 2× larger, the name in bold on a tag under the dot (beside it went behind the VDB's own annotations, verified on the VBB book) and the <code>with NER → space lines</code> box. The <strong>title block</strong> is now read by its <em>DRAWING NUMBER</em> / <em>DRAWING TITLE</em> labels rather than by font size (which on one page had recorded <em>Critical NER 4</em> as the sheet title); the viewer shows <code>Page 1 - VFF-401-CSL-O · LEVEL 01</code>; checked on all seven books. The defect class of <strong>columns that did not sort</strong> (a heading key naming a field that does not exist) fixed in eight tables. The matching tiles relabelled so they add up on screen. 463 tests.
+</td></tr>
+<tr><td class="ctrl">11/09/2026</td><td>
+
+<strong>Version 2.0.0.</strong> The application gained a version number in one file (<code>VERSION</code>), shown on the sign-in screen, in the sidebar, at <code>/healthz</code>, in the workbook and the PDF; the interface warns when the browser is holding an older version. The user manual was rewritten from scratch with the functionality only; the installation manual, this history, the <code>CHANGELOG.md</code> with the numbering rule and the installation package <code>ner-analyzer-2.0.0-windows.zip</code> with the <code>install</code> / <code>start</code> / <code>stop</code> / <code>autostart</code> / <code>backup</code> / <code>run-tests</code> / <code>build_package</code> scripts were born. The previous manual, with every revision note, was kept under <code>docs\history\</code>. Rights: © Marcelo Barbosa (free software under the GNU AGPL-3.0 since 4.3.0).
+</td></tr>
+<tr><td class="ctrl">11/09/2026</td><td>
+
+<strong>Version 2.1.0 — Python comes in the package.</strong> The 2.0.0 package had a hole: it promised “no internet, nothing outside the folder” yet required Python 3.12 to be downloaded and installed first — it worked on the first machine only because that one already had it. Marcelo's question (<em>“did you build an installer that installs Python when the machine has none?”</em>) exposed it. Three ways out were put on the table: embed the official python.org <em>embeddable package</em> (11 MB, nothing outside the folder); carry the python.org installer inside the zip and run it silently (installs Python on the machine, touches PATH, may be blocked by corporate policy); or freeze everything into a single <code>.exe</code> (PyInstaller: a large, fragile build with PyMuPDF, numpy, pandas and OR-Tools, corporate antivirus distrusts it, a rebuild per release). Marcelo chose the first and asked that the third stay on record, to be reconsidered when the application is commercialised. Done: <code>install.bat</code> unpacks Python 3.12.10 into <code>.python\</code>, writes its search path (<code>python312._pth</code>), checks the Python Software Foundation signature, installs <code>pip</code> from the bundled wheel and the lock file's packages, and places <code>msvcp140.dll</code> beside Python only when Windows lacks it (the copy numpy ships). Every script now looks for <code>.python\</code> before <code>.venv\</code>; <code>run.py</code> hands <code>backend\</code> to uvicorn explicitly because the embedded Python ignores <code>PYTHONPATH</code> by design. The package builder fetches the python.org zip once and refuses any copy that does not match the pinned SHA-256. A scan of the 47 wheels showed who needs the Visual C++ runtime: numpy, pandas and shapely carry their own copy; PyMuPDF, OR-Tools and RapidFuzz expect the system's. Tested on a clean install with Python removed from PATH. Package: 97 MB.
+</td></tr>
+<tr><td class="ctrl">17/09/2026</td><td>
+
+<strong>Version 2.2.0 — the TEAP rules.</strong> Four requests from Marcelo in one conversation. <em>(1)</em> “The TEAP is the document that rules everything… it is mandatory to check the TEAP and match it to the map, not the other way round”: the check now runs only from the TEAP to the drawing; rooms on the drawing with no TEAP line are no longer counted, returned by the matching or written to the workbook, and the <code>Drawing space</code> list now offers the rooms not yet matched first. <em>(2)</em> TEAP spaces with zero ports leave the queue, Demand, Exceptions and the analysis — a filter, not a deletion. Checking the real TEAP v2.3 showed the risk of the bare rule: VEE has 253 wired connections on 27 zero-port spaces (105 on the press tribune, 58 on the five FOP photo positions), because the TEAP counts the port on the device and not on the service; those spaces stay visible, with a warning and no invented port. <em>(3)</em> The same space on different pages: VEE's PRS.001 family was tied to page 31, which has no NER, and labelled again on page 32, which has one. New table <code>space_occurrence_links</code>; same code and same level is proof, anything less is a question on the row, and another floor is never inferred. <em>(4)</em> Wireless points: their own marker, one port on the nearest NER within the limit, counted against capacity. <strong>Two defects found on the way:</strong> TEAP v2.3 has three quantity columns and the importer took <code>NEW QTY</code> instead of <code>Updated QTY</code> (the workbook's README says to use the latter); and a newer TEAP was added beside the older one instead of replacing it — the VFF project held v2.0 and v2.3 together, 102 + 105 spaces, ports doubled and the 45 decisions stuck on the old rows. A newer TEAP now replaces the older one and the decisions cross over by space key. Left out, recorded as a limitation: stitching the sheets of one level together to measure between them — the overall plans carry no space codes to anchor it.
+</td></tr>
+<tr><td class="ctrl">17/09/2026</td><td>
+
+<strong>Version 2.2.1 — the watchdog that did not watch on battery.</strong> Minutes after 2.2.0 the server fell at 14:31, with nothing in the log, and did not come back. Two causes, both with evidence. <em>(1)</em> The server had been restarted, while delivering 2.2.0, by <code>server-start.cmd</code> from the remote tool session: <code>start</code> made it a child of that session, and when the session's helper process was recycled the server went with it — the 26 Aug lesson again, by another road. <em>(2)</em> The watchdog should have raised it within two minutes and did not: <code>watchdog-heartbeat.txt</code> had stood still since 13:48. The task's XML showed <code>DisallowStartIfOnBatteries</code> and <code>StopIfGoingOnBatteries</code> on — defaults of <code>schtasks /create</code>, which has no switch for conditions — with the laptop at 73% on battery. The server task had already been fixed by hand; the watchdog's had not. In went <code>tools\task-harden.ps1</code>, which <code>autostart.bat</code> runs on both tasks, and <code>server-start.cmd</code> now starts the server through the scheduled task. The falls of 2 Sep and 16 Sep are worth re-reading with this in mind: “killed from outside, no trace” is also the signature of a task ended by the Scheduler, not only of memory running out.
+</td></tr>
+<tr><td class="ctrl">17/09/2026</td><td>
+
+<strong>Version 2.3.0 — erasing on the sheet itself.</strong> Marcelo's request after a wireless point landed in the wrong place: <em>“anything I draw, being able to erase it right there is more practical, besides erasing it on the other screens”</em>. The Drawing viewer gained the <code>delete</code> tool (the eraser, which stays armed), the <kbd>Delete</kbd> key for whatever is selected, and selectable route segments. Doing it exposed an old hole: a shaft, once registered, <strong>was drawn nowhere</strong>, and neither it nor a route could be removed — a shaft between the wrong pages turned “other level, not measured” into a confident wrong distance with no way back. Shafts now show on both pages they join, and routes and shafts gained audited removal. The <em>Wireless points</em> table on Demand gained a per-row <code>Delete</code>.
+</td></tr>
+<tr><td class="ctrl">18/09/2026</td><td>
+
+<strong>Version 2.4.0 — the installer that erases itself.</strong> Marcelo's request: <em>“an installer that also installs Python, as we did last time, but this time the installer must destroy every installation file. It installs, brings the services up and then cleans the installer itself, leaving only the APP running on the machine”</em>. The package gained <code>setup.bat</code>: unzip anywhere and one double-click copies the application into a folder of its own (<code>%LOCALAPPDATA%\Programs\ner-analyzer</code>, chosen because it is the folder Windows reserves for per-user programs, needs no administrator and is never synced by OneDrive), runs <code>install.bat</code> and <code>autostart.bat</code> there, starts the server through the scheduled task, waits for <code>/healthz</code>, opens the browser — and then removes <code>vendor\</code> from the installed folder and, once its window closes, every file of the unzipped package and the zip itself. Two design decisions worth recording. The cleanup deletes <strong>file by file, from the package's own <code>MANIFEST.txt</code></strong>, never a whole folder: whoever unzips straight into Downloads cannot lose Downloads. And an installation already in the target is <strong>updated</strong>, not replaced: a backup first, both tasks held while the Python is rebuilt (the watchdog would start the old runtime mid-swap), <code>data\</code> untouched. The old path — <code>install.bat</code> in the unzipped folder — still exists. Tested as a clean install on Marcelo's machine with PATH cut down so no Python on the machine could be found.
+</td></tr>
+<tr><td class="ctrl">18/09/2026</td><td>
+
+<strong>Version 2.4.1 — the sheet that prints no space code.</strong> Marcelo ran the matching step on the VDD project (a cricket venue, VDB 3.0) and got <em>“ingest at least one drawing before running the matching step”</em> — with the drawing imported, nine pages, scale confirmed and ten equipment rooms detected. The message was false: the drawing-space table was empty because the extractor only created a space from a <strong>code</strong> (<code>PRS.006.02</code>), and this book prints none — every room is labelled by name alone, over two or three lines of 12 pt text (<em>Venue Media Centre (VMC)</em>, <em>Workforce Check-in</em>), on a raster plan. VEE and VCC print codes, which is why the case had never shown; and the matching screen promised the “exact name → normalised name → similarity” steps that, with no space, were never reached. Three things changed. <em>(1)</em> On a sheet with no code at all, the name labels become the spaces: lines of one size, overlapping along the reading axis and touching on the other (2 pt of clearance at most — on this book the lines of one label overlap, and two neighbouring labels come within 4 pt on page 9), after excluding by explicit rule the title-block column (anchored on <em>DRAWING NUMBER</em>, not on <em>SCALE</em>, which the scale bar prints mid-sheet), the legend, the client-group key, the general notes, the revision table, the stamps, the key plan's sheet references and the NER markers themselves. Every space read this way carries confidence 0.45 and evidence saying it was read by name; a sheet with codes is read exactly as before. <em>(2)</em> The message now tells “no drawing” from “drawing ingested, no space recognised”. <em>(3)</em> A book imported before this version that yielded zero spaces is read once more at the next start, on the same thread that reads the sheet numbers, without touching the markers and without a re-import — which would double pages and NERs. Measured on VDD: 58 spaces on the six floor plans, none on the three key plans, no debris from the legend or the notes; 23 of the 94 TEAP spaces matched by name, all held for review. What stays unmatched — Press Tribune (106 ports), Photo Work Room (70), Photo File Centre (21), the Photo Positions — is not labelled on the book: the pavilion interiors are not drawn (<em>North Pavilion: Three Levels</em>). The <em>centre/center</em> pair also entered name normalisation, because the TEAP writes <em>Center</em> and the book <em>Centre</em>.
+</td></tr>
+<tr><td class="ctrl">18/09/2026</td><td>
+
+<strong>Version 2.4.2 — the installer finishes erasing itself.</strong> In the clean-install test of 2.4.0, <code>setup.bat</code> deleted every file of the unzipped package but left the empty folder behind. The reason is a Windows rule: a folder cannot be removed while any process still has it as its working directory — and <code>setup.bat</code>'s own window is not the only candidate. Called from inside another script, <code>setup.bat</code> hands the directory back to its caller the moment it exits; an Explorer window open in the folder holds it just the same. The clean-up now keeps trying for about 45 seconds. The files always went on the first pass; it is the empty folder that has to wait. The same day it turned out the 2.4.1 package's <code>INSTALL.txt</code> still said 2.4.0 — a test now holds it to the <code>VERSION</code> file, as it already did for the manuals.
+</td></tr>
+<tr><td class="ctrl">18/09/2026</td><td>
+
+<strong>Version 2.4.3 — the clean-up only scratched the surface.</strong> The clean-install test of 2.4.2 showed what 2.4.0 had hidden: of the 142 files in the unzipped package, the clean-up deleted 22 — exactly the ones at the root — and left the 120 that sit inside folders. <code>MANIFEST.txt</code> writes its paths with forward slashes (<code>backend/app/config.py</code>), as any manifest that crosses systems does, and Windows' <code>del</code> refuses a forward slash: it reads it as the start of an option. The clean-up script now converts each path before deleting. The lesson stays: the first version “worked” on screen — not one error message, because every line ends in <code>2^&gt;nul</code> — and only a test that went and looked at the folder afterwards saw it was still there.
+</td></tr>
+<tr><td class="ctrl">18/09/2026</td><td>
+
+<strong>Version 2.4.4 — what the installer test found inside the application.</strong> With 2.4.3 installed into a clean folder, running <code>run-tests.bat</code> from there reported nine failures. Eight were expected and were not failures: the <code>setup.bat</code> tests have no subject in an installation <code>setup.bat</code> made, because it does not copy itself into one — they now skip there, as the bundled-package tests already did. The ninth was real, and it was in the application: the <strong>audit log</strong> was ordered by time alone. A bulk decision stamps every row it writes with a single instant, and Windows' clock ticks coarsely enough that the click before it can land on the same one; tied, SQLite returns those rows in whatever order it likes. The screen whose whole purpose is to say <em>who decided what, and in which order</em> could show an order that never happened. The tie-break is now the row number. It had never shown on Linux, where the clock is too fine to tie.
+</td></tr>
+<tr><td class="ctrl">21/09/2026</td><td>
+
+<strong>Version 2.5.0 — the drawn wireless stands in for the TEAP's wireless.</strong> Marcelo, looking at a NER's load on VAA: <em>“the sum of ports used by wireless points has to allow for the TEAP already asking for wireless … otherwise I get 5 on the drawing + 1 that was already in the TEAP, telling me to use 6 ports on the switch when I will really use 5”</em> — and why it matters: the result feeds each venue's LLD, and one port too many is an expensive sum. Measured on the real TEAP: 88 of VAA's 110 spaces carry the <code>DWISA</code> line (<em>Wireless Connection - Shared Internet Access (SIA) Wireless LAN</em>) with one port, the access point's uplink, added to the space total by rule A; nothing tied a drawn wireless point to that space, so the two added up. Three decisions of his, taken before the code: the point → space tie is <strong>proposed automatically</strong> (the nearest room on the same sheet matched to the TEAP, up to the general limit) and corrected in the Inspector; a space <strong>with no point drawn keeps the TEAP's port</strong> (the TEAP rules); and <strong>indoor and outdoor</strong> access points follow one rule and differ only in symbol, numbering and report. Done: <code>space_key</code> / <code>tie_source</code> on the marker; the proposal on placing and on dragging (a manual choice survives a drag; so does a manual clear); in the engine, a space with at least one tied point loses the ports of its TEAP wireless lines, with the note on the row and the workbook's new <code>Counted ports</code> column; the <code>WIRELESS_OUTDOOR</code> kind (<code>+AP out</code>, the sign on a mast, teal, <code>AP-E-n</code>) beside the indoor one (<code>+AP in</code>, <code>AP-I-n</code> — the old <code>WP-n</code> were renamed once at start, audited, and tied by the same proposal). In the workbook, the two requests that had been waiting: <strong>a filter on every sheet</strong> and <code>Utilisation %</code> as a <strong>formula</strong>, so the network team can correct <code>Total ports</code> and watch the figure follow; plus <code>Indoor APs</code> / <code>Outdoor APs</code> per NER and, on the wireless-points sheet, the type, the space stood in for and who tied it.
+</td></tr>
+<tr><td class="ctrl">21/09/2026</td><td>
+
+<strong>Version 2.6.0 — the tiles are the filter, and every decision has an Undo.</strong> Marcelo, on the TEAP × drawing screen, <em>“one of the most important functions”</em>: <em>“all these captions could be buttons that filter TEAP Spaces, Matched, Confirmed by you… so I could even check things I confirmed myself and unconfirm them if I got something wrong”</em>. Two findings on the way. <em>(1)</em> The <em>confirmed by you</em> tile also counted what the <strong>matcher</strong> confirms on its own — an exact code with no rival comes in at 0.98 against the 0.95 threshold, with nobody named — and a “what I signed” filter that shows rows never touched does not serve the request; those got a tile of their own (<em>exact code, confirmed by the matcher</em>) and the note on the row. <em>(2)</em> Undo could not be “clear”: a room chosen by hand overwrote the matcher's on the row, and <code>— none —</code> only emptied it until the next run. The matcher's answer is now kept beside the decision (six <code>auto_*</code> columns on <code>space_matches</code>), and <code>Undo</code> returns the row to exactly what the next run would show: same room, same method, confirmed only where the matcher would confirm. On a row no run has refreshed since 2.6.0, <code>Undo</code> releases the decision and asks for the run rather than inventing. Done: every tile a button, counted from the queue's own rows (there before any run, never at odds with the table); the two check boxes became tiles; <code>your decisions — kept on every re-run</code> cuts across the groups; <code>Confirm</code> disabled on what you already signed and enabled on what the matcher signed, to make it yours; <code>POST /matches/{id}/undo</code>, audited as <code>match.undone</code> with what was taken back. The <em>choose one by hand or reject</em> label lost its “or reject”: there has been no <em>Reject</em> on this screen since 2 Sep.
+</td></tr>
+<tr><td class="ctrl">22/09/2026</td><td>
+
+<strong>Version 2.6.1 — the watchdog killed a server that was still starting.</strong> Marcelo: <em>“it is slow and every time I select a project it does not go well”</em>. On the machine, 75% CPU and 1 GB free of 16 (Edge WebView, Foxit, Excel, SentinelOne, remote desktop); the server had died at 10:14, and the laptop went in and out of Modern Standby three times in the next ten minutes. What followed was the watchdog's own doing, read from <code>watchdog.log</code> and <code>server.log</code>: a restart at 10:24:15; a <strong>second</strong> watchdog run at 10:24:49 finds the port not answering yet — the server was still importing its libraries on the starved machine —, kills it and starts another, whose bind fails with error 10048; <em>restart FAILED</em> three times in three minutes. The <code>.vbs</code> that hides the window returned at once, so the task's <em>IgnoreNew</em> policy never had a live instance to protect. Fixes: the <code>.vbs</code> waits; the watchdog holds a lock file, tells <em>refused</em> (nothing listening: restart now) from <em>slow</em> (listening, no answer in 20 s: restart only on the third consecutive check), leaves a process younger than three minutes alone, polls the health check for up to 150 s after a start and records the standby and power events of the previous half hour; <code>serve.py</code> takes a named mutex before importing anything. Crossing the eight deaths on record since 2 Sep with Windows' power log: three came right after leaving Modern Standby; five have no power event and no known cause — process-exit auditing is off on this managed machine, and without it there is no way to see who kills. In the browser a server that is down stopped looking like an ended session: a red pill, <code>/healthz</code> every five seconds, session and project reloaded by themselves when it returns.
+</td></tr>
+<tr><td class="ctrl">22/09/2026</td><td>
+
+<strong>Version 2.7.0 — four groups, the space the drawing does not show, NER references and suggested names.</strong> Four requests from Marcelo in one day. <em>Demand per space did not scroll sideways</em> on a smaller monitor: the table was at 100%, and a table at 100% does not overflow, it shrinks — it got a working width, and the sideways scrollbar is now mirrored right under the headings, because the native one sits at the foot of a 62vh box, under the fold. <em>“I cannot see in practice why split the status into not analysable, match not confirmed, not analysed … the ones not crossed all fall into the same group”</em>: the engine's ten statuses are now shown in <strong>four groups</strong> — served, out of limit / over capacity, served not measured, pending (needs a room or a NER) — with the precise status as the reason, on the small line under the pill and in the workbook's <code>Status detail</code> column; the tiles became the filter. And the rule that was missing: <em>“every TEAP space that needs network service will have to find a place on the drawing or … I have to tie it to an existing or created NER”</em> — a TEAP space <strong>with no room on the drawing</strong>, which until then simply did not exist for the engine, enters the analysis as pending and, when he chooses its NER under <code>Served by</code>, the ports count against that room's capacity with the distance not measured (<code>assigned_not_placed</code>), the same treatment as another level. The workbook gained the <em>Coverage figures</em> sheet: found on the drawing, not found, tied by hand, confirmed by whom, served, pending, ports on a NER, NERs he drew — as counts and shares. On key plans, <code>*NER★</code> and <code>*NER</code> place a <strong>NER reference</strong> (<code>NER_CRITICAL_REF</code> / <code>NER_NONCRITICAL_REF</code>): the name of a NER from the register, a dashed ring, the 90 m and 70 m circles to the sheet's scale, on the PDF too, counted nowhere — like a TER, but with the circles. And, from the VAA device naming sheet (<code>NERc.02</code> the broadcast compound, <code>NERc.03</code> the OVR, <code>NERc.03.1</code> the second OVR, <code>NERc.04</code> the FOP), a <code>Suggested name</code> column on the NERs screen: prefix by criticality, number by the functional area the room serves most in the last run, <code>.1</code>/<code>.2</code> for the second and third room, an adopted name keeping its slot, an area→number table editable per project, <code>Adopt</code> being the ordinary rename. A suggestion, never an automatic rename — the bulk renamer left this project for a reason, and base vs <code>.1</code> by ports may not be how the network team numbers. With no run, the suggestion falls back to the nearest room and calls itself weak. TER: <code>TER01</code>, <code>TER02</code> in the Inspector. 660 tests, 15 new.
+</td></tr>
+<tr><td class="ctrl">22/09/2026</td><td>
+
+<strong>Version 2.8.0 — named areas, TER/COW/DIVA references, fibre runs to the TER, and two viewer defects.</strong> Marcelo, in the evening: <em>“let me draw areas and name them, mainly to highlight areas of interest like BTOC, TER, etc.… for illustration only”</em> — the <code>+area</code> tool: click the corners, double-click or Enter to close, a name, a tag at the centre, on the marked-up PDF too; a <code>Zone</code> of kind <code>area</code> (the zones table had existed since August, with no tool since 3 Sep), which enters no figure. <em>“I also need *COW, *TER and *DIVA”</em>: the three reference kinds (<code>TER_REF</code>, <code>COW_REF</code>, <code>DIVA_REF</code>), dashed ring, no circles, outside the TER numbering; the whole illustrative group went violet on the toolbar, <em>“just so it is not confused”</em>. Names on the sheet a point larger, bold, on a white tag. <em>“Every time I move a NER the PDF goes far away and I have to press Fit — why does that happen?”</em>: Konva bubbles the marker's <code>dragend</code> up to the Stage, and the Stage's handler took the marker's position (in PDF units, thousands) as the sheet's pan. Fixed: only the Stage's own drag moves the sheet. <em>“Coverage also seems not to be working”</em>: it worked, but painted almost nothing, because the overlay found each row's room by comparing the tail of the TEAP key with the room code — which only holds when the two are spelled the same, and the matcher exists precisely because they are not. Every row of the analysis now carries the id and position of the room it was measured from; a NER's Inspector read the load by <code>E&lt;id&gt;</code> where the analysis records it by <code>A&lt;id&gt;</code>, and said every NER served nothing. The <code>Register NERs</code> button only appears when there is something to toggle. In the workbook, <em>“a RUN fiber to TER column, counting 2 for each NERc and one for each non-critical NER, and a summary: how many ports in total, how many fibres, how many indoor and outdoor APs”</em>: a <code>Fibre runs to TER</code> column on <em>NERs and ports</em> (rule per project, under <em>Project rules</em>), a <code>TOTAL</code> row of live sums outside the filter, and the <em>Totals:</em> block at the top of the <em>Summary</em>. And the review of the naming convention against the <code>NC.xlsx</code> sheet: what was missing was the rule for rooms with no named area — the VAA numbers 01–07 by area and then runs on in sequence (<code>NERc.08</code>, <code>NERc.09</code>) for the rest; the app only said <em>no number — add it to the convention</em>, which on the event's TEAP (SPT, TEC, SPP…) was nearly every NER. It now numbers in sequence from <code>Sequence for the rest starts at</code> (08), critical rooms first, no number repeated, an adopted slot respected; area 07 came in as IP6 / cellular (the only reading of the sheet's row 07, which carries nothing but T-Mobile's CoW IP6). Left out on purpose: <code>NERc.OD1</code> (an outdoor NER) and the full device name (<code>VAA-L0-NERc.02-CEN9348-01</code>), because the app does not know whether a NER is outdoor or which switches it holds. 672 tests, 11 new; no installer built, at his request, until he tests the version.
+</td></tr>
+<tr><td class="ctrl">22/09/2026</td><td>
+
+<strong>Version 2.8.1 — the test pass.</strong> <em>“Now you are a tester… check all the current documentation and test everything”</em>: 2.8.0 checked screen by screen against its own manual, on a synthetic venue (three pages, a two-venue TEAP, a wireless line, a zero-port wired line, a contradictory criticality, a room with a similar name) driven through the real screens — 300 automated checks, 31 of which left the green. Application defects: saving a mapping template under a name already used was a 500 that also stopped the import; the saved templates were never offered back; the wired-connection rule matched the bare word <em>wired</em>, and a storage room with four <em>USB Wired Mouse</em> lines entered the study as “4 wired connection(s)”; the workbook the app exports had none of the <em>Matching</em> and <em>Match exceptions</em> sheets the manual described (only the command-line tools wrote them); a hand-set <code>photographer</code> type vanished on a re-import unless the row carried another decision; a NER erased in the viewer and restored on the NERs screen came back with no marker; a drag was audited as <code>element.updated</code> with the destination only; the account events (created, blocked, reset, deleted) went to a table no screen read; the <em>Ports</em> column of Demand per space did not sort (its key named a field the row does not have); the demand-type select showed “pho”; the <code>*TER</code> reference notice promised circles; the progress bar read <em>Finished finished</em>; and thirty-odd strings stayed English on the Portuguese screens (<em>Sign out</em>, the whole TEAP card, <em>Change password</em>, the first account…). The open project now reopens after a Ctrl+Shift+R. Manual errors, corrected: a move does not change the origin; dragging a locked marker pans the sheet; Scale has no unconfirm; the TEAP × drawing tiles read 0 before the first run; the <em>show TEAP spaces with no ports</em> box is on Demand per space; a drawing cannot leave a project; each export replaces the previous file; the <em>No coverage analysis</em> note is per project; a shaft only measures when a traced route reaches it. 698 tests, 26 new; installer still not built, as asked.
+</td></tr>
+<tr><td class="ctrl">24/09/2026</td><td>
+
+<strong>Version 2.9.0 — the <em>TEAP by NER</em> sheet.</strong> Marcelo had built a PivotTable by hand on the VAA export (NER → space → product, summing <code>Counted ports</code>) and asked for it in the workbook, <em>“if it is an easy change”</em>. A real PivotTable was not: openpyxl cannot create one, and a hand-written definition Excel dislikes opens with a repair prompt and loses the table. He chose the grouped sheet. Reviewing his pivot found four things the sheet fixes: the biggest group was “(blank)” (564 of the 649 ports, pending) and is now named <em>Pending — no NER</em>; the NER totals did not match <em>NERs and ports</em> because the drawn wireless points are not on the flat sheet (NER.10: 20 against 22; NERc.04 and Critical NER#5 were missing) and they now appear under their NER; the fixed range stopped one row short of the data; 99 zero-port lines were noise, and are now left out with their count noted. Totals by <code>SUBTOTAL</code>, outline levels (the 1/2/3 buttons). Checked on the real data: 659 in total, the same as the Summary. 700 tests.
+</td></tr>
+<tr><td class="ctrl">24/09/2026</td><td>
+
+<strong>Version 2.10.0 — a <em>none</em> that sticks, a NER on another page that counts, and the event's naming convention.</strong> Five requests from Marcelo the same day. <em>“When I really find nothing to match it with… I would rather choose none and have it hold”</em>: on TEAP × drawing, <code>— none —</code> cleared the decision and the matcher proposed its room again on the next run; it now records on the TEAP line that the space has no room on this drawing (the same lock as the old reject), kept on every <code>Run matching</code>, with <code>— none (your choice) —</code> in the select and <code>Undo</code> to give the matcher's answer back; the space counts under <em>not on this drawing</em> and enters the analysis with no room. <em>“If I chose it, it should be served”</em>: on Demand per space the <code>other level</code> box is gone — choosing a NER on another page is itself the statement (status <em>Other level — not measured</em>, ports counted, a green line naming both pages). The cause of the <em>pending</em>: with a NER chosen while the space had no room and the room tied later (or the box unticked), the box stayed unticked and the engine refused the room. On the same page the choice is still measured: far away, <em>Out of limit</em>. <em>“I want to go back to no room on the drawing”</em>: with a NER chosen by hand, the first option of <code>Served by</code> is <code>✕ clear my choice</code>, saying where the row goes back to (no room, the nearest-NER rule, or the TEAP's room), audited. <em>“Tied to another room and rooms chosen by you do not work as a filter”</em>: the five counters became buttons, like the group tiles. <em>“The name convention is wrong, the right sheet is attached”</em> (<em>NER Standardized Naming Structure.xlsx</em>): the VAA sheet's table (NERc.02 BTOC, NERc.03 OVR, a dot separator, a sequence from 08) was wrong and is replaced. Now <code>NERc NN</code> / <code>NER NN</code> with a space, <code>.1</code> for a second room with the same purpose; COMP with 01 TER, 02 VMC, 03 tribunes, 04 BTOC, 05 broadcast compound, 06 CCR, 07 OVR, 08 FOP, extra critical rooms 09–20 and non-critical from 21; IBC/MPC/OLV, UAC/HQ/OFH and OTHER presets through the <code>Venue type</code> select, inferred from the venue code; <code>NERc 01</code> is the critical room at a TER marker (30 m); sequences by page, top to bottom, left to right; adopted names recognised in any spelling. A convention saved on a project before this version (the VAA table) is no longer read: the project uses the event's preset until it is saved again. 701 tests.
+</td></tr>
+<tr><td class="ctrl">24/09/2026</td><td>
+
+<strong>Version 2.11.0 — the NER of each wireless point.</strong> <em>“The APs I placed in the rooms of page 6 need a NER. Since I assigned NERs to the spaces… why did placing APs in the same rooms not give them the same NER”</em>: VAA page 6 has no NER, and a point followed only the nearest-room rule on its own sheet — <em>No NER reaches it</em>. A point tied to a space whose NER is fixed (by you or by the TEAP) is now served by that same NER, counted on it and not measured when it is on another page; and the <code>Served by</code> column of the wireless points table became a select to choose one point's NER. The count stays TEAP − 1 + points. 702 tests.
+</td></tr>
+<tr><td class="ctrl">25/09/2026</td><td>
+
+<strong>Version 2.12.0 — fewer buttons, one exceptions list, search on the drawing, and the repeated NER name.</strong> <em>“I think we only need 3 buttons here… any other button is unnecessary and is cluttering and overcomplicating the analysis”</em>: TEAP × drawing now has <code>TEAP spaces</code>, <code>matched</code> and <code>no room found</code> (which now includes the <code>— none —</code> you chose; <em>“if I changed it to NONE it is because no room was found”</em>); six tiles went. <em>“Why does coverage exceptions not seem to show everything that was really left out?”</em>: the screen ran an analysis of its own and listed only the engine's exceptions — on VDD, 4 rows against 43 pending spaces with no room and no NER, which were only in the second table — and the near-limit space sat inside <em>Served</em> on Demand. Exceptions now reads the same rows as Demand (47 on VDD), with filters, the <code>Served by</code> select, the other NERs measured with their distance and one click to use one, and buttons that open the row on Demand or the room on the drawing. Demand got a search box and the <em>near the limit</em> counter. The VDD case behind the question, <em>SPP Work Room</em>: served by NERc 02 at 85.2 m; the next NER on the same page, NERc 07, is 123.7 m away — there is no closer NER, only a new one. In the Drawing viewer, a name search across every page; and creating a NER under an existing name asks whether it is the same one (it becomes one more occurrence of it) or asks for another name. 706 tests.
+</td></tr>
+<tr><td class="ctrl">26/09/2026</td><td>
+
+<strong>Version 2.12.1 — the manual reviewed against the code, and what the review found.</strong> <em>“Review and rewrite the whole manual to match the latest version”</em>: every section of the manual was checked against the code and corrected where it had drifted (a reader of a shared project cannot build reports; the marked-up PDF covers only the first drawing set and carries the legend <em>or</em> the footnote; a pinned NER still serves a space whose match or scale is unconfirmed; a page with no scale gives <em>No NER reaches it</em>; the repeated-name dialog, the search, <code>Reset to default</code> and the merge rule described as the code does them). The review found defects, fixed rather than documented: a TEAP imported with no venue column was filtered by the project's code, matched no row, “succeeded” empty and deleted the TEAP already in the project; an import with no row is now refused and the TEAP stays; an old <code>.xls</code> is refused at upload with the reason; changing the room on a confirmed row drops the confirmation; <code>Save rules</code> shows its failure; a new shaft appears at once; the pending-ports counter no longer counts rows set to <code>— none —</code>. The installer was built again and tested in an isolated folder.
+</td></tr>
+<tr><td class="ctrl">29/09/2026</td><td>
+
+<strong>Version 2.12.2 — the white page on other computers.</strong> Installed on two more machines, the app opened a blank white page with no error. The interface is a JavaScript module, and a browser refuses a module that arrives with another type; the server took the type from the Windows registry, where on many machines <code>.js</code> is <code>text/plain</code>. Marcelo's machine had it right, so it never showed here. The server now fixes the type of the interface files itself. Installer built again.
+</td></tr>
+<tr><td class="ctrl">29/09/2026</td><td>
+
+<strong>Version 2.13.0 — key plans only illustrate, and the NERs the drawing already states become NERs.</strong> <em>“I just want to avoid creating every NER by hand when the information is already on the drawing… I'd rather check and validate than create everything from scratch.”</em> The importer reads <code>TEC.003.01</code> (critical) and <code>TEC.003.02</code> (non-critical) in any spelling — on the real books it is <code>TEC.003.01-05</code>, with a dash, and a bare <code>TEC.003.02</code> exists — and, with no code, the <em>Network Equipment Rack (NER) - Critical / Non-Critical</em> label, following its arrow to the room (VBB: 27 labels, no code, 25 arrows followed; VAA: 9 of 9; VEE: 15 of 17, the other 2 with the label inside the room). His decisions: per place (a NER already written within 12 m is that room), name = the code or <code>NERc p9-1</code>, criticality not stated = non-critical and pending, and apply it to the existing projects. The <em>KEY ENLARGED PLAN</em> / <em>KEY FLOOR PLAN</em> pages, recognised by the title block's title, leave every TEAP × drawing crossing (on VDD, 191 of 529 spaces were on the key plan), with a <code>Key plan</code> box in the viewer for a title block read wrong. Measured on a book already commented (VEE): of the 17 TEC.003 rooms, 5 stayed with the team's red NER and 12 became new NERs — the manual warns.
+</td></tr>
+<tr><td class="ctrl">14/10/2026</td><td>
+<strong>Version 3.0.0 — a room drawn on several sheets stands where each sheet draws it; a found room is served; the NERs sheet; a Mac.</strong> Marcelo, the same evening, on the VAA export: <em>“quando uma NER aparece em mais de uma página, o PDF traz a NER posicionada em local errado… A NERc_04.1 não aparece na página 6 e na página 4 ela está errada.”</em> Two defects, one older than the other. The exporter had always drawn each register room once, at its canonical point, on its canonical page — tolerable while rooms were drawn on one sheet, wrong now that the books draw the same rack on a level plan and on two overlapping details. And the canonical point itself was corrupt: since the register, a drag of a room's marker on <em>any</em> sheet copied that sheet's coordinates into the canonical position and left the canonical page as it was, so NERc_04.1 stood at page 6's x/y on page 4 — in the PDF and in every distance the engine measured from it. Only the marker on the canonical sheet moves the canonical point now; a start-up pass puts each stored point back on its own marker (three rooms on VAA); the engine carries every marker of a room and measures a space from the room's marker on the space's own sheet; the PDF draws every marker where it is; a saved scenario carries them all. The second question — <em>“pq aparece em exceções se a própria ferramenta já identificou uma NER próxima? Se está na mesma página inclusive”</em> — was a rule, not a defect: since the master prompt, a match nobody confirmed blocked the verdict. Asked whether the nearest NER should serve such a space, he chose yes, with the warning kept. So an unconfirmed match is now measured and served like any other, its ports count, it leaves Exceptions, and the row, a counter on Demand, the PDF's orange box and <em>Needs validation</em> keep saying the room is not confirmed. The risk is said in the manual: a wrong room means a wrong NER. On the workbook, <em>Full name</em> moved to B, a <em>Space code</em> (AAM / VDB, filled from the code the drawing prints, editable on the NERs screen) is C, the notes written on the NERs screen are the last column, and the sheets come in his order with yellow and red tabs. Moving columns of an export is a MAJOR change by his own rule — he chose 3.0.0 over 2.20.0 when asked. And a second installer, for the team's MacBooks: Apple Silicon only (his answer), a standalone CPython 3.12.15 pinned by hash, the same 48 pinned packages built for macOS, <code>setup.command</code> with no administrator password and a per-user launch agent in place of the two Windows tasks. There is no Mac on either side of the build; the installer was rehearsed end to end on Linux with a Linux runtime — install, update with backup, a broken package rolled back, the tests passing inside the installed copy — and the first real Mac install is the open check.
+</td></tr>
+<tr><td class="ctrl">16/10/2026</td><td>
+<strong>Version 4.0.0 — one set of numbers in every sheet; the TEAP as the only source of ports; placing that never duplicates; a way back in for a forgotten password.</strong> Another analysis of the VBB workbook found the sheets disagreeing: 576 ports on a NER on the <em>Summary</em> against 519 on <em>Coverage figures</em>, 842 requested against 839, and indoor/outdoor 13/8/2 against 14/9. Marcelo: <em>“O NER tem que bater em todas as planilhas. Pq isso aconteceria?”</em> Read on the VBB export and database before anything was changed: the <em>Summary</em> counted ports the way the engine did since 2.5.0 — the TEAP minus the <code>DWISA</code> lines whose access points were drawn (56), plus one port per drawn access point (59) — while <em>Coverage figures</em> took the raw TEAP total and left the access points out of <em>on a NER</em>, so its own rows did not add up (519 + 264 = 783, not 839). The indoor/outdoor figures of the workbook were consistent; the 14/9 came from counting NERs he had removed (NERc_01.1 indoor, NERc_05.2 outdoor) — and showed that the indoor/outdoor of NERc_02.1 had stayed on its removed twin. His answer went further than the arithmetic: <em>“AP não é um produto do TEAP. Mantenha somente a informação que já existe que é o produto DWISA e o número de AP placed nos desenhos deveria seguir rigorosamente esta qtde, e para os lugares não encontrados no VDB, não fazer nada, mantendo-os como pending - no NER. Clicar duas vezes no botão place AP ou Place NER não pode duplicar o que já foi feito.”</em> So the 2.5.0 rule (<em>“5 no desenho + 1 que já estava no TEAP … quando de verdade eu só vou usar 5”</em>) was turned around: every port is a TEAP port, the <code>DWISA</code> line counts on its space on the NER that serves the space, and a drawn access point is a position measured for the 90 m rule, never a port. <em>TEAP by NER</em> lists TEAP lines only; <em>Wireless points</em> lost its <code>Ports</code> column; <em>Summary</em>, <em>Coverage figures</em> and the <code>TOTAL</code> of <em>NERs and ports</em> carry the same requested / on a NER / pending and the same indoor / outdoor / not said. <code>Place APs from the TEAP</code> now places exactly the <code>DWISA</code> quantity, takes back extra points it placed itself (never a hand-drawn one) and leaves spaces with no room pending; both placing buttons refuse a second press while running, on the screen and on the server. The tabs follow his screenshot — <em>TEAP by NER</em> red, <em>NERs and ports</em> and <em>Wireless points</em> yellow, the rest uncoloured — and the file opens on the first. For a forgotten password: <code>Forgot your password?</code> on the sign-in screen, and <code>reset-password.bat</code> / <code>mac/reset-password.command</code> in the installed folder — no e-mail, no network, the owner of the computer's way back in. MAJOR by his rule: an export changed shape (a column out of <em>Wireless points</em>, the sheets in a new order) and its totals changed meaning.
+</td></tr>
+<tr><td class="ctrl">16/10/2026</td><td>
+<strong>Version 4.1.0 — several series of one book in one project; a sheet is a book and a page.</strong> Marcelo loaded the 300, 400 and 600 series of VAA into one project to cross more of the TEAP — the press tribune (106 ports) and the commentary positions (51) are only on the 600 series — and found the drawings <em>“um pouco bagunçados”</em>: every series starts at page 1. A study came first, as a deck (what changes, how, the impacts, every duplication scenario), measured on the real books and the TEAP v2.3: 650 ports for VAA; about 41 % of them found on the 400 series alone, about 81 % with the 600 and 700; the 300 adds almost nothing to the crossing and is the sheet where a whole level fits. Then: <em>“Vamos seguir com essa mudança… precisa ser preciso. Tudo que já funciona bem não pode alucinar.”</em> The database had always kept the book of every page; everything above it compared the page number alone — the engine, the matcher, the register, the viewer (which opened the first book whatever sheet was chosen), the marked-up PDF (the first book only) — so page 2 of the 300 at 1:800 and page 2 of the 400 at 1:400 were one sheet, and spaces were measured against NERs of another book, in another coordinate system. A <strong>sheet key</strong> now names a sheet everywhere above the database: the page number itself in a project with one book, so nothing there changes, and book × 10000 + page with several. The viewer pages through every series (<code>400 · Page 6 - VAA-411B3-VBV-O</code>) and opens the right book; a marker placed on a sheet goes to that sheet's book; key plans, scales, the same-space links, the duplicate check and the APs placed from the TEAP are per sheet; the marked-up PDF is one file with every book; the workbook names a sheet by its drawing number. Zones, routes and vertical links record their book. A level guessed from a bare three-digit figure on a sheet with a title block — the seat counts <code>142</code> / <code>138</code> on the 600 series, which had become the level of four NERs — is no longer read, and the one already stored is taken back at start, audited. Proved before release: every screen payload and every workbook cell of the eleven one-book projects of the live database, before and after, identical; on VAA the totals still 650, and the spaces that had been “served” by a NER of another book now pending, as they should.
+</td></tr>
+<tr><td class="ctrl">28/10/2026</td><td><strong>Version 4.8.1 — the replay of the QA scripts, before 4.8.0 left the work laptop.</strong> 4.8.0 was built and installed on the work laptop and the scripts of the morning's QA pass were run again on a fresh copy of its fourteen projects: the dragged NERs on VKK no longer came back as new ones, <code>Spread stacked Wi-Fi points</code> took the 290 stacked points to none, a deleted Wi-Fi point stayed deleted, a package exported twice came in "the same" with the day's date, and VBB 700 page 8 printed <code>WIFI-35</code> and its footnote. One check failed: on VBB 400 page 15 the Wi-Fi points no longer sat on each other, but their name tags still touched — the side-by-side pitch had been set in 2.19.0 for the short <code>AP-n</code> tags, and a 9 pt bold <code>WIFI-n</code> tag is wider than the step. The pitch was widened and a test now draws the tags the way the PDF does. The same replay showed that Wi-Fi points deleted before 4.8.0 come back once on the first <em>Place Wi-Fi from the TEAP</em> — their audit lines hold no space — and the manual says so. PATCH; 4.8.0 itself was not published.</td></tr>
+<tr><td class="ctrl">28/10/2026</td><td><strong>Version 4.8.0 — what a QA pass on real data found, and a browser that stopped freezing.</strong> A QA pass on a copy of the fourteen projects of the work laptop judged 4.7.0 fit to use with reservations and named two serious defects. <em>Place NERs from the drawing</em> created a room a second time when its NER had been dragged more than 12 m away from the bare <code>TEC.010</code> it was read from (the VKK project): the same-place test looked only at where the marker was, so every marker now keeps where it was first put and the test asks both spots. And 290 of 639 Wi-Fi points sat exactly on top of another one — several TEAP lines tied to one room each got their point at the same spot — so the marked-up PDF printed their names over each other, the confusion a reviewer had already had with the AP count. Points are now placed side by side, and a <code>Spread stacked Wi-Fi points</code> button separates the ones already drawn. Two medium ones: exporting a package marked the analysis as changed, so the next package was never compared on import, and the import quoted the scenario's first save as the date of the run; and sheets larger than 14,400 pt, which carry <code>/UserUnit</code>, lost every label of the app in the PDF because PyMuPDF does not apply that unit to inserted text. The browser stall Marcelo had felt after <em>Run matching</em> was the TEAP × drawing table building every room of the drawing into every row — about 100,000 options at once on the larger venues; a row now holds only its own room until it is reached. He also decided that a Wi-Fi point he deletes stays deleted, as a removed NER does. With them, the low findings: a notice that no longer pushes the viewer's sheet under the pointer, a next name that skips a live NER's former names, the API refusing what the screens never send, slow reads moved off the event loop, the test run cleaning its temporary folders, two audit lines made consistent and <code>NER_DATA_DIR</code> moving the database with the uploads. MINOR.</td></tr>
+<tr><td class="ctrl">27/10/2026</td><td><strong>Version 4.7.0 — a ruler, a route that works, and one analysis.</strong> Marcelo asked what <code>route</code> was for, and said it would be very useful if it were a continuous line in any direction, ended with a double-click, giving the length on the page's scale; and that <code>Coverage</code> looked useless. The answers were less flattering to the application than the questions. <code>route</code> saved one straight segment per two clicks and showed no length, and the engine joined a space to a route only through a segment's end within about 4 m at 1:200 — so a space beside the middle of a corridor tray never joined the tray, and a route drew a line that changed nothing. <code>Coverage</code> ran and saved the real analysis, but the viewer never read the saved one back, so it looked like a test button. He chose to keep them apart: a <strong>ruler</strong> (<code>measure</code>) that saves nothing and goes in no report — <em>"coisa rápida pra fazer análise útil"</em> — and a <code>route</code> kept and made usable: traced corner by corner, named and measured, snapping onto other routes, joined by the engine anywhere along a segment within 15 m on the sheet's scale, with the traced part and the straight lead-in written into the space's assumptions. <code>Coverage</code> became <code>Run analysis</code>, the same one as on Demand per space, and the viewer opens on the last saved run with the time it was run. On the way, a defect older than the question: <em>Last run</em> on Demand per space showed the scenario's first save, not the last run, and in UTC read as local time. Both tools measure flat, on one scale per page — the manual says so under what the app does not do. MINOR.</td></tr>
+<tr><td class="ctrl">27/10/2026</td><td><strong>Version 4.6.1 — a screen that refused to draw.</strong> The same afternoon, on the work laptop: opening a project showed <em>This screen could not be drawn</em> on Import, and Ctrl+Shift+R put it right. The upload queue added in 4.6.0 was declared below the screen's "no project yet" return; React counts a component's hooks on every render and refuses one that calls more than the last, which is what happened when a project was chosen after the application had opened without one. The Scale screen had carried the same fault since 4.0.0, unseen because it hits only that order of events. Marcelo: <em>"isso não pode acontecer, seja mais crítico antes de publicar uma versão nova"</em>. Two holes were closed, not one: a test now reads every screen of the interface and refuses a hook after an early return, and the interface tests open the application with no project chosen before choosing one — every earlier run had started with a project already selected, the one state in which the fault cannot show. PATCH.</td></tr>
+<tr><td class="ctrl">27/10/2026</td><td><strong>Version 4.6.0 — handing a project to another computer; one book once.</strong> Marcelo asked for four things. Several design books chosen at once in the file dialog — they are now read one after the other, each to its end, so the server can refuse the second copy of the same book instead of letting the two race in together. The same file uploaded twice had been accepted without a word, leaving every room and NER twice: a book is now refused when the same content (SHA-256) or the same file name is already in the project — a same-named book with other content is almost always a new revision, and two revisions side by side draw every room twice — and a book can be taken out with <code>Remove</code>, after a count of what goes with it: a NER also drawn on another book stays and is placed there, one drawn only on that book leaves the list with the reason, the person's ties to its rooms are released and counted, and the matching runs again. The pages shown on <em>Demand per space</em> became buttons to the Drawing viewer, as on <em>TEAP × drawing</em>. And the largest: a VTCM who stops, or passes a venue on (his example: a colleague who has to hand a venue to another VTCM mid-way), should not leave the next person starting from zero. <code>Export</code> writes the whole project — books, TEAP and every decision — into one package; <em>Import a project package</em> brings it in on the other computer as a new project of whoever imports it. Three choices were made on purpose. No account travels: the person importing becomes the owner, and password hashes never leave the machine. The saved analysis does not travel either, because it holds the exporting database's ids and sheet keys; it is run again on import and compared with the exported one, and the round-trip test holds the two to be identical. And a package is a <strong>copy, not a link</strong>: there is no merge, so the handbook and the import message both say to agree who carries on. The package is treated as untrusted input — only listed files, each checked against its SHA-256, known columns only, values coerced, all or nothing — and it is not encrypted: it carries the venue's design books, and the screens say to move it only through approved channels. MINOR.</td></tr>
+<tr><td class="ctrl">23/10/2026</td><td><strong>Version 4.5.0 — indoor or outdoor for each Wi-Fi point.</strong> Marcelo asked for a way to say, beside each Wi-Fi point, whether the service will be given indoors (a covered area) or outdoors (an open area), in a column next to the Wi-Fi, as a NER already has since 2.14.0: a detail that tells the LLD team the setting each access point is proposed for. The point got its own <code>Indoor / outdoor</code> field (<code>elements.environment</code>), set with a select in the <em>Wireless points</em> table of <em>Demand per space</em>, beside <em>Type</em>, and in the viewer's Inspector; the workbook's <em>Wireless points</em> sheet carries it beside <code>Type</code>, and the <em>Summary</em> counts the points indoor, outdoor and not said. Two choices were made on purpose. The export reads the value off the points as they are, not from the last run, so a point said outdoor after the analysis is exported as outdoor; and the change is audited under its own action, <code>wireless.environment</code>, which does not mark the analysis out of date — nothing the engine measures depends on it. Inserting the column beside <code>Type</code>, where he asked for it, moves the columns after it one to the right; it was kept MINOR, as the NERs' column was in 2.14.0, and the CHANGELOG says so for anyone who keyed a formula to a column letter. MINOR.</td></tr>
+<tr><td class="ctrl">22/10/2026</td><td><strong>Version 4.4.0 — fewer clicks between screens.</strong> After a week on real venues Marcelo asked for six small things, built together. The left-hand menu folds to a rail of step numbers (<code>«</code> / <code>»</code>) and the viewer's legend to a <code>LEGEND ▴</code> tab, both remembered per browser, to give the drawing the room on a laptop screen. Every page number on <em>NERs</em> (the page pill, <em>also on</em>, each marker under <em>Details</em>) and in the <em>Page</em> column of <em>TEAP × drawing</em> became a button that opens the viewer on that sheet, zoomed in on the NER or room and ringed. A <code>none</code> button beside the room list sets <code>— none —</code> without scrolling to the top of hundreds of rooms. He also asked why he should press <code>Confirm</code> on an exact match: a row already confirmed now shows <code>✓ exact</code> or <code>✓ confirmed</code> instead of the button, the rows still needing a look come first, and an identical name on a TEAP line with <em>no</em> code, answered by one room only, is confirmed by the matcher like an exact code. The line was drawn there on purpose: a TEAP line <em>with</em> a code the drawing does not print stays for a person, because the name alone may be the room next door — the same reason a base-code match was never confirmed silently. And the Wi-Fi name on the marked-up PDF, reported by the team as small and unreadable (6.5 pt cyan straight on the linework), is now 9 pt bold dark blue on a white tag, like a NER's. MINOR.</td></tr>
+<tr><td class="ctrl">19/10/2026</td><td><strong>Version 4.3.0 — Wi-Fi points instead of APs, the legend on the first page, and free software.</strong> A reviewer counted the access-point symbols on a marked-up PDF and read them as the number of access points requested. They never were: one was drawn per unit of the TEAP's wireless line, and only in the spaces found on the drawings. <em>Place Wi-Fi from the TEAP</em> (was <em>Place APs from the TEAP</em>) now draws <strong>one</strong> Wi-Fi point per TEAP space with a wireless (DWISA) line whose room is on a drawing, whatever the quantity; the quantity stays on the TEAP line and in the workbook as the space's wireless ports, and the number of access points comes from the wireless design. Points are labelled <code>WIFI-n</code> (were <code>AP-n</code>), the viewer's tool is <code>+Wi-Fi</code>, and on the first start a pass renames every <code>AP-n</code> to <code>WIFI-n</code> and, in a space holding several points placed from the TEAP, keeps the oldest; a point drawn or tied by hand is never removed. Ports are unchanged. The legend box, which sat over the plan on every sheet, is drawn on the first page of the marked-up PDF only; every other page carries the short footnote and <em>Legend: see the first page of this file.</em> And the application became free software: GNU Affero General Public License v3 (<code>LICENSE.txt</code>), the author's credit kept as an additional term (<code>NOTICE.txt</code>, section 7(b)) — the AGPL because PyMuPDF, which reads the drawings, is itself AGPL; <code>THIRD-PARTY-NOTICES.txt</code> lists every component and its licence. A client's own reference material (a list of accommodation-matrix space names, a naming structure for network rooms) left the source for a private folder, <code>backend/app/reference_private/</code>, which git ignores and a public package leaves out; the application works without it. <code>tools/make_package.py --public</code> builds the public edition and refuses while any shipped text names an event, an organiser, a venue or an employer. MINOR.</td></tr>
+<tr><td class="ctrl">17/10/2026</td><td><strong>Version 4.2.3 — sheet numbers a person can read.</strong> On the NERs screen of a project with the 400 and 600 series, Marcelo saw <em>also on 10012, 20004</em> and asked what those numbers were. They were the internal names of sheets since 4.1.0 (book number × 10000 + page), which the API hands out on purpose and every screen is meant to turn into <code>400·12</code>. The <em>also on</em> line printed them raw, and a sweep of the screens found eight more places doing the same: the <code>Page</code> column of <em>TEAP × drawing</em>, the same-name dialog when renaming a NER, the consolidation note, the notice after creating a marker in the viewer, the scale notice, and the three places that name a shaft's pages. All nine now write the series and the page. The back end, the workbook and the CSV were swept the same way, on a two-series project driven through matching, analysis, consolidation and both exports: no sheet key in any text or cell. One-book projects read exactly as before. PATCH: no screen, no column and no file shape changed.</td></tr>
+<tr><td class="ctrl">17/10/2026</td><td><strong>Version 4.2.2 — a test that depended on the clock.</strong> 4.2.1 installed on the work laptop, its own <code>run-tests.bat</code> failed one test, and not every time: 3 runs in 8. Measured on the laptop, not guessed: its clock moves in steps of about 1 ms, and the test removed a NER and created the new one in the same millisecond, so the removal was not <em>before</em> the creation and the start-up flag did not fire. The rule was right — on VCC the removal was on 8 October and the re-creation on 16 October — and the test was not: it now sets both dates and checks the rule from both sides. Nothing in the application changed; PATCH, because the manual promises that every test passing means the installation is sound, and a test that fails at random breaks that promise.</td></tr>
+<tr><td class="ctrl">16/10/2026</td><td><strong>Version 4.2.1 — the QA pass on 4.2.0.</strong> The same senior QA review, on copies of the live data, found that the D1 fix held for VBB but not for rooms removed before 2.18.1 with no TEC code: on VCC four of them came back at the very spot when <code>Place NERs from the drawing</code> read their block symbols — on the live installation too, at 20:59 — and one on VGG. The position the NER list keeps for a removed room now holds it, and the rooms already re-created are flagged, not removed. Seven smaller ones: a page past the end of a one-book project, a PDF that opens with no page, Restore and two simultaneous renames giving two NERs one name, the start-up matching audited as <code>user</code>, evidence lines repeated on every run, and a project deletion that left no trace. PATCH: no screen gains anything.</td></tr>
+<tr><td class="ctrl">16/10/2026</td><td>
+<strong>Version 4.2.0 — the QA pass on 4.1.0, and every defect it found.</strong> Marcelo asked for a senior QA review of 4.1.0 on his own installation, without touching the code: requirements and history read, the live projects probed through the API, copies of them used for anything that changed data, the manual read whole against the screens. Verdict: <em>approved with reservations</em> — sixteen defects, three of them high, and ten divergences between the manual and the application. Then: <em>“vc consegue corrigir todos os defeitos encontrados para nova versão? se sim, faça.”</em> The three that mattered most were silent. <code>Place NERs from the drawing</code> created a removed numbered room again whenever its code was printed on another sheet or book — reproduced on 4.0.0 as well, from the backup; part of it was the NER block symbol drawn inside the room, read in the same run as its code and counted as a second room. The drawing reader cut codes with a three-digit sub-index (<code>PRS.007.001-004</code> read as <code>PRS.007</code>), between 77 and 314 per project, and the cut code then matched the wrong TEAP line <em>exactly</em> — PRS.001, the 68-port VMC, tied to a photo work area. And every start since 3.0 signed off the matcher's confirmations as decisions “by user”. All three are fixed at the root and repaired in the existing databases at start, with an audit entry each; nothing a person decided is touched (a lock with a human decision in the audit log stays). He also asked why <em>Wireless points</em> (57) and <em>of which wireless ports</em> (53) differ on <em>NERs and ports</em>: an access point followed the NER nearest the point, the port the NER of its space — the fix makes the point follow the space, and the two columns stay as a cross-check. MINOR rather than PATCH because two screens gain something (the <em>changed since the last run</em> pill, the question on a duplicate name); no export changes shape.
+</td></tr>
+<tr><td class="ctrl">14/10/2026</td><td>
+<strong>Version 2.19.0 — the access points the TEAP states, drawn where their rooms are.</strong> Marcelo, from the work laptop, mid-morning: <em>“Consegue desenhar nos VDB o AP (access point), nos espaços que já sabemos que tem wifi, assim como fazemos com as NERs. Somente para espaços que encontramos automaticamente no TEAP e nos espaços. Só para facilitar os espaços que já conhecemos.”</em> The pieces were all there since 2.5.0 and 2.11.0: a wireless point is one port of demand on the nearest NER, a point <em>tied</em> to a TEAP space stands in for that space's wireless port (<em>TEAP − 1 + points</em>), and <code>wireless_line_ports</code> already reads which TEAP lines are wireless. What was missing was the act: forty rooms with a <code>DWISA</code> line meant forty clicks of <code>+AP</code>. The new card on the Scale screen, <code>Place APs from the TEAP</code>, beside <em>NERs from the drawing</em>, does them at once — one wireless point per wireless port of every TEAP space whose room is on a drawing (matched or tied by hand, not rejected), beside the room's label and tied to the space with a tie of its own kind, <code>teap</code>, which a move never re-proposes (an auto tie follows the nearest room after a drag; a point placed for a space keeps that space wherever it goes, and the inspector still lets the person change or clear it). Never on a key plan; a space with a tied point already — by hand or an earlier run — is left alone, so the step adds only what is missing; a space with no room is named in the notice and placed nowhere. The count is unchanged by design: the port the TEAP already asked for only gets a position on the sheet. On the same request, the names of the illustrative references — <code>*NER★</code>, <code>*NER</code>, <code>*TER</code>, <code>*COW</code>, <code>*DIVA</code> — are two points larger than a room's in the Drawing viewer (14 pt against 12) and in the marked-up PDF (11 against 9): they are read from across a key plan. The <code>AP-n</code> sequence became one function shared by <code>+AP</code> and the new step. Ten new tests. Built and installed from the work laptop for the first time — the code taken from the installed 2.18.1 package, the <code>vendor</code> folder from the Drive copy of the tree — with the package and the changed files left on the Drive for the development tree on the other computer.
+</td></tr>
+<tr><td class="ctrl">14/10/2026</td><td>
+<strong>Version 2.18.1 — deleting a NER deletes it everywhere.</strong> Marcelo, on the night of 13 October: <em>“Se a mesma NER aparece em diferentes páginas e eu vou lá nas NERs e deleto uma, ela tem que ser deletada de todas as páginas… Inclusive no Drawing viewer, se eu uso a opção delete de uma NER que aparece repetida em outras páginas, ela tem que ser apagada de todas as páginas e ela tem que sumir da lista de NERs. Eu não posso apagar do Drawing viewer e ela continuar na lista.”</em> The investigation read the two delete paths against the code and the live database (the VHH project: seven NERs drawn on two to four sheets each, <code>NER21</code> on pages 5, 6, 7 and 8). Three things explained what he saw. The viewer's <code>Delete</code> went through <code>DELETE /elements/{id}</code>, which deleted <strong>that one marker</strong> and retired the register row only when it had been the room's last — a NER on three sheets kept the other two and its row, and the notice (<em>deleted from the drawing</em>) said nothing about it. <code>Remove</code> on the NERs screen did hide the room everywhere (the viewer, the positions layer, the analysis and the export all skip a removed row), but the “is there a NER here already?” test of <code>Place NERs from the drawing</code> skipped the markers of a removed room, so the next run read the team's annotation at the same point and created the room again under a new name — <em>ela volta</em>. And two rows that carry the same name are two NERs (two answers of “not the same NER” when a marker was placed, or two rows renamed alike); removing one leaves the other on its pages. The correction keeps the register's rule — nothing is deleted, every removal is audited and reversible — and changes what one act means: <code>Delete</code> on any NER marker in the viewer now removes <strong>the NER</strong>, every page, the list, the analysis and the export, with a question that names the other sheets; the markers stay in the table, hidden with their room, so <code>Restore</code> brings every page back without redrawing anything. The old, narrower act survives where it is the right one — a duplicate drawing of a room on one sheet — as <code>Delete only this marker</code> in the inspector (<code>?scope=marker</code>). A removed room's marker now holds its spot: the placing pass absorbs the annotation (<code>annotations_on_removed</code>) and the drawn-rooms pass counts the same case (<code>on_removed_ner</code>), and creates nothing there. And <code>Remove</code> on the NERs screen says when other live rows carry the same name, lists their codes and pages, and asks whether to take them too. The release also carries the installer fix found on the work laptop on 9 October: a stray <code>%APPDATA%\Python\Python312\site-packages\pymupdf</code> made pip say “already satisfied”, nothing was copied into <code>.python\</code>, and the isolated server started without pymupdf — pip and the component check now run with <code>-s</code> (and <code>--ignore-installed</code>), <code>run.py</code> passes <code>PYTHONNOUSERSITE=1</code> to uvicorn and <code>tools/serve.py</code> drops the user site-packages from <code>sys.path</code> before importing anything. Thirteen new tests.
+</td></tr>
+<tr><td class="ctrl">09/10/2026</td><td>
+<strong>Version 2.18.0 — the NER naming structure v2.0: <code>NERc_01.1</code>, <code>NER_20.1</code>, the full name in the workbook.</strong> Marcelo sent the new version of the naming sheet (<em>NER Standardized Naming Structure v2.0</em>) with one condition: <em>“cuidado para não deixar tudo mais lento de novo, o sistema está ótimo e rodando bem.”</em> Read against v1.1, the sheet changed four things: every rack has a name of its own, with a rack suffix (<code>NERc 01.1</code>, never <code>NERc 01</code>; two racks side by side are <code>.1</code> and <code>.2</code>); the non-critical series starts at <code>NER 20.1</code>, not 21 — so the start the app took on 1 October was right for v1.1 and wrong for v2.0; three more critical numbers are fixed (<code>09.1</code> mixed zones, <code>10.1</code> SPP control, <code>11.1</code> SPP workroom, with 12.1–19.1 left to VTS); and the full name carries the venue code in front, each venue of a cluster with its own code (<code>LSH_NERc 02.1</code>, <code>LCT_NERc 02.1</code>). The sheet itself writes the prefix both ways, <code>VVV_NERc_02.1</code> in the principles and <code>LSH_NERc 02.1</code> in the example — his decision: <em>“seguir novo formato, mas não usar espaços e sim NERc_01.1, isso serve pra tudo”</em>, and <em>“leva o nome completo para o Excel”</em>. So every NER the app creates is now <code>NERc_01.1</code>, <code>NERc_02.1</code> … / <code>NER_20.1</code>, <code>NER_21.1</code> …; the register reads the old forms (<code>NERc01</code>, <code>NERc 01</code>) and the prefixed ones (<code>VHH_NERc_01.1</code>) as the same series when it picks the next number, and nothing already named is renamed — his names are his. The <em>NERs and ports</em> sheet gained a last column, <code>Full name</code>: the project's venue code in front of the NER name. The reference panel shows the v2.0 sheet with its principles. Constants, one regular expression, one column and a static table: nothing in the extraction, the viewer or the analysis was touched, by design.
+</td></tr>
+<tr><td class="ctrl">08/10/2026</td><td>
+<strong>Version 2.17.0 — the memory the books leave behind.</strong> On the work laptop, with eight event projects loaded in one afternoon, Marcelo noticed the upload taking longer than it used to and the Drawing viewer slowing with every project opened: <em>“quanto mais projetos eu tenho mais lento fica.”</em> The first suspect, the database, was innocent — 2 MB, eight projects, nothing in the import that reads across projects. The numbers told it: the same import ran at 1.5 s/page at 17:13 and 17.1 s/page at 18:09, and a TEAP import that takes two seconds took two minutes beside it. The machine had 700 MB of RAM free; the server process held 650 MB it would never give back (Python and MuPDF keep what a 90 MB book needs), so Windows had paged it out; and the browser tab held every book it had ever opened, because the viewer opened the PDF again at every page turn and never closed one. Three changes, no screen touched. The two heavy reads — the import and <em>Place NERs from the drawing</em> — run in a child Python started for the job (<code>isolate.py</code>): same code, same progress, same cancel, and the memory goes back when the child exits; <code>NER_INPROCESS=1</code> keeps the old way, and a child that cannot start falls back to it with a line in the log. The viewer keeps one open book per drawing, closes it when the drawing, the project or the screen changes, stops a render it no longer needs and drops the previous page's bitmap at once; the bitmap is capped at 6,000 px on the long side. And every <code>project_id</code> and the other keys the screens filter by are indexed — SQLite does not index a foreign key by itself, so until now every “rows of this project” query read the whole table; a database from before gets its 29 indexes at the first start. Not moved to the child: the marked-up PDF export, which reads the register as it draws. On the same afternoon, before any of this, restarting the server on the work laptop took it from 654 MB to 354 MB and freed 1.9 GB on the machine — the proof, and the stopgap until the version is installed there.
+</td></tr>
+<tr><td class="ctrl">02/10/2026</td><td>
+<strong>Version 2.16.1 — what moving to another computer found.</strong> Marcelo copied the development folders to a second laptop and made it the main one: <em>“prefiro usar esse computador para reconstruir ou atualizar o NER_Build”</em>, and <em>“tem uma instalação local que não é a última, atualize”</em>. Doing exactly that — the checkout's Python rebuilt from <code>vendor\</code>, the installation there taken from 2.8.1 to 2.16.0 without administrator rights, the day's project carried into it with <code>backup.bat</code> and <code>--restore</code> — walked the two paths 2.16.0 had only been tested around, and three things failed quietly. <strong>One:</strong> <code>autostart.bat</code> answered <code>ERROR: Access is denied.</code> and stopped. It made the sign-in task with <code>schtasks /sc onlogon</code>, a trigger for <em>every</em> user of the computer, which only an administrator may create; and because it stopped there, the watchdog was not installed either. Every installation until then had been made from an elevated window; the 2.16.0 installer for accounts without the rights had been install-tested with <code>--no-services</code> only, because the task names are fixed and a test must not re-point the tasks of the machine it runs on. So <code>setup-noadmin.bat</code> installed an application that nothing started. The task is now written as XML for the person signed in alone (<code>tools\signin-task.ps1</code>: a per-user logon trigger, the account by SID, registered with <code>schtasks /Create /XML</code>, the battery and 72-hour settings off from the start) — tried on that laptop side by side with the old form, which Windows refused in the same window — and the watchdog is installed whatever happens to the sign-in task, since on its own it starts the server within two minutes of a sign-in. <strong>Two:</strong> the restored database went on naming <code>…\NER_Build\ner-analyzer\data\uploads</code>, the folder the backup was taken in. <code>stored_path</code> is a full path; nothing ever re-read it. Had that folder not existed, every drawing would have been “missing”; it did exist, so the installation read another folder's files and looked perfectly healthy. The server now runs <code>rebase_stored_paths</code> first thing at every start: a record that names any place but this installation's <code>data\uploads</code> is moved to the same relative path here when the file is here and has the recorded SHA-256, with a line in the audit log; a record whose file is not here is left alone. <strong>Three:</strong> the backup did not carry <code>data\criticality-matrix.xlsx</code>, the one file the application keeps outside the database and the uploads. It does now, and a restore replaces the installation's matrix only with one the backup holds. (The matrix has no screen in today's interface; its endpoints are still there, and a backup that claims to hold <em>everything the application knows</em> should hold it.) Two small things on the way: a restore into a new installation no longer leaves an empty <code>replaced-…</code> folder, and <code>backup.py</code> prints plain ASCII, its middle dot having come out garbled in a Windows log. No screen changed. Fourteen tests in <code>test_carry_services_2161.py</code>.
+</td></tr>
+<tr><td class="ctrl">01/10/2026</td><td>
+<strong>Version 2.16.0 — the installer without administrator rights.</strong> The team's computers are managed: a non-administrator cannot install software and will not be given the rights. The check that 2.13.1 added — <em>“precisa de direitos de administrador”</em> — was the only thing in the installation that ever needed them: the folder is the person's own, the two scheduled tasks are per-user (<code>/rl limited</code>), the server listens on <code>127.0.0.1</code>. <code>setup.bat --no-admin</code> and its double-click form <code>setup-noadmin.bat</code> skip the Windows prompt and install for the account signed in, saying so; and when the prompt is refused or cannot be answered, <code>setup.bat</code> no longer stops but asks <em>Install without administrator rights, for this account only? [Y/N]</em>. Everything else — the backup and replacement of a previous installation, the wrong-account guard, the clean-up of the installation files — is unchanged, and the package carries the new file as a required one.
+</td></tr>
+<tr><td class="ctrl">01/10/2026</td><td>
+<strong>Version 2.15.0 — the NERs the 3.x design books state: TEC.010 / TEC.020, the label without “(NER)”, the NER block symbol, names from NER21.</strong> With the VCC Softball book (<code>VCC_400_SBL_O.pdf</code>, 83 pages, imported that afternoon) and three AAM workbooks (VDD, VEE, VBB): <em>“Os novos VDBs estão vindo dessa forma. Decidiram não colocar os nomes tec.003.xxx.xxx ainda. Tem como usar isso para desenhar NERs ali além de todas as outras regras que já temos?”</em> — a screenshot of a small orange square with the word NER inside a dashed rectangle. The book was read before anything was written: it has no <code>TEC.003</code> rack and no “(NER)” anywhere; the taxonomy moved — the AAM workbooks file the racks under <code>TEC.010</code> (critical) and <code>TEC.020</code> (non-critical), and <code>TEC.003</code> is now the Mobile Equipment Room — and the four coded rooms print a two-line label, <em>Network Equipment / Rack - Non-Critical</em>, with no bracket and no arrow. The other nineteen racks are a CAD block whose word is not text at all: AutoCAD plots its lettering as strokes, so the extractor of 2.14 saw nothing where he saw NER. The block is now recognised by shape — the 55 strokes of the reference block on page 27 kept as a template, each candidate square's strokes centred, turned onto the lettering's axis and scaled by its spread, and compared by Chamfer distance in the four flips alignment leaves open; a dash crossing the block or a stroke of the room beside it is dropped as an outlier and the rest aligned again. The nineteen blocks score 0.002 to 0.05 (the two turned 45° the highest); nothing else on the book — toilets, the COW block, seating — scores under 0.16. His rule for them: <em>“coloca NER não crítica e depois eu mudo se precisar”</em> — non-critical with the criticality pending, a symbol inside a coded room taken as that room's rack, and a symbol at the same position as one on another sheet (the level-01 rack repeated on the level-02 plan) created and asked about. Only a code with a room number identifies one room across sheets now; a bare <code>TEC.010</code> on two sheets is two racks. And the non-critical series starts at <code>NER21</code>, where the event's naming sheet puts it (<em>“segue tudo em sequência como NER XX começando com 21 em diante”</em>); the critical one keeps <code>NERc01</code>. The placing step walks every detail sheet's strokes now, a second or two per page, and says which page it is on. On the VCC book: 23 NERs, no false positive.
+</td></tr>
+<tr><td class="ctrl">30/09/2026</td><td>
+<strong>Version 2.14.0 — key plans ticked on the Scale screen, space names read the accommodation-matrix (AAM) way, the NERs placed as a step, sequential names, a toolbox in the viewer, one AP, indoor/outdoor, a clean export.</strong> The evening's review of 2.13.0, in his words. The space names had become <em>“muito poluído”</em>: on a containment book with no space codes, every short text on the sheet — <em>CABLE GOES UNDER BRIDGE</em>, <em>L145m (476ft)</em>, <em>STRM SEWR</em>, the pathway legend — had arrived as a room. The rule is now the accommodation-matrix (AAM) one he set out: the code first (<code>ACR.001</code>, <code>BRS.052.02-001</code>), and without a code only a label that reads as a known space name — the AAM list he supplied (the VHH squash and VBB golf sheets, 318 names, infrastructure and partner footprints left out) plus the project's own TEAP; measured on one venue's book, 1,111 name-only labels became 167 rooms and nothing else. A start-up pass cleans the older books the same way, never touching a space a TEAP line is tied to. The key plans moved to the Scale screen as a tick per page, ticked by default from the title block (widened to the index, information, abbreviations and typical-solutions sheets) and applied in one act; a key plan yields no space at all. The NERs are no longer placed at import: the book is read, and <em>Place NERs from the drawing</em> — after the key plans and the scales, <em>“aí sim roda o processo”</em> — creates them in his order (the team's annotations, the TEC.003 rooms, the NER labels), never on a key plan, never within 12 m of a NER already there. The naming convention of 2.7.0 went whole — the suggested names, <em>Adopt</em>, the editor: <em>“mantenha tudo como NERcXX e NERxx e crie tudo em sequência, que eu vou renomear tudo na mão mesmo”</em> — every NER the app creates is <code>NERc01</code> … / <code>NER01</code> … with the printed label kept as <em>printed as</em>, and the event's naming sheet is a reference panel that decides nothing. The viewer's toolbar, <em>“com muitas funções e muito grande”</em>, became a top strip (a pager, the key-plan tick, the search) and a toolbox down the left; the viewer returns to the last page viewed. Indoor and outdoor access points are one <em>AP</em> again; a NER says whether it is indoor or outdoor, for the workbook, because that decides the rack the venue is sent. The TEAP × drawing room list is one alphabetical list. And, asked with a screenshot of a red <em>COW #1</em> and a green ink blob: the exported PDF takes the reviewers' annotations off the copy first — they are PDF annotations, not the drawing — so the export carries only what the file was born with and what the app draws.
+</td></tr>
+<tr><td class="ctrl">30/09/2026</td><td>
+<strong>Version 2.14.2 — the manual audited against the code, and a one-page guide for the team.</strong> Marcelo: <em>“Agora atualize o manual completamente. Não precisa mais da versão em PT-BR, somente em inglês”</em> — with an installer as before, a simple installation manual and the e-mail that sends both to the team. The user manual was read section by section against the interface and the server, in four parallel audits, and corrected in forty-odd places: the order of the NERs columns; <code>Applied</code> and <code>Source</code> as the two columns they are on the Scale screen; the matching order as the engine really runs it, with no synonym step of its own and the building only nudging the confidence; the wireless-port formula (the ports of the space's wireless lines, not a fixed one); the three cases that move a tile before the next run; what <em>Insufficient capacity</em> overrides; the ten rows of the legend, not eleven; the row order of the <em>Summary</em> sheet; <code>backup.bat --to</code> writing a <code>backup-…</code> folder <em>inside</em> the folder named; and the last bilingual labels the 2.13.1 conversion had left in the control cells (<em>caixa / box</em>, <em>seleção / select</em>, <em>1º</em>). The same conversion had dropped the documents' <code>&lt;html&gt;</code> skeleton; the four are complete pages again. New: <code>docs\QUICK-INSTALL.html</code>, one page and five steps for whoever receives the zip, shipped in the package. The audit also found two things in the code: the Import card announced <code>XLS</code> among the formats it refuses, and the next sequential NER name counted only live rows, so a removed NER's number could be handed out again and a restore would have made two <code>NERc02</code> — the removed rows count now, as the function's docstring had always claimed.
+</td></tr>
+<tr><td class="ctrl">30/09/2026</td><td>
+<strong>Version 2.14.1 — the export that fell on its first press.</strong> The first marked-up PDF after 2.14.0 stopped with <code>NameError: name 'wcol' is not defined</code>. Folding the two access-point kinds into one had removed the line that chose the label colour by kind and left the name behind, in the branch that draws an access point; no test exported a PDF with an access point in the analysis, and 781 passed over it. Fixed in one line, and two things stay: an export with an access point on the sheet, and a scan of every backend module for a name a function reads that nothing defines — the kind of defect Python only reports at the line, on the button, in front of the person.
+</td></tr>
+<tr><td class="ctrl">29/09/2026</td><td>
+<strong>Version 2.13.1 — a clean installer that asks for administrator rights, and English-only manuals.</strong> Marcelo, preparing the e-mail that takes the application to the team: the installer <em>“needs administrator rights, because despite the changes made, that did not work well”</em>; the application <em>“has to work in Chrome, Edge, Firefox, everything”</em>; and <em>“the manual does not need two languages, keep everything in English, it is easier and faster to update.”</em> <code>setup.bat</code> now checks for administrator rights and, without them, asks Windows through the UAC prompt and carries on in the elevated window. Asking for them opened a trap worth closing: a standard user whose prompt is answered with an IT administrator's name and password gets a window running as <em>that</em> account, and a per-user installation would land in the administrator's profile, with its tasks, invisible to the person at the keyboard. Setup compares the account signed in at the console with the window's own and refuses, naming both (a Remote Desktop session reports no console user and is not compared). An existing installation is no longer overlaid: after the database backup and the stop, the old folder is moved whole to <code>ner-analyzer.previous</code>, its <code>data\</code> is moved into the new empty folder, and the new version installs there, so no file of the old one survives; a failure after the move puts everything back, data first. <code>install.bat</code> opened in the package hands over to <code>setup.bat</code>, so there is one way in whichever script the team opens. The browser opens through <code>explorer.exe</code>, as the person signed in and not elevated, and an <em>NER Analyzer</em> desktop shortcut replaces the instruction to run <code>start.bat</code>. The three documents became English only: <code>INSTALL.html</code>, <code>HISTORY.html</code> and the user manual, one PDF each. Browsers: the interface uses no engine-specific API; checked in Chrome and Edge on his machine, where no Firefox is installed.
+</td></tr>
+</tbody>
+</table></div>
+</section>
+<!-- ================================================================== -->
+<section id="saiu">
+<h2>What went out, and why</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Removed</th><th>When and why</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">The optimiser (CP-SAT) and the <em>As-Is vs Proposed</em> screen</td><td>2 Sep. Not because it worked badly: what it optimised — distance on a plan — is a fraction of what decides where a NER goes. Power, cooling, space, security, access, A/B independence and continuity are not in the model, and an answer presented as an optimum made the engineering argument harder. <strong>There is one proposal, and it is the drawing.</strong> OR-Tools stays installed, unused.</td></tr>
+<tr><td class="ctrl">Suggest NERs for uncovered areas · proposals from the tracker</td><td>2 Sep. A NER that is not on a sheet is not a register row — it is a drawing job. Five of the fourteen VJJ proposals arrived with no position, and a room with no position never reaches the analysis. The tracker is still where the requirement is argued with VNI; once agreed, the NER is drawn by hand in the viewer.</td></tr>
+<tr><td class="ctrl"><code>Method</code>, <code>Confidence</code>, <code>Reason</code> columns and the <code>Reject</code> button on TEAP × drawing</td><td>2 Sep. They described <em>how</em> the matcher arrived at its guess, and the answer never changed what you do: the room is the right one or it is not, and that is read off the drawing, not off a percentage (90% looks like agreement, and is precisely the row that needs a human). The evidence went to the workbook's <em>Matching</em> sheet and the audit log.</td></tr>
+<tr><td class="ctrl"><code>Code</code>, <code>Status</code>, <code>Keep</code>, <code>Coverage</code> columns, the search box and the bulk renamer of the register; the register's own export; the criticality <em>confirmed</em> tick</td><td>2 Sep. Noise for the desk work; capacity stayed (<em>“let's keep capacity”</em>). Choosing the criticality became the confirmation.</td></tr>
+<tr><td class="ctrl">The scale's <code>Set</code> button</td><td>2 Sep. The only state it could produce was a page that had a scale and still blocked the results — a state nobody chooses on purpose.</td></tr>
+<tr><td class="ctrl"><em>Matches awaiting human validation</em> on Exceptions; the scenario picker on Reports; the <em>Redundancy candidates</em> card and sheet; the <code>Rule</code>, <code>Explanation</code>, <code>Demand type</code>, <code>Capacity known</code> workbook columns</td><td>2 Sep. They duplicated the queue, the scenario or a constant (on the event's TEAP all 17,495 lines fire rule A; <code>Rule</code> said the same on every row). The warning <code>Rule</code> carried — an assumed port count — moved into <code>Needs validation</code>.</td></tr>
+<tr><td class="ctrl">The <em>On the drawing</em> and <em>Register</em> tabs as separate screens; the <em>change requests</em></td><td>3 Sep. From the desk it was one job done in two places: rename on one tab, classify on the other, confirm on both. They became one list, with the per-marker evidence behind <code>Details</code>. Change requests (the frozen XLSX register) went at his request; the snapshot stays on the server.</td></tr>
+<tr><td class="ctrl">The <em>Coverage analysis</em> screen</td><td>3 Sep. Two screens for one question, with the button that answered it on the other. <code>Run analysis</code>, the totals, the filter and the per-NER load moved to <em>Demand per space</em>.</td></tr>
+<tr><td class="ctrl">Two-point calibration and the zones (permitted / forbidden / technical) in the viewer</td><td>3 Sep. <em>“I don't think I need it”</em> / <em>“I don't need to draw areas”</em>: the scale is typed on the Scale screen, and the study needs rooms, not areas. The endpoints stay on the server; should a sheet ever arrive with no printed scale and no known ratio, calibration is the thing to bring back.</td></tr>
+<tr><td class="ctrl">The <code>Remember</code> box and the cross-venue alias dictionary; the <code>Confirm all base_code</code> / <code>Confirm all fuzzy_name</code> buttons</td><td>3 Sep. <em>“I prefer to do it project by project. Not every venue is the same.”</em> A pairing that is right at VEE is a guess at the next venue. And: <em>“Better to do it by hand, one by one — it is risky to assume a near name is the right room.”</em></td></tr>
+</tbody>
+</table></div>
+</section>
+<!-- ================================================================== -->
+<section id="defeitos">
+<h2>Defects found and fixed</h2>
+
+<p class="lede">The ones worth remembering, because each taught a rule that still holds.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Defect</th><th>What it was, what remains</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">A scale read from a date</td><td>26 Aug. A permissive regular expression read <code>03/31/2026</code> as scale 1:2026 and detail bubbles <code>1 / 410</code> as 1:410; a substring search picked up <code>Rack (NER)</code> from an annotation block as a room. Fixed and pinned by regression tests on the real document.</td></tr>
+<tr><td class="ctrl">The whole TEAP against one venue</td><td>27 Aug. 96 venues imported against one venue's drawing; 2.6% of the matches belonged to the right venue, and nothing in the matcher looks at the venue. The venue filter on import went in, with a block and a banner. The guard inside the matcher itself stays on the not-done list, by choice (<em>“leave it”</em>, at the time).</td></tr>
+<tr><td class="ctrl">Three wrong tie-breaks in the matcher</td><td>27 Aug. It compared full codes (a sub-index difference blocked 11 rooms); it never handled the top two candidates on the same page (8 rooms); it treated any page-rank difference as evidence (6 <code>SEC.005-*</code> rooms). The lesson that stayed: a smaller queue is not automatically a better one — what matters is what each row asks.</td></tr>
+<tr><td class="ctrl">The server killed for memory</td><td>28 Aug and 2 Sep. A process killed by Windows writes nothing on its way out; from the chair it looked “frozen” and had been dead for hours. What stayed: the memory guard, the model ceiling, the watchdog that records the memory before restarting and the two-minute heartbeat.</td></tr>
+<tr><td class="ctrl">Page rotation, on the way in and on the way out</td><td>31 Aug. Markers in open ground and 61 of 253 spaces written off the sheet in the exported PDF. The rule that stayed: rotation is applied at one point on the way in, and every write into the PDF goes through one coordinate translation. Books imported before the fix need re-importing (the <em>Positions outside the page</em> warning on Reports).</td></tr>
+<tr><td class="ctrl"><code>Run matching</code> erased decisions</td><td>31 Aug. It deleted every row and rebuilt from scratch; the VCC audit log showed the same confirmation given three times in three minutes. A first fix “snapshotted” the decisions; the definitive one took them out of there: the decision lives on the TEAP line, and the matching is derived. Row <code>id</code>s stopped changing between runs (SQLite recycles numbers after a bulk delete).</td></tr>
+<tr><td class="ctrl">The export froze the server</td><td>31 Aug. Every drawing operation on the PDF rewrote the page's whole content stream; two and a half minutes on a 75-page book, inside the request, on a single-worker server — indistinguishable from a dead one. One commit per page (20×) and the export as a background job.</td></tr>
+<tr><td class="ctrl">Black screen</td><td>31 Aug. <code>Refresh from a new analysis</code> treated the job identifier as the result; the error unmounted the whole React tree. A per-screen error boundary went in, and the wait for the job with a progress bar.</td></tr>
+<tr><td class="ctrl">AssignIn</td><td>2 Sep. An edit that cut from one route decorator to the next swallowed the request model defined between them. FastAPI does not fail at import for that: the annotation became a query parameter and the route answered 422 to every real call — <strong>choosing the NER serving a space was broken for a day</strong>. A test now scans every API file for referenced models that are not defined.</td></tr>
+<tr><td class="ctrl">Criticality that never reached the engine</td><td>3 Sep. The register's criticality select never confirmed a pending row, so the choice never reached the room's kind or the engine. Choosing became confirming, and the marker is repainted.</td></tr>
+<tr><td class="ctrl">Sheet title by font size</td><td>10 Sep. On a VBB sheet the largest text was the label <em>Critical NER 4</em>, recorded as the title; a 16 pt grid tag fools any font heuristic. The reader now anchors on the title block's <em>DRAWING NUMBER</em> / <em>DRAWING TITLE</em> labels.</td></tr>
+<tr><td class="ctrl">Headings that did not sort</td><td>10 Sep. The sort key was the column label, not the row field; clicking did nothing. Fixed in eight tables at once. Rule: a heading key must be a row field or carry its own getter.</td></tr>
+<tr><td class="ctrl">The wrong quantity column on TEAP v2.3</td><td>17 Sep. v2.3 carries <code>TEAP v2.0</code>, <code>NEW QTY</code> and <code>Updated QTY</code>, and its README says to use the third. The proposed mapping took <code>NEW QTY</code> (the first heading containing “qty”), so every line unchanged since v2.0 came in at quantity zero. Ports were unaffected — they come from <code>Network Ports</code> — which is why nobody saw it. It surfaced while checking the zero-port rule against the real workbook: with the wrong column only 5 of VEE's 27 zero-port spaces with wired connections would have been recognised. The rule that stayed: a new rule is checked against the real document before it ships.</td></tr>
+<tr><td class="ctrl">Two TEAPs side by side in one project</td><td>17 Sep. Importing a second TEAP file added its spaces to the first one's: the VFF project held v2.0 (102 spaces) and v2.3 (105) together, with the ports doubled and the 45 decisions made on the v2.0 rows absent from the v2.3 ones — from the chair, “122 spaces with no room”. A newer TEAP now replaces the older one and the decisions cross over by space key. The VFF project is put right by re-importing v2.3 once.</td></tr>
+<tr><td class="ctrl">“Ingest at least one drawing” with the drawing ingested</td><td>18 Sep. The VDD book prints no space code and the extractor only created spaces from a code: nine pages, ten NERs, zero rooms — and the message blamed the import. Rule that stays: on a sheet with no code, the name label is the space, at low confidence and with explicit evidence; and a refusal says which of the two situations it is, never one sentence for both.</td></tr>
+<tr><td class="ctrl">The clean-up that only deleted the root</td><td>18 Sep. The 2.4.0 <code>setup.bat</code> said it had deleted the unzipped package and had deleted 22 of its 142 files — exactly the ones at the root. <code>MANIFEST.txt</code> writes its paths with forward slashes and Windows' <code>del</code> reads a slash as the start of an option; since every line of the clean-up ends in <code>2&gt;nul</code>, none of them failed <em>out loud</em>. The rule that stayed: a destructive step is checked by looking at the folder afterwards, never by the absence of an error message — and silence bought with <code>2&gt;nul</code> is silence that hides its own defect.</td></tr>
+<tr><td class="ctrl">The watchdog that killed a starting server</td><td>22 Sep. Two watchdog runs at once on a starved machine: the second could not tell “still importing” from “dead”. Rule that stays: a watchdog runs one at a time, and “not answering” is never one thing — refused, slow and starting are three states, and only the first is restarted at once.</td></tr>
+<tr><td class="ctrl">Moving a marker threw the sheet away</td><td>22 Sep. Konva bubbles a marker's <code>dragend</code> up to the Stage, and the Stage's handler took the position of whatever had just been dragged — the marker, in PDF units, thousands — as the sheet's pan; every NER moved called for a <code>Fit</code>. Rule that stays: a Stage handler checks that the event's target is the Stage itself before acting, because on a canvas everything bubbles.</td></tr>
+<tr><td class="ctrl">The coverage that painted almost nothing</td><td>22 Sep. The viewer's <code>Coverage</code> button ran the analysis and painted only the spaces whose code on the sheet was spelled the same as the tail of the TEAP key — the matcher exists because it almost never is. Every analysis row now carries the id of the room it was measured from. In the same pass, the Inspector read a NER's load by <code>E&lt;id&gt;</code> where the analysis records it by <code>A&lt;id&gt;</code>, and said every NER served nothing. Rule that stays: a screen does not rebuild a result's key; the result carries the key the screen needs.</td></tr>
+<tr><td class="ctrl">What the 2.8.0 test pass found</td><td>22 Sep. Nine application defects in one day of testing against the manual (a repeated template name = 500; templates never offered; <em>USB Wired Mouse</em> read as a wired connection; <em>Matching</em> sheets missing from the app's workbook; a photographer type lost on re-import; Restore with no marker; a drag audited with no origin; account events invisible; a Ports column that did not sort), plus a dozen untranslated strings and eleven sentences of the manual describing what the app did not do. Rule that stays: the manual is a contract to be tested — every control it names has to exist under that label, and every behaviour it promises has to be exercised on a real screen, not only in a unit test. The pass became a Playwright script (six stages, 300 checks) and twenty-six regression tests.</td></tr>
+<tr><td class="ctrl">A sign-in task only an administrator could create</td><td>2 Oct. <code>schtasks /sc onlogon</code> registers a trigger for every user of the machine and is refused without elevation; <code>autostart.bat</code> stopped at the refusal and never reached the watchdog. The installer made for accounts without the rights had been tested everywhere except the one step that needed them. Rules that stay: a task is registered for the person signed in, never for everyone; one refused step does not cancel the next; and a path that cannot be exercised on the test machine is exercised with another task name, not left untested.</td></tr>
+<tr><td class="ctrl">A restored database that read the folder it came from</td><td>2 Oct. Uploaded files are recorded by full path, and a restore into another folder kept the old one. With the old folder gone it is an obvious failure; with it still on the disk it is invisible, and breaks the day somebody tidies that folder. Rule that stays: a path stored in the database is checked against where the installation actually is, at every start.</td></tr>
+<tr><td class="ctrl">A NER deleted on one sheet stayed on the others</td><td>13 Oct. The viewer's <code>Delete</code> deleted one marker; a room drawn on three sheets kept two of them and its row in the list, and the notice said nothing. Fixed in 2.18.1: deleting a NER marker removes the NER everywhere, with the other pages named in the question; <code>Delete only this marker</code> keeps the narrower act for a duplicate drawing. The rule it taught: an act on a room must mean the same thing on every screen — the register is one room, however many sheets draw it.</td></tr>
+<tr><td class="ctrl">A removed NER that came back</td><td>13 Oct. <code>Place NERs from the drawing</code> asked “is there a NER here already?” and skipped the markers of a removed room, so the team's annotation at the same point became a new NER on the next run. Fixed in 2.18.1: a removed room's marker holds its spot and absorbs the candidate (counted as <code>annotations_on_removed</code> / <code>on_removed_ner</code>). Removing a room is a decision about that place on the sheet; a later pass respects it.</td></tr>
+<tr><td class="ctrl">pip that saw another Python</td><td>9 Oct, work laptop. A stray <code>%APPDATA%\Python\Python312\site-packages\pymupdf</code> made the installer's pip report pymupdf “already satisfied”; nothing was copied into <code>.python\</code>, and the server — isolated by its <code>._pth</code> — failed with <code>ModuleNotFoundError</code>. Fixed by hand that night; in 2.18.1 pip, the component check and the server all run without the user site (<code>-s</code>, <code>--ignore-installed</code>, <code>PYTHONNOUSERSITE=1</code>). The three must see the same environment.</td></tr>
+<tr><td class="ctrl">Two totals for one workbook</td><td>16 Oct, VBB. <em>Coverage figures</em> was computed apart from the analysis: the raw TEAP total as <em>requested</em> but only the spaces as <em>on a NER</em>, while the <em>Summary</em> took the TEAP minus the wireless lines with drawn access points plus the points — 842 / 576 against 839 / 519, and a sheet whose own rows did not add up. Fixed in 4.0.0 by removing the cause rather than the symptom: the TEAP is the only source of ports, every sheet reads the same run, and a test exports a workbook and holds the four sheets to the same three numbers. Rule that stays: a total written in two places is computed once.</td></tr>
+<tr><td class="ctrl">A double click that placed twice</td><td>16 Oct. <code>Place NERs from the drawing</code> and <code>Place APs from the TEAP</code> were idempotent run after run, not against themselves: two presses arriving together each read “nothing placed yet”. Fixed in 4.0.0: a lock per project and step on the server (a second press gets <em>already running</em>), a guard on the button read before the screen re-renders, and the AP step reconciles to the <code>DWISA</code> quantity, taking back extra points it placed.</td></tr>
+<tr><td class="ctrl">A room on several sheets drawn at the wrong place</td><td>14 Oct. The marked-up PDF drew each NER once, at its canonical point, on the canonical page; and a drag of the room's marker on any other sheet copied that sheet's x/y into the canonical point without changing its page — VAA's NERc_04.1 stood at page 6's coordinates on page 4, and the engine measured from there. Fixed in 3.0.0: only the canonical sheet's marker moves the canonical point, a start-up pass puts stored points back on their markers, every marker is drawn and measured on its own sheet. Rule that stays: a position is a page <em>and</em> a point, and they are written together or not at all.</td></tr>
+<tr><td class="ctrl">A backup that left one file behind</td><td>2 Oct. <code>data\criticality-matrix.xlsx</code> lives beside the uploads, outside any project, and <code>backup.py</code> copied the database and the uploads only. Rule that stays: when a file is added under <code>data\</code>, the backup is where it is added next.</td></tr>
+</tbody>
+</table></div>
+</section>
+<!-- ================================================================== -->
+<section id="decisoes">
+<h2>Decisions that shaped the application</h2>
+<ul>
+<li><strong>Colour does not classify.</strong> On the real book every equipment-room label is the same red; criticality is in the text. The app reads the text and reports a confidence; the blue/red/yellow convention is how it draws its own output.</li>
+<li><strong>Code before name.</strong> The drawings carry the TEAP's code taxonomy; matching on the code is exact and explainable. The name is the fallback, and a similar name is never confirmed on its own.</li>
+<li><strong>Rule A is authoritative, and reconciled.</strong> <code>Network Ports</code> = quantity × ports per unit on 17,495 of 17,495 checkable TEAP lines; the importer re-verifies at every import and warns per line.</li>
+<li><strong>A straight line is never presented as compliant without qualification.</strong> Every distance with no traced route carries the warning and the slack factor; the 90 m is a <em>permanent link</em>, not a straight line.</li>
+<li><strong>A room and an occurrence are different things.</strong> A room drawn on four sheets is one NER with four markers. The identifier never changes; renaming writes history.</li>
+<li><strong>Merge on proof, ask on suspicion, never assume.</strong> An identical label is necessary and not sufficient; level and building agreeing is what merges by itself; an unknown level is a question.</li>
+<li><strong>The TEAP rules</strong> (2.2.0). It says whether an area is served: the check runs from the TEAP to the drawing and never back, a space with no ports requested is nobody's work, and a newer TEAP replaces the older one. The exception — wired connections the TEAP requests without counting a port — stays in sight, with no invented port: what a connection is worth is for whoever owns the TEAP to decide.</li>
+<li><strong>The same space on several sheets follows the NER rule</strong> (2.2.0): merge on proof (same code, same level read off the title block), ask on suspicion, another floor is never inferred — and the question is asked only where the answer changes the result.</li>
+<li><strong>The drawn wireless is the space's wireless</strong> (2.5.0). The TEAP's wireless line counts until the access points are drawn; from then on the points carry the port and the TEAP line leaves the sum — never both. With nothing drawn, the TEAP rules.</li>
+<li><strong>A figure on screen is a filter, and a decision is reversible</strong> (2.6.0). The tiles are counted from the rows the table shows, so they never disagree with it; “confirmed by you” counts people, not the matcher; and undo returns the matcher's answer, never a blank.</li>
+<li><strong>A symbol is read by its shape, against a reference the real document gave</strong> (2.15.0). The NER block's word is strokes, not text; the app keeps the strokes of one real block as a template and matches by geometry — centred, turned, scaled, Chamfer distance — never by colour, never by OCR. Another venue's block, another word, is not read until its block joins the reference.</li>
+<li><strong>Only a NER serves.</strong> TER, IDF, COW and DIVA node are drawing and nothing else; the refusal is the server's.</li>
+<li><strong>There is one proposal, and it is the drawing.</strong> The app says what each placement costs; the engineering decision stays with a person, room by room.</li>
+<li><strong>The decision lives where the data lives.</strong> The chosen room sits on the TEAP line; the criticality, on the NER; re-running any step never erases a decision.</li>
+<li><strong>When a column goes, the warning it carried is moved, not lost.</strong> Method and confidence → the <em>Matching</em> sheet; demand rule → <code>Needs validation</code>; audit log → <em>Account &amp; security</em>.</li>
+<li><strong>The data statement says what the application does, and what it does not protect.</strong> It claims compliance with no policy; it lists “no encryption at rest”. A notice that only reassures manufactures confidence that is not there.</li>
+<li><strong>Local, on 127.0.0.1.</strong> The strongest protection is the loopback address, not the password; removing it is another deployment, with other obligations.</li>
+<li><strong>The package carries no data.</strong> The builder refuses a package with the <code>data</code> folder; carrying data is a separate, deliberate act.</li>
+<li><strong>Visual changes are decided by looking at a real PDF</strong>, not by reading the code — the black ring, the darker name, the tag under the dot.</li>
+<li><strong>The manual ships with every change</strong>, with the control labels never translated. Bilingual (Portuguese and English) up to 2.13.0; English only from 2.13.1, to keep it fast to update.</li>
+<li><strong>The package carries its own Python</strong> (2.1.0). A prerequisite that needs the internet and an installer contradicts a package that promises neither; the python.org embedded Python closes that without putting anything outside the folder.</li>
+<li><strong>Deliberately open: the single <code>.exe</code>.</strong> Freezing the application into an executable (PyInstaller or similar) was set aside in 2.1.0 for its cost and fragility, but Marcelo intends to commercialise the application and asked for the option to be raised again when that moves forward — a product that is sold may justify a signed installer and an executable of its own.</li>
+</ul>
+</section>
+<!-- ================================================================== -->
+<section id="numeros">
+<h2>The numbers</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Milestone</th><th>Automated tests</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">26/08 · V1</td><td>130</td></tr>
+<tr><td class="ctrl">26/08 · V2</td><td>170</td></tr>
+<tr><td class="ctrl">27/08 · accounts</td><td>194</td></tr>
+<tr><td class="ctrl">02/09 · simplification</td><td>401 → 417</td></tr>
+<tr><td class="ctrl">03/09 · screen pass</td><td>438</td></tr>
+<tr><td class="ctrl">10/09 · Demand per space</td><td>463</td></tr>
+<tr><td class="ctrl">11/09 · 2.0.0</td><td>473, run in the development environment and on the Python of Marcelo's machine</td></tr>
+<tr><td class="ctrl">11/09 · 2.1.0</td><td>498, including those that hold the scripts and the package builder to the embedded-Python layout</td></tr>
+<tr><td class="ctrl">17/09 · 2.2.0</td><td>550 — 52 more than at 2.1.0 — on the TEAP rule, zero-port spaces, the same space on several pages, wireless points and the two TEAP v2.3 defects</td></tr>
+<tr><td class="ctrl">17/09 · 2.2.1</td><td>553</td></tr>
+<tr><td class="ctrl">17/09 · 2.3.0</td><td>558</td></tr>
+<tr><td class="ctrl">18/09 · 2.4.0</td><td>564 — six on <code>setup.bat</code>: its own folder, the order of the scripts, manifest-based cleanup, safe update</td></tr>
+<tr><td class="ctrl">18/09 · 2.4.1</td><td>611 — 47 on the code-less sheet: label grouping, what is not a room, the title block, the extractor on a synthetic book, the two refusals, the re-read at start</td></tr>
+<tr><td class="ctrl">18/09 · 2.4.2</td><td>613 — two on the installer's clean-up and the version in INSTALL.txt</td></tr>
+<tr><td class="ctrl">18/09 · 2.4.3</td><td>614 — one more: the forward-slash path that <code>del</code> refuses</td></tr>
+<tr><td class="ctrl">18/09 · 2.4.4</td><td>615, eight of them skipped in an installation made by <code>setup.bat</code></td></tr>
+<tr><td class="ctrl">21/09 · 2.5.0</td><td>627 — thirteen on wireless: 5 + 1 = 5, the port that stays with nothing drawn, the tie proposed, moved, chosen and cleared, indoor and outdoor, the re-read of old points, the workbook's filter and formula</td></tr>
+<tr><td class="ctrl">21/09 · 2.6.0</td><td>636 — nine on the tiles and Undo: the matcher's confirmation told apart from yours, the tiles' sum, Undo of a room, a confirmation and a rejection, the row with no room, the pre-2.6.0 row, the refusal and the audit</td></tr>
+<tr><td class="ctrl">22/09 · 2.7.0</td><td>660 (+2 skipped) — fifteen on the four groups, the space with no room on the drawing (pending, served by choice, over capacity, rejected), the <em>Coverage figures</em> sheet, the NER references, the name suggester and the sideways-scrolling table</td></tr>
+<tr><td class="ctrl">22/09 · 2.8.0</td><td>672 (+1 skipped) — eleven on the named areas (create, list by page, rename, delete, on the PDF), the TER/COW/DIVA references (no register row, no circles, outside the numbering), the room on every analysis row, the drag that leaves the sheet alone, the fibre column, the TOTAL row and the Summary totals</td></tr>
+<tr><td class="ctrl">22/09 · 2.8.1</td><td>698 (+1 skipped) — twenty-six on the test pass: the wired-connection rule (a mouse and a keyboard do not count; SIA, RJ45 and Wired LAN do), the template replaced under the same name and offered back, the <em>Matching</em> sheets in the app's workbook, the photographer type carried across a re-import, the marker redrawn on Restore, <code>ner.moved</code> with from and to, the account events (administrators only), Ports and Payload sorting, the reference notice, the progress bar, the remembered project and the translated strings</td></tr>
+<tr><td class="ctrl">24/09 · 2.9.0</td><td>700 (+1 skipped) — two on the <em>TEAP by NER</em> sheet: its place, NER totals equal to <em>Ports assigned</em>, the access points under their NER, the pending group named and last, the zero-port lines left out and counted, and every <code>SUBTOTAL</code> over its own rows with the right outline level</td></tr>
+<tr><td class="ctrl">24/09 · 2.10.0</td><td>701 (+1 skipped) — one new, on <em>none</em> surviving a re-run of the matching; the naming tests rewritten for the event's naming sheet; the other-page test rewritten for the new rule</td></tr>
+<tr><td class="ctrl">24/09 · 2.11.0</td><td>702 (+1 skipped) — one on the NER of a wireless point: it follows the NER chosen for its space, not measured on another page; one chosen for the point wins; releasing goes back; the load stays TEAP − 1 + points</td></tr>
+<tr><td class="ctrl">25/09 · 2.12.0</td><td>706 (+1 skipped) — seven new: three tiles on TEAP × drawing; a NER drawn as the same one from another page joins the same register row with its name and classification (and the refusal for anything but a NER); the question in the viewer; the search across every page; the other NERs measured without the serving one; Exceptions reading the Demand rows.</td></tr>
+<tr><td class="ctrl">26/09 · 2.12.1</td><td>711 (+1 skipped) — five new: a TEAP with no venue column imported whole; an empty import refused without deleting the TEAP; <code>.xls</code> refused with the reason; changing the room drops the confirmation; the interface fixes in the source</td></tr>
+<tr><td class="ctrl">29/09 · 2.12.2</td><td>713 (+1 skipped) — two new: <code>.js</code> goes out as JavaScript even with the registry saying <code>text/plain</code>; the interface bundle served as JavaScript</td></tr>
+<tr><td class="ctrl">29/09 · 2.13.0</td><td>744 (+1 skipped) — thirty-one new: the key-plan title; the TEC.003 code in every spelling; criticality from the code or the words; the arrow followed (one path or two); stacked labels; the legend; a NER written on a key plan becomes a reference; the import creates the NERs; an already marked NER is not doubled, not even with racks side by side; the same code on two sheets; pending criticality before confirming; key plans out of the crossing; no NER or AP on a key plan; the box releases and restores; the one-time pass on old projects</td></tr>
+<tr><td class="ctrl">16/10 · 4.0.0</td><td>945 in the container, no skips — fifteen new in <code>test_teap_ports_aps_400.py</code> (requested / on a NER / pending equal on Summary, Coverage figures, TEAP and coverage, TEAP by NER and NERs and ports; indoor / outdoor never counting a removed NER; no AP rows and no Ports column; the tab order and colours with one tab selected; APs exactly the DWISA quantity, nothing for a space with no room or a zero quantity; a second press adds nothing, extra points it placed taken back, a hand-drawn one never; a second press while running refused; a run saved before 4.0.0 counted the new way in the export; the reset tool on the API and the command line, shipped on both systems; the sign-in screen) and eleven older tests rewritten for the new rule. On the work laptop, an update of a copy of the live 3.0.0 installation (twelve projects) with <code>setup.bat --no-admin --no-services</code>: version 4.0.0, data and backup kept, <code>run-tests.bat</code> all passed, and every project exported twice — from its saved 3.0.0 run and after a fresh analysis — with the same numbers on every sheet (VBB: 839 requested, 573 on a NER, 266 pending; 13 indoor / 8 outdoor / 2 not said). The Mac package rehearsed on Linux: 3.0.0 installed, 4.0.0 over it, projects and accounts kept, the reset tool and the tests passing in the installed copy.</td></tr>
+<tr><td class="ctrl">16/10 · 4.1.0</td><td>955 in the container — ten new in <code>test_multi_book_410.py</code> (a one-book project keeps its page numbers; every page 1 of two books is its own sheet and a bare page number names none; markers and rooms stay on their book; a NER on another book's page 1 serves nothing; the distance uses its own book's scale; a key plan of one book is not one of the other; the same code in two books linked on the same level with both sheets named; the marked-up PDF carries every book; the workbook names the sheet; a guessed three-digit level taken back, once). A golden comparison on a copy of the live database (twelve projects): every screen payload (project, elements, spaces, TEAP spaces, matches, NERs, links, positions, zones, routes, verticals, tie options, analysis, assignments) and every cell of every workbook sheet, before and after — identical for the eleven one-book projects, new keys only. End to end on the real VAA 400, 600 and 700 books with the TEAP v2.3: nine NERs, none duplicated across the series (sixteen rooms recognised as a NER already placed on another series by its code), 650 ports, a 22-page marked-up PDF, every series rendered in the viewer.</td></tr>
+<tr><td class="ctrl">28/10 · 4.8.1</td><td>1092 (+11 skipped without the private reference files) in the container (+1 new test file: <code>test_wifi_tags_481.py</code>, 3 tests); the 4.8.0 packages fresh-installed on the work laptop with every test passing in both, and the QA scripts replayed on a copy of its fourteen projects (the five requested checks, the consistency of every project, the API's refusals, the TEAP × drawing screen on VAA and VBB with 165 options in the page instead of one list per row)</td></tr>
+<tr><td class="ctrl">28/10 · 4.8.0</td><td>1089 (+11 skipped without the private reference files) in the container (+1 new test file: <code>test_qa_fixes_480.py</code>, 24 tests)</td></tr>
+<tr><td class="ctrl">27/10 · 4.7.0</td><td>1075 (+1 skipped) in the container (+1 new test file: <code>test_routes_measure_470.py</code>, 19 tests); and an interface run that draws a measure, two joined routes and a route beside a space, runs the analysis from the viewer and reads the method and the lead-in — it found a route saved twice by a quick double-click before release</td></tr>
+<tr><td class="ctrl">27/10 · 4.6.1</td><td>1049 (+11 skipped where the private reference lists are absent) in the container (+1 new test file: <code>test_hooks_order_461.py</code>, 3 tests, which found the Scale screen's fault besides the reported one); an interface run that opens the application with no project and chooses one</td></tr>
+<tr><td class="ctrl">27/10 · 4.6.0</td><td>1053 in the container (+1 new test file: <code>test_project_transfer_460.py</code>, 17 tests)</td></tr>
+<tr><td class="ctrl">23/10 · 4.5.0</td><td>1036 (+1 skipped) in the container (+1 new test file: <code>test_wifi_environment_450.py</code>, 12 tests; two older files follow the new column)</td></tr>
+<tr><td class="ctrl">22/10 · 4.4.0</td><td>1024 (+1 skipped) in the container (+1 new test file: <code>test_workflow_shortcuts_440.py</code>, 12 tests)</td></tr>
+<tr><td class="ctrl">19/10 · 4.3.0</td><td>1013 in the container (+2 new test files: <code>test_wifi_points_430.py</code>, <code>test_public_edition_430.py</code>)</td></tr>
+<tr><td class="ctrl">17/10 · 4.2.3</td><td>997 in the container — seven new in <code>test_sheet_labels_423.py</code>: a two-series project where no string of any API response and no workbook or CSV cell carries a sheet key; a check that the sweep actually sees sheet names, so it cannot pass on empty payloads; and source checks on the NERs screen, <em>TEAP × drawing</em>, the scale screen and the viewer that no list of sheets is joined and no sheet is printed without being formatted.</td></tr>
+<tr><td class="ctrl">17/10 · 4.2.2</td><td>990 in the container, the same tests — <code>test_d17_a_ner_already_re_created_there_is_flagged_not_removed</code> sets the removal and creation dates instead of reading the clock, and checks that a NER created before the removal is not flagged. On the work laptop the file ran repeatedly and the installed copy's <code>run-tests.bat</code> was run again after the update.</td></tr>
+<tr><td class="ctrl">16/10 · 4.2.1</td><td>990 in the container — thirteen new in <code>test_qa_fixes_421.py</code>: a symbol, a label or a code where a NER removed the old way stood creates nothing and adds a hidden marker; another room elsewhere, another code or another book is still created; an annotation at the removed spot is not placed; a NER already re-created there is flagged once and kept; a page a one-book project does not have is refused; a PDF that opens with no page is refused and not kept; Restore refused while a live NER has the name; two renames at once leave one name; the start-up matching audited as system; no evidence line added twice; a project deletion in the installation log</td></tr>
+<tr><td class="ctrl">16/10 · 4.2.0</td><td>978 in the container — twenty-three new in <code>test_qa_fixes_420.py</code>, one or more per defect of the QA pass: a removed coded room stays removed on another sheet and book and <code>Restore</code> brings every marker; a NER block symbol beside a code read in the same run is that room; the reader keeps three-digit sub-indices and refuses dates; cut codes repaired once with the confirmation released; the matcher's confirmation not adopted, an old start's lock released and a person's kept; a deleted NER absent from an export made before the run, and a saved Proposed scenario coming out as it was saved; the actor from the sign-in, not the body; a shaft between books; project files removed and ids not reused; orphans removed; a duplicate name refused and flagged; a locked rename refused; reload and first sheet in the source; a non-PDF refused and not kept; blank and case-duplicate project names; a page past the end of a book; decisions carried counted; an AP following its space's NER, and waiting with a space that has none</td></tr>
+<tr><td class="ctrl">14/10 · 3.0.0</td><td>912 (+18 skipped) in the container — forty new: nine in <code>test_room_markers_notes_2200.py</code> (the PDF draws a room on two sheets at each sheet's marker; a space is measured from the room's marker on its own sheet; a drag on another sheet leaves the canonical point, one on the canonical sheet moves it; the start-up pass puts a copied point back, once; a pre-3.0.0 scenario is drawn where the markers are; an unconfirmed match is served and is no exception; Full name / Space code / Notes on the NERs sheet; the sheet order and tab colours) — all but one fail on the 2.19.0 code — and thirty-one in <code>test_mac_package_300.py</code> (every macOS script parses and stays within bash 3.2; offline isolated install; Intel and old macOS refused; backup before anything moves, data kept, rollback; the clean-up removes only the package; a per-user launch agent that restarts a crash only; identical pins on both systems; executable bits in the zip; a Windows wheel refused); five older tests rewritten for the new rule and column order.</td></tr>
+<tr><td class="ctrl">14/10 · 2.19.0</td><td>ten new in <code>test_wireless_from_teap_2190.py</code>: one point per wireless port beside the room's label, tied <code>teap</code>, two for a two-port line one step apart, six in rows of four; the NER's load is the same five ports before and after (the point carries the wireless one); a second run adds nothing and a hand-drawn tied point counts as done, in one <code>AP-n</code> sequence; a space with no room is named, not placed; a key plan gets nothing; a drag never re-ties a TEAP-placed point but the person still can; the step is audited; <code>+AP</code> reads the shared label helper; the reference label is two points larger in <code>reports.py</code> and <code>Viewer.tsx</code>; the Scale screen, the API client and the PT strings carry the step.</td></tr>
+<tr><td class="ctrl">14/10 · 2.18.1</td><td>thirteen new in <code>test_delete_everywhere_2181.py</code>: a NER on three sheets deleted in the viewer on the middle one leaves every page, the live list, the positions layer, the analysis and the export, with the reason naming page 2 and “1, 3”; Restore brings all three pages back and redraws nothing; <code>scope=marker</code> deletes one drawing and keeps the NER, retires it only on the last marker, and refuses any other value; a removed room's marker still answers <code>_ner_marker_near</code>; the placing pass and the drawn-rooms pass create nothing where a removed NER stood; a TER is simply deleted; a locked NER refuses both acts; the viewer, the API client, the NERs screen and the PT strings carry the new wording; <code>install.bat</code>, <code>run.py</code> and <code>serve.py</code> keep the user site out. <code>test_tester_pass_281</code> (Restore redraws the erased marker) now uses <code>scope=marker</code>.</td></tr>
+<tr><td class="ctrl">09/10 · 2.18.0</td><td>867 on the development laptop — twenty-one new cases (eight tests, two of them parametrised) in <code>test_naming_v2_2180.py</code>: the v2.0 form of the sequential name and the series start at 20; the old, spaced and venue-prefixed spellings read as one series; a prefix never doubled; the <code>Full name</code> column of <em>NERs and ports</em> with the project's venue code, and the name alone when the project has none. The 2130 / 2140 / 2142 / 2150 names updated to the new form.</td></tr>
+<tr><td class="ctrl">08/10 · 2.17.0</td><td>845 (+1 skipped) — eight new: in <code>test_isolate_2170.py</code>, the child returns what the function returns and its progress reaches the parent; an exception in the child arrives with its type name; a progress callback that raises (cancel) kills the child; the in-process switch; the two service call sites going through the child. In <code>test_indexes_2170.py</code>, a new database has the indexes; a database without them gets them at start, once; <code>elements</code> queried by project or by NER use an index.</td></tr>
+<tr><td class="ctrl">02/10 · 2.16.1</td><td>837 (+1 skipped) — fourteen new in <code>test_carry_services_2161.py</code>: no all-users trigger left in <code>autostart.bat</code>; the task written for the person signed in, by SID, hardened from the start; the watchdog installed whatever the sign-in task did; the packager refusing to build without the two task scripts; a restored database pointed at this installation, once, with the audit line; the same with the old folder still on the disk; a record never moved to a different file or to nothing; the pass first at every start; the backup carrying the matrix and the restore putting it back, replacing the installation's own only with the backup's; the installation manual saying all of it.</td></tr>
+<tr><td class="ctrl">01/10 · 2.16.0</td><td>823 (+1 skipped) — six new in <code>test_installer_2160.py</code>: the <code>--no-admin</code> switch and the <code>:noadmin</code> path before anything is changed; the question when the rights are refused and the silent failure under <code>NER_NOPAUSE</code>; the wrapper calling <code>setup.bat --no-admin</code>; the wrapper required by the packager and excluded from the copy into the target; the usage text; the documents naming it.</td></tr>
+<tr><td class="ctrl">01/10 · 2.15.0</td><td>817 (+1 skipped) — twenty-three new in <code>test_ner_sources_2150.py</code>: the TEC.010 / TEC.020 codes in their spellings and what is not a NER code (<code>TEC.003-001</code>, <code>TEC.015-2</code>); the label without “(NER)” and the lone <em>Rack - Critical</em> that is not one; the template matching itself at any angle and size and refusing another word or scrambled strokes; the symbol found on a synthetic sheet plain, turned 45°, crossed by dashes, and not in the legend; a 3.x-style book read and placed — <code>NERc01</code>, <code>NERc02</code>, <code>NER21</code>–<code>NER24</code>, the symbol in a coded room absorbed, the same-position twin asked about, the step idempotent; the non-critical series from 21.</td></tr>
+<tr><td class="ctrl">30/09 · 2.14.2</td><td>794 (+1 skipped) — nine new in <code>test_docs_pass_2142.py</code>, plus the version check extended to the quick guide: the four documents complete English pages with no Portuguese left; the control-kind labels English only; the quick guide naming the package, the version and the installer; the Import card and the manual naming the same three formats; the quick guide required in the package; a removed NER's number never handed out again.</td></tr>
+<tr><td class="ctrl">30/09 · 2.14.1</td><td>784 (+1 skipped) — three new: the marked-up PDF with an access point and its label on the sheet; the backend scanned for a name read in a function that nothing defines; the scanner proved on a file with one.</td></tr>
+<tr><td class="ctrl">30/09 · 2.14.0</td><td>781 (+1 skipped) — twenty-six new in <code>test_spaces_vocab_sequence_2140.py</code>: the bundled AAM list; which labels read as a space name and which do not; the TEAP extending the vocabulary; the length tag stripped; a key plan yielding no space; the clean-up of an older book, tied spaces kept; the next sequential name per series; extracted markers named in sequence and a hand-drawn one keeping its name; indoor / outdoor as a field and a column; the annotations taken off an exported copy. The 2.13.0 file rewritten for the placing step, the batch key-plan ticks and the illustrative titles; the wireless tests for one kind of AP.</td></tr>
+<tr><td class="ctrl">29/09 · 2.13.1</td><td>757 (+1 skipped) — thirteen new: the rights asked before anything changes and the unelevated window ending; the other-account refusal; the old installation moved aside after backup and stop, with a bounded retry; the rollback that moves the data back before removing anything; the browser opened unelevated and the desktop shortcut; <code>install.bat</code> handing over only in a package and before delayed expansion; the line endings; the manuals English only under their new names.</td></tr>
+<tr><td class="ctrl">22/09 · 2.6.1</td><td>647 — eleven on the watchdog: the waiting <code>.vbs</code>, the lock, the three states, the wait after a start, the power events, the launcher's mutex and the browser's reconnect</td></tr>
+</tbody>
+</table></div>
+
+<p>Measurements worth keeping: 26 equipment rooms detected on the VEE book (7 critical, 14 non-critical, 2 COW, 3 IDF), matching a manual read; 74 of 89 real spaces matched (83%) on the first run; 2.6% of matches from the right venue when the TEAP enters unfiltered; level stated on 3 of 34 pages of the VEE book; 20× on the marked-up PDF's speed; 38/38 pages with the title block read on the books loaded on 10 Sep; on TEAP v2.3, 253 wired connections on 27 zero-port spaces on VEE and 241 on 23 on VFF; the level a drawing number implies agrees with the title block on 68 sheets of 68; VEE's queue went from 75 to 25 rows under the zero-port rule.</p>
+</section>
+<!-- ================================================================== -->
+<section id="docs">
+<h2>Reference documents</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>File</th><th>What it carries</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">docs\MANUAL.html · .pdf</td><td>The current version's user manual — functionality only.</td></tr>
+<tr><td class="ctrl">docs\QUICK-INSTALL.html · .pdf</td><td>The one-page installation guide: what you need, five steps, what to do if something goes wrong.</td></tr>
+<tr><td class="ctrl">docs\INSTALL.html · .pdf</td><td>The installation manual.</td></tr>
+<tr><td class="ctrl">docs\history\MANUAL-ate-2026-09-10.html</td><td>The previous manual, untouched, with every dated revision note (2 Sep, 3 Sep, 10 Sep) and the “removed — and why” sections. It is the primary source for this history.</td></tr>
+<tr><td class="ctrl">CHANGELOG.md</td><td>From 2.0.0 on, what changes in each version, and the numbering rule.</td></tr>
+<tr><td class="ctrl">docs\DECISIONS.md</td><td>The technical decisions, numbered, with the reason for each — from compiling the interface into the server to the watchdog.</td></tr>
+<tr><td class="ctrl">docs\FINDINGS.md</td><td>What the event's real documents actually contain, measured; the defects only real data exposed.</td></tr>
+<tr><td class="ctrl">docs\LIMITATIONS.md</td><td>What is not done and the recommended order to do it.</td></tr>
+<tr><td class="ctrl">docs\VERSIONING.md</td><td>The VDB versioning design (the “did they draw what I asked?” reconciliation, renumbering, freeze) — proposed, not built.</td></tr>
+</tbody>
+</table></div>
+
+<p class="legal">© 2026 Marcelo Barbosa. Created by Marcelo Barbosa. Free software under the GNU AGPL-3.0 — see LICENSE.txt and NOTICE.txt.</p>
+</section>
+</main>
+</div>
+<script>
+(function () {
+  // Highlight the section currently in view in the table of contents.
+  var links = Array.prototype.slice.call(document.querySelectorAll("#toc a"));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+
+  if ("IntersectionObserver" in window) {
+    var seen = {};
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { seen[e.target.id] = e.isIntersecting; });
+      var current = null;
+      document.querySelectorAll("main section").forEach(function (s) {
+        if (seen[s.id] && !current) current = s.id;
+      });
+      links.forEach(function (a) { a.classList.remove("on"); });
+      if (current && byId[current]) byId[current].classList.add("on");
+    }, { rootMargin: "-10% 0px -70% 0px" });
+    document.querySelectorAll("main section").forEach(function (s) { obs.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

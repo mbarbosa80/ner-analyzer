@@ -1,0 +1,65 @@
+NER Spatial Coverage Analyzer
+Copyright (C) 2026 Marcelo Barbosa
+
+Created by Marcelo Barbosa
+https://www.linkedin.com/in/mbarbosa80/
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version. The full text is in LICENSE.txt.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+details.
+
+The source code ships inside every package (backend, frontend/src, tests and
+tools), so whoever receives a copy of the program also receives its source.
+
+
+ADDITIONAL TERMS (section 7 of the GNU Affero General Public License)
+---------------------------------------------------------------------
+
+1. Attribution (section 7(b)). Every copy and every modified version must
+   keep this NOTICE.txt file and the author credit "Created by Marcelo
+   Barbosa" where the program shows it: the sign-in screen, the foot of the
+   sidebar, the stamp on the exported PDF and workbook, and the manuals.
+
+2. Modified versions (section 7(c)). A modified version must be marked as
+   changed, with the name of whoever changed it and the date, and must not
+   be presented as the original program or as made by the original author.
+
+3. Names (section 7(e)). This licence grants no right to use the author's
+   name, or the name "NER Spatial Coverage Analyzer", to endorse or promote a
+   modified version or any product derived from it, beyond the attribution
+   in term 1.
+
+
+WHAT THE PROGRAM IS
+-------------------
+
+A design aid for venue technology teams: it crosses a venue's design drawings
+with its technology equipment request (TEAP) to study where network
+equipment rooms (NERs) go and which spaces each one serves. It does not
+replace engineering approval, a site survey, cable route validation or
+physical inspection. It runs on the user's own computer, sends nothing to the
+cloud and keeps the user's documents on that computer.
+
+This is an independent project, built from the author's own experience. It is
+not affiliated with, sponsored by or endorsed by any event organiser, rights
+holder, sports federation, venue owner or employer. It contains no document
+belonging to any of them: reference material a team is entitled to (lists of
+space names, a naming structure) is kept out of the published source, in
+backend/app/reference_private/, and added only to that team's own copies.
+Names of products and organisations that may appear in a user's own
+documents belong to their owners.
+
+
+THIRD-PARTY COMPONENTS
+----------------------
+
+The program uses free and open-source components, each under its own licence
+— see THIRD-PARTY-NOTICES.txt. Among them PyMuPDF / MuPDF (Artifex Software,
+Inc.), which is licensed under the GNU AGPL-3.0; that is one reason this
+program is published under the same licence.

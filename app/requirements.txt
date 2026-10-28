@@ -1,0 +1,29 @@
+# NER Spatial Coverage Analyzer — Python runtime
+# Python 3.11 or newer.
+#
+# Lower bounds only: these are the versions the application was built and tested
+# against. Pin exactly (pip freeze) before deploying to a shared machine.
+
+fastapi>=0.115
+uvicorn[standard]>=0.32
+python-multipart>=0.0.12
+
+SQLAlchemy>=2.0.36
+pydantic>=2.9
+pydantic-settings>=2.6
+
+# document handling — treated as untrusted input, macros are never executed
+pymupdf>=1.24            # vector PDF extraction and marked-up export
+openpyxl>=3.1            # xlsx / xlsm, read-only, keep_vba=False
+xlrd>=2.0                # legacy .xls
+pandas>=2.2
+
+# geometry, routing and optimisation — all deterministic
+shapely>=2.0
+networkx>=3.3
+rapidfuzz>=3.9
+ortools>=9.10
+
+# tests
+pytest>=8.3
+httpx>=0.27

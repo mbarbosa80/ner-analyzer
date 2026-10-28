@@ -1,0 +1,481 @@
+:root {
+  --bg: #0f1117;
+  --panel: #171a22;
+  --panel-2: #1e222c;
+  --line: #2b3040;
+  --text: #e6e8ee;
+  --muted: #99a0b0;
+  --accent: #4a8cff;
+  --ok: #2ea44f;
+  --warn: #f28c1a;
+  --bad: #d81b1b;
+  --radius: 8px;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { background: #3a1c1c; border-color: #5c2a2a; }
+button.small { padding: 3px 8px; font-size: 12px; }
+
+input, select, textarea {
+  font: inherit;
+  color: var(--text);
+  background: #10131a;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  width: 100%;
+}
+
+label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+
+a { color: var(--accent); }
+
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+.sidebar {
+  width: 232px;
+  flex: 0 0 232px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar h1 { font-size: 14px; margin: 16px 16px 4px; letter-spacing: 0.02em; }
+.sidebar .sub { font-size: 11px; color: var(--muted); margin: 0 16px 14px; }
+/* The version sits under the subtitle; the copyright at the foot of the column. */
+.sidebar .sub.version { margin-top: -10px; font-family: ui-monospace, Consolas, monospace; letter-spacing: 0.04em; }
+.sidebar .copyright {
+  margin-top: auto;
+  padding: 12px 16px 14px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--muted);
+  opacity: 0.8;
+  border-top: 1px solid var(--line);
+}
+.nav { display: flex; flex-direction: column; gap: 1px; padding: 0 8px 16px; }
+.nav button {
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.nav button.active { background: var(--panel-2); color: var(--text); }
+.nav button:disabled { opacity: 0.35; }
+.nav .step { font-size: 11px; opacity: 0.6; }
+/* The account entry is not step 11. Anyone following the numbered workflow
+   would otherwise scroll past the only place accounts are managed. */
+.navsep {
+  margin: 14px 10px 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+.topbar {
+  height: 46px;
+  flex: 0 0 46px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.content { flex: 1; overflow: auto; padding: 18px; }
+.content.no-pad { padding: 0; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.card h2 { font-size: 14px; margin: 0 0 10px; }
+.card h3 { font-size: 13px; margin: 14px 0 8px; color: var(--muted); }
+
+.row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.row > * { min-width: 0; }
+.grid { display: grid; gap: 10px; }
+.grid.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid.c5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.grid.c4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--panel); z-index: 1; }
+tbody tr:hover { background: #1b1f29; }
+.scroll { max-height: 62vh; overflow: auto; }
+/* A wide working table (Demand per space): below its working width the box
+   scrolls sideways instead of the browser crushing every column to fit. A
+   table set to 100 % never overflows — it shrinks — so nothing scrolled on a
+   narrow monitor and the Notes column came out three words wide. */
+.wide-scroll { overflow-x: auto; overflow-y: auto; }
+table.wide { min-width: 1380px; width: 100%; }
+/* The sideways scrollbar mirrored at the top of a wide box (WideScroll.tsx):
+   a thin strip whose only content is as wide as the table. Scrolling it
+   scrolls the table, and the other way round. */
+.hscroll-top { overflow-x: auto; overflow-y: hidden; height: 14px; margin-bottom: 2px; }
+
+.pill {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.stat { background: var(--panel-2); border-radius: var(--radius); padding: 10px 12px; }
+.stat .n { font-size: 20px; font-weight: 600; }
+.stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+/* A tile that is also the filter (TEAP × drawing, 2.6.0): pressed = the
+   worklist shows only its rows. */
+button.stat.tile { text-align: left; border: 1px solid transparent; width: 100%; }
+button.stat.tile:hover { border-color: var(--accent); }
+button.stat.tile.on { border-color: var(--accent); background: #1a2a45; }
+button.stat.tile.on .k { color: var(--accent); }
+
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; }
+
+.banner {
+  background: #2a1f10;
+  border: 1px solid #5c4420;
+  color: #f0c98a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.banner.err { background: #2c1414; border-color: #5c2626; color: #f0a0a0; }
+.banner.ok { background: #12271a; border-color: #24512f; color: #9fe0b0; }
+/* The app's notice (4.8.0): over the page, never in its flow. */
+.banner.toast {
+  position: fixed;
+  top: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  max-width: min(900px, 80vw);
+  margin: 0;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.disclaimer {
+  font-size: 11px;
+  color: #f0a0a0;
+  border-top: 1px solid var(--line);
+  padding: 8px 16px;
+  background: var(--panel);
+}
+
+/* viewer */
+.viewer { display: flex; height: 100%; min-height: 0; }
+.canvas-wrap { flex: 1; position: relative; overflow: hidden; background: #0a0c11; }
+.inspector {
+  width: 316px;
+  flex: 0 0 316px;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  overflow-y: auto;
+  padding: 12px;
+}
+.inspector.collapsed { display: none; }
+.inspector { position: relative; }
+.inspector-toggle {
+  position: absolute; top: 8px; right: 8px;
+  width: 22px; height: 22px; line-height: 1; padding: 0;
+  font-size: 15px; border-radius: 4px;
+}
+.inspector-reopen {
+  position: absolute; top: 10px; right: 10px; z-index: 6;
+  padding: 4px 9px; font-size: 11px; border-radius: 4px;
+}
+
+.toolbar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: rgba(23, 26, 34, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px;
+  max-width: calc(100% - 20px);
+}
+.toolbar button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.toolbar .pager { display: inline-flex; gap: 4px; align-items: center; }
+.toolbar .pager button { padding: 3px 7px; }
+
+/* The toolbox (2.14.0): the tools in a column down the left of the sheet,
+   in groups with a hairline between them; the view switches at the bottom.
+   The illustrative group — references on a key plan and named areas, drawn
+   and counted nowhere — is in violet so *NER is never taken for +NER
+   (Marcelo, 22 Sep 2026). Folds to a tab, like the inspector. */
+.toolbox {
+  position: absolute;
+  top: 58px;
+  left: 10px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 96px;
+  max-height: calc(100% - 70px);
+  overflow-y: auto;
+  background: rgba(23, 26, 34, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px;
+}
+.toolbox.collapsed { display: none; }
+.toolbox .tb-head { display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: var(--muted); padding: 0 2px 2px; }
+.toolbox .toolbox-toggle { width: 20px; height: 20px; line-height: 1; padding: 0; font-size: 14px; border-radius: 4px; }
+.toolbox-reopen { position: absolute; top: 58px; left: 10px; z-index: 6;
+  padding: 4px 9px; font-size: 11px; border-radius: 4px; }
+.toolbox .tool-group { display: flex; flex-direction: column; gap: 3px; }
+.toolbox .tool-group + .tool-group { border-top: 1px solid var(--line); padding-top: 4px; }
+.toolbox .tool-group button { width: 100%; text-align: left; padding: 3px 7px; }
+.toolbox .tool-group.illustrative { background: rgba(107, 90, 168, 0.14); border-radius: 6px; padding: 4px; }
+.toolbox .tool-group.view { margin-top: 2px; }
+.toolbox button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.toolbox button.illus { border-color: #6b5aa8; color: #c9bff2; }
+.toolbox button.illus.active { background: #6b5aa8; border-color: #6b5aa8; color: #fff; }
+.toolbox select { width: 100%; font-size: 11px; }
+.toolbox .tb-note { color: #c9bff2; padding: 2px; }
+/* When the overlay's analysis was run, and whether it is out of date (4.7.0). */
+.toolbox .tb-note.run { color: var(--muted); line-height: 1.35; }
+.toolbox .tb-note.run.warn { color: var(--warn); }
+
+/* The aside's two tabs (2.14.0): the inspector, and the naming reference. */
+.aside-tabs { display: flex; gap: 4px; margin-bottom: 8px; padding-right: 26px; }
+.aside-tabs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.naming-reference h3 { font-size: 12px; margin: 10px 0 4px; }
+table.naming-ref { width: 100%; font-size: 11px; border-collapse: collapse; }
+table.naming-ref th, table.naming-ref td { padding: 2px 5px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+table.naming-ref td.mono { white-space: nowrap; }
+.naming-side { width: 300px; flex: 0 0 300px; border-left: 1px solid var(--line); background: var(--panel);
+  overflow-y: auto; padding: 12px; position: relative; }
+.naming-side.collapsed { display: none; }
+.with-side { display: flex; gap: 0; min-height: 0; }
+.with-side > .main { flex: 1; min-width: 0; }
+.naming-reopen { position: fixed; top: 60px; right: 10px; z-index: 6; padding: 4px 9px; font-size: 11px; border-radius: 4px; }
+/* Key plan (2.13.0): the switch beside the page selector, amber when on. */
+.toolbar .key-plan-toggle { display: inline-flex; gap: 4px; align-items: center; margin: 0;
+  padding: 2px 6px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.toolbar .key-plan-toggle.on { border-color: var(--warn); color: var(--warn); font-weight: 600; }
+.key-plan-note { color: var(--warn); border-left: 3px solid var(--warn); padding-left: 8px; }
+
+.legend {
+  position: absolute;
+  right: 10px;
+  bottom: 14px;
+  z-index: 5;
+  background: rgba(23, 26, 34, 0.95);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 11px;
+  width: 232px;
+}
+.legend .lg-row { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
+.legend .sw { width: 13px; height: 13px; flex: 0 0 13px; border-radius: 3px; }
+.legend .foot { margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--line); color: #f0a0a0; font-size: 10px; }
+
+/* long provenance text stays scannable; the full text is in the title tooltip */
+.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: help;
+}
+
+/* The Notes column on Demand per space. Closed: two lines and a "read (n)"
+   link; open: one note per line, wrapped, nothing clipped and nothing that
+   needs a tooltip to be read. Marcelo, 10 Sep 2026: "não consigo ler as notas". */
+td.notes { min-width: 260px; max-width: 420px; white-space: normal; }
+td.notes.open { max-width: 560px; }
+td.notes .notes-clamp { -webkit-line-clamp: 2; line-clamp: 2; cursor: pointer; }
+td.notes .notes-list { margin: 0; padding-left: 16px; }
+td.notes .notes-list li { margin: 0 0 4px; line-height: 1.35; }
+button.linkish {
+  all: unset;
+  cursor: pointer;
+  color: var(--accent, #4c8dff);
+  font-size: 11px;
+  padding: 0;
+}
+button.linkish:hover { text-decoration: underline; }
+button.linkish:focus-visible { outline: 2px solid var(--accent, #4c8dff); outline-offset: 2px; }
+
+.legend { max-height: calc(100% - 24px); overflow-y: auto; }
+
+/* Positions that fall outside their page: shown, never hidden. */
+.warn-box {
+  border: 1px solid #d08a00;
+  border-left: 4px solid #d08a00;
+  background: #fff8ec;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.warn-box table { border-collapse: collapse; width: 100%; }
+.warn-box th, .warn-box td { text-align: left; padding: 2px 8px 2px 0; }
+.warn-box th { color: #7a5200; font-weight: 600; }
+
+/* One screen, two views: NERs on the drawing vs the register of decisions. */
+.subtabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line, #2a3242);
+}
+.subtabs button {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 8px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  cursor: pointer;
+  color: var(--muted, #8b97ad);
+  font-weight: 600;
+}
+.subtabs button.active {
+  color: var(--fg, #e8edf5);
+  border-bottom-color: var(--accent, #4c8dff);
+}
+.subtabs button .hint {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+/* A TEAP row with no room chosen yet — the ones that actually need a decision. */
+tr.row-unresolved > td:first-child { box-shadow: inset 3px 0 0 var(--warn, #d08a00); }
+
+/* A NER that was removed or rejected: still readable, no longer editable. */
+tr.row-closed { background: rgba(180, 60, 60, 0.06); }
+tr.row-closed input:disabled,
+tr.row-closed select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Sortable column headings. */
+th.sortable { padding: 0; }
+th.sortable > button {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 8px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+}
+th.sortable > button:hover { background: rgba(127, 127, 127, 0.14); }
+th.sortable > button:focus-visible { outline: 2px solid var(--accent, #4c8dff); outline-offset: -2px; }
+th.sortable .arrow { opacity: 0.28; font-size: 10px; }
+th.sortable > button:hover .arrow { opacity: 0.6; }
+th.sorted .arrow { opacity: 1; color: var(--accent, #4c8dff); }
+th.sorted > button { color: var(--fg, #e8edf5); }
+
+/* The naming-convention editor (2.7.0): a form laid out in four columns —
+   number, area, the words that identify it, remove. Not a data table. */
+.convention-grid { display: grid; grid-template-columns: 90px 1.2fr 2fr auto; gap: 6px 10px; align-items: center; }
+
+/* Drawing viewer search (2.12.0): a box in the toolbar, its hits in a list
+   that drops over the sheet. */
+.viewer-search { position: relative; display: inline-flex; align-items: center; }
+.viewer-search input { width: 190px; padding: 4px 8px; font-size: 12px; }
+.viewer-search .search-hits {
+  position: absolute; top: calc(100% + 4px); left: 0; z-index: 20;
+  width: 360px; max-height: 60vh; overflow-y: auto;
+  background: var(--panel, #171a22); border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); padding: 4px;
+}
+.viewer-search .hit {
+  display: block; width: 100%; text-align: left; background: transparent; border: 0;
+  border-radius: 6px; padding: 5px 8px; color: var(--text, #e6e8ee); cursor: pointer;
+}
+.viewer-search button.hit:hover, .viewer-search button.hit.first { background: rgba(76, 141, 255, 0.16); }
+.viewer-search .hit .nm { font-weight: 600; }
+
+/* 4.4.0 — the menu folds to a rail of step numbers; the legend folds to a tab;
+   a page number that opens the sheet. */
+.sidebar { position: relative; }
+.sidebar.rail { width: 46px; flex: 0 0 46px; overflow-x: hidden; }
+.sidebar.rail .nav { padding: 0 5px 16px; }
+.sidebar.rail .nav button { justify-content: center; padding: 8px 0; font-size: 12px; }
+.rail-toggle {
+  background: transparent; border: 1px solid var(--line); color: var(--muted);
+  border-radius: 6px; padding: 2px 8px; margin: 10px auto 10px; font-size: 13px; cursor: pointer;
+}
+.rail-toggle.open { position: absolute; top: 10px; right: 8px; margin: 0; }
+.rail-toggle:hover { color: var(--text); border-color: var(--muted); }
+.legend-fold { font-size: 10.5px; }
+.legend-reopen {
+  position: absolute; right: 10px; bottom: 14px; z-index: 5;
+  background: rgba(23, 26, 34, 0.95); border: 1px solid var(--line); border-radius: 8px;
+  padding: 5px 10px; font-size: 11px; font-weight: 600; color: var(--text); cursor: pointer;
+}
+button.linkish.page-link { font-size: 12px; text-decoration: underline dotted; }
+button.linkish.page-link.pill { border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; text-decoration: none; }
+button.linkish.page-link.pill:hover { border-color: var(--accent, #4c8dff); }
+.none-btn { margin-left: 6px; padding: 2px 7px; font-size: 11px; }
+tr.row-decided td { opacity: 0.72; }
+.sidebar:not(.rail) h1 { margin-right: 44px; }
+.env-select { min-width: 110px; }

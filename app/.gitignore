@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/
+node_modules/
+frontend/dist/
+backend/app/static/
+sample_data/*.pdf
+sample_data/*.xlsx
+uitest.mjs
+.DS_Store
+
+# A client's own reference material (4.3.0) — never published; see
+# backend/app/reference_private/README.md
+backend/app/reference_private/*
+!backend/app/reference_private/README.md
+# The verbatim archive of an old manual (private; left out of a public package)
+docs/history/
+# Build inputs fetched per machine
+vendor/
+dist/
