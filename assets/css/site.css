@@ -213,6 +213,7 @@ h3 { font: 700 21px/1.2 var(--display); font-stretch: 104%; margin: 0 0 10px; }
 .feat .ico { width: 40px; height: 40px; margin-bottom: 18px; color: var(--ink); }
 .feat p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
 .feat .code { font: 500 11px/1 var(--mono); color: var(--ink-3); letter-spacing: .08em; display: block; margin-bottom: 14px; }
+@media (min-width: 981px) { .feat.wide { grid-column: 1 / -1; } }
 @media (max-width: 980px) { .features { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px) { .features { grid-template-columns: 1fr; } }
 

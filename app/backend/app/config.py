@@ -49,8 +49,14 @@ class Settings(BaseSettings):
     def exports_dir(self) -> Path:
         return self.data_dir / "exports"
 
+    @property
+    def composite_dir(self) -> Path:
+        """The composite maps (5.0.0): pictures and tiles derived from the
+        books, rebuilt on demand — not in a backup, not in a project package."""
+        return self.data_dir / "composite"
+
     def ensure_dirs(self) -> None:
-        for d in (self.data_dir, self.uploads_dir, self.exports_dir):
+        for d in (self.data_dir, self.uploads_dir, self.exports_dir, self.composite_dir):
             d.mkdir(parents=True, exist_ok=True)
 
 

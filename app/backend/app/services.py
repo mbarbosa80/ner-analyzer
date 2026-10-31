@@ -125,7 +125,7 @@ def remove_project_files(project_id: int) -> list[str]:
     """Delete a deleted project's uploads and exports from disk (4.2.0). The
     manual promised it; the folders stayed, with the venue's documents in them."""
     gone = []
-    for base in (settings.uploads_dir, settings.exports_dir):
+    for base in (settings.uploads_dir, settings.exports_dir, settings.composite_dir):
         d = base / f"project_{project_id}"
         if d.is_dir():
             shutil.rmtree(d, ignore_errors=True)
@@ -418,6 +418,12 @@ def delete_drawing(db: Session, project: Project, drawing: Drawing, *,
     audit(db, project.id, "drawing.deleted", entity="drawing", entity_id=drawing.id,
           actor=actor, payload={k: v for k, v in out.items()}
           | {"sha256": drawing.sha256})
+    # Its composite maps (5.0.0) go with it: the rows by the foreign key, the
+    # pictures and tiles here.
+    from . import composite_service as _CS
+    for _m in _CS.maps_of(db, project.id, drawing.id):
+        _CS._drop_files(_m)
+        db.delete(_m)
     db.delete(drawing)
     db.flush()
 
@@ -485,7 +491,7 @@ def _place_ners_from_drawing(db: Session, project: Project, drawing: Optional[Dr
               "rooms_found": 0, "created": 0, "same_as_marker": 0, "on_removed_ner": 0,
               "same_code_other_page": 0, "criticality_unstated": 0,
               "placed_on_label": 0, "on_key_plan": 0, "symbols": 0,
-              "same_place_other_page": 0, "names": [], "books": []}
+              "same_place_other_page": 0, "released_spot": 0, "names": [], "books": []}
     for i, d in enumerate(drawings):
         report(i / max(len(drawings), 1), f"placing the NERs of {d.filename}")
         summary = dict(d.extract_summary or {})
@@ -500,6 +506,11 @@ def _place_ners_from_drawing(db: Session, project: Project, drawing: Optional[Dr
                 continue
             near = _ner_marker_near(db, project, ann["page"], ann["x"], ann["y"],
                                     drawing_id=d.id)
+            if near is None and _released_near_annotation(db, project, d.id, ann) is not None:
+                # Where a person took a NER's drawing off this sheet (5.1.0):
+                # the annotation names that NER, not a new one.
+                totals["annotations_absorbed"] += 1
+                continue
             if near is None and _removed_spot_near(db, project, d.id, ann["page"],
                                                    ann["x"], ann["y"]) is not None:
                 # Where a removed NER stood (4.2.1), even with no marker left.
@@ -551,7 +562,7 @@ def _place_ners_from_drawing(db: Session, project: Project, drawing: Optional[Dr
         totals["rooms_found"] += stats["found"]
         for k in ("created", "same_as_marker", "on_removed_ner", "same_code_other_page",
                   "criticality_unstated", "placed_on_label", "on_key_plan",
-                  "symbols", "same_place_other_page"):
+                  "symbols", "same_place_other_page", "released_spot"):
             totals[k] += stats[k]
         totals["names"] += stats["names"]
         summary["ner_pass"] = {"at": _dt.datetime.utcnow().isoformat(timespec="seconds"),
@@ -593,6 +604,75 @@ def _removed_spot_near(db: Session, project: Project, drawing_id: int, page: int
         if dist <= limit and (best is None or dist < best[0]):
             best = (dist, a)
     return best[1] if best else None
+
+
+def _released_near_annotation(db: Session, project: Project, drawing_id: int, ann: dict):
+    sh = SH.for_project(db, project.id)
+    first = sh.drawing_ids[0] if sh.drawing_ids else None
+    sc = scale_map(db, project.id).get(sh.key(drawing_id, ann["page"]))
+    limit = DRAWN_ROOM_SAME_PLACE_M / sc.metres_per_unit if sc else DRAWN_ROOM_SAME_PLACE_PT
+    assets = [a for a in db.execute(select(NerAsset).where(
+        NerAsset.project_id == project.id, NerAsset.merged_into_id.is_(None))).scalars()
+        if a.released_spots]
+    return released_spot_near(assets, drawing_id, ann["page"], [(ann["x"], ann["y"])],
+                              limit, first)
+
+
+def release_spot(asset: NerAsset, e: Element, why: str) -> None:
+    """Keep the spot of a NER drawing a person takes off a sheet (5.1.0, D25).
+
+    A move on the composite map that leaves a sheet, or *Delete only this
+    marker*, deleted the marker and with it the only record that the room the
+    sheet prints there is this NER: the next *Place NERs from the drawing*
+    read the room and created a new NER on it (a port project and an arena project,
+    QA of 5.0.0, 31 Oct 2026: NER_38.1 and NER_43.1 at 0.0 m from where
+    NER_21.1 and NER_35.1 had been drawn). Both the marker's spot and the spot
+    it was first put on are kept."""
+    import math
+    spots = list(asset.released_spots or [])
+    at = _dt.datetime.utcnow().isoformat(timespec="seconds")
+    for x, y in marker_spots(e):
+        if any(s.get("drawing_id") == e.drawing_id and s.get("page") == e.page
+               and s.get("x") is not None
+               and math.dist((s["x"], s["y"]), (x, y)) < 0.5 for s in spots):
+            continue
+        spots.append({"drawing_id": e.drawing_id, "page": e.page, "x": round(x, 2),
+                      "y": round(y, 2), "at": at, "why": why})
+    asset.released_spots = spots
+
+
+def unrelease_spot(asset: NerAsset, e: Element) -> None:
+    """The drawing came back to that sheet (an Undo): the spot is held by its
+    marker again, so it is no longer kept as released."""
+    import math
+    keep = [s for s in (asset.released_spots or [])
+            if not (s.get("drawing_id") == e.drawing_id and s.get("page") == e.page
+                    and s.get("x") is not None
+                    and any(math.dist((s["x"], s["y"]), p) < 0.5 for p in marker_spots(e)))]
+    if keep != list(asset.released_spots or []):
+        asset.released_spots = keep or None
+
+
+def released_spot_near(assets, drawing_id: Optional[int], page: int, points, limit: float,
+                       first_book: Optional[int], code: Optional[str] = None):
+    """The NER (live or removed) one of whose released spots on this sheet is
+    within ``limit`` of any of ``points``, as ``(distance, asset)``, or None.
+    A room whose printed code is another NER's code is another room."""
+    import math
+    best = None
+    for a in assets:
+        if code and a.space_code and a.space_code != code:
+            continue
+        for s in a.released_spots or []:
+            if s.get("page") != page or (s.get("drawing_id") or first_book) != drawing_id:
+                continue
+            if s.get("x") is None:
+                # A whole sheet kept off (5.1.1, D34): no position to measure from.
+                continue
+            d = min(math.dist((s["x"], s["y"]), p) for p in points)
+            if d <= limit and (best is None or d < best[0]):
+                best = (d, a)
+    return best
 
 
 def _ner_marker_near(db: Session, project: Project, page: int, x: float, y: float,
@@ -730,7 +810,7 @@ def adopt_drawn_rooms(db: Session, project: Project, drawing: Drawing, rooms,
     stats = {"found": len(rooms), "created": 0, "same_as_marker": 0, "on_removed_ner": 0,
              "same_code_other_page": 0, "criticality_differs": 0,
              "criticality_unstated": 0, "placed_on_label": 0, "on_key_plan": 0,
-             "symbols": 0, "same_place_other_page": 0, "names": []}
+             "symbols": 0, "same_place_other_page": 0, "released_spot": 0, "names": []}
     if not rooms:
         return stats
     # This book's key plans and pages, by its own page numbers; scales by
@@ -771,6 +851,10 @@ def adopt_drawn_rooms(db: Session, project: Project, drawing: Drawing, rooms,
             NerAsset.merged_into_id.is_(None))).scalars()
         if a.position_known is not False and a.canonical_page
         and (a.canonical_drawing_id or first_book) == drawing.id]
+    # Where a person took a NER's drawing off a sheet (5.1.0, D25).
+    released = [a for a in db.execute(select(NerAsset).where(
+        NerAsset.project_id == project.id, NerAsset.merged_into_id.is_(None))).scalars()
+        if a.released_spots]
     names = [a.display_name for a in live]
     # Where the symbols of this pass land, per page, for the same-position
     # question across sheets.
@@ -858,6 +942,26 @@ def adopt_drawn_rooms(db: Session, project: Project, drawing: Drawing, rooms,
             stats["same_as_marker"] += 1
             continue
 
+        # 1r. Where a person took a NER's drawing off this sheet (5.1.0, D25):
+        #     the room printed there is that NER — live, the pass creates
+        #     nothing and does not draw it back (the person took it off);
+        #     removed, it stays removed.
+        rel = released_spot_near(released, drawing.id, r.page,
+                                 [(r.x, r.y), (r.label_x, r.label_y)], limit_for(r.page)[0],
+                                 first_book, code=r.code)
+        if rel is not None:
+            held = rel[1]
+            gone = held.deleted_at is not None
+            if not gone:
+                _add_once(held, "classification_evidence",
+                          f"the drawing prints {what} where {held.display_name}'s drawing was "
+                          f"taken off {sh.label(sh.key(drawing.id, r.page))} — taken as this "
+                          f"NER, no second one created")
+            if r.source != "symbol":
+                this_pass.append((r.page, r.x, r.y, held, gone))
+            stats["on_removed_ner" if gone else "released_spot"] += 1
+            continue
+
         # 1a. Where a removed NER stood (4.2.1): the room stays removed, by its
         #     position, whatever read it this time — a code other than its own
         #     is another room. A marker is added, hidden with it, so the next
@@ -923,6 +1027,24 @@ def adopt_drawn_rooms(db: Session, project: Project, drawing: Drawing, rooms,
         # 2. The same code is already a NER — the room drawn on another sheet.
         if r.code and r.code in by_code:
             a = by_code[r.code]
+            # 5.1.1 (D34): a person took this NER's drawing off this very sheet
+            # (a move on the composite map or *Delete only this marker*). The
+            # code it prints elsewhere on the sheet does not draw it back —
+            # wherever the room is printed. Before 5.1.1 only a room within
+            # the same-place distance of the spot was held, and a deletion
+            # made before 5.1.0 had no spot at all (``released_sheets_511``
+            # keeps those sheets whole).
+            off = next((s for s in (a.released_spots or [])
+                        if s.get("page") == r.page
+                        and (s.get("drawing_id") or first_book) == drawing.id), None)
+            if off is not None:
+                _add_once(a, "classification_evidence",
+                          f"the drawing prints its code {r.code} on "
+                          f"{sh.label(sh.key(drawing.id, r.page))}, the sheet its drawing was "
+                          f"taken off — not drawn back there")
+                this_pass.append((r.page, r.x, r.y, a, False))
+                stats["released_spot"] += 1
+                continue
             e = Element(project_id=project.id, drawing_id=drawing.id, page=r.page,
                         kind=a.kind, label=a.display_name, x=r.x, y=r.y,
                         origin="extracted", confidence=0.8, confirmed=False,
@@ -3091,6 +3213,10 @@ _ANALYSIS_NEUTRAL = {
     # measures. Exporting made Demand say "changed since the last run", and a
     # second export then shipped as "out of date" and was never compared.
     "project.exported", "project.imported",
+    # 5.0.0: building a composite map, or leaving a sheet off it, is a picture
+    # of the book — nothing the analysis measures. Moving a NER on the map is
+    # not neutral: it is audited as ``ner.moved``.
+    "composite.built", "composite.sheet_excluded", "composite.deleted",
 }
 
 

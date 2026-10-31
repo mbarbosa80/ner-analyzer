@@ -1738,4 +1738,143 @@ export const PT: Record<string, string> = {
     "Um ponto Wi-Fi que você apaga continua apagado: rodar este passo de novo deixa o espaço sem ponto. Desenhe um ponto com +Wi-Fi para o espaço, ou vincule um a ele, para trazê-lo de volta.",
   "Place Wi-Fi from the TEAP will not put it back; draw one with +Wi-Fi to bring it back.":
     "Place Wi-Fi from the TEAP não vai colocá-lo de volta; desenhe um com +Wi-Fi para trazê-lo de volta.",
+  // --- 5.0.0: the composite map -------------------------------------------
+  "Composite map":
+    "Mapa composto",
+  "Move":
+    "Mover",
+  "Moves on":
+    "Move-se em",
+  "Taken off":
+    "Sai de",
+  "Drawn on":
+    "Desenhada em",
+  "This changes the NER's position on the sheets: distances and statuses change - run the analysis again. You can undo it.":
+    "Isto muda a posição da NER nas folhas: distâncias e status mudam - rode a análise de novo. Dá para desfazer.",
+  "moved":
+    "movida",
+  "left":
+    "saiu de",
+  "drawn on":
+    "desenhada em",
+  "not moved in book(s)":
+    "não movida no(s) livro(s)",
+  "is back where it was":
+    "voltou para onde estava",
+  "NER critical":
+    "NER crítica",
+  "NER non critical":
+    "NER não crítica",
+  "The NER leaves the register — every sheet and every book it is drawn on, the NERs list and the analysis. Restore on the NERs screen brings it back.":
+    "A NER sai do registro: de todas as folhas e livros em que está desenhada, da lista de NERs e da análise. Restore na tela NERs a traz de volta.",
+  "deleted":
+    "excluída",
+  "Sign in in the main window, then reload this one.":
+    "Entre na janela principal e depois recarregue esta.",
+  "Sheets":
+    "Folhas",
+  "Reload":
+    "Recarregar",
+  "sheet(s)":
+    "folha(s)",
+  "contradicted":
+    "contradita",
+  "not placed":
+    "não posicionada",
+  "left off":
+    "fora do mapa",
+  "built":
+    "montado em",
+  "The book was replaced after this map was built — build it again.":
+    "O livro foi substituído depois que este mapa foi montado. Monte de novo.",
+  "Moving a NER here changes where it is drawn on the sheets; the analysis still measures every distance on its own sheet. Drag a NER to move it; click it for the rest.":
+    "Mover uma NER aqui muda onde ela está desenhada nas folhas; a análise continua medindo cada distância na própria folha. Arraste uma NER para movê-la; clique nela para o resto.",
+  "Build this map again":
+    "Montar este mapa de novo",
+  "Undo the last move":
+    "Desfazer o último movimento",
+  "criticality not confirmed":
+    "criticidade não confirmada",
+  "locked":
+    "travada",
+  "Its drawings on different sheets are":
+    "Os desenhos dela em folhas diferentes estão a",
+  "apart on the map.":
+    "de distância no mapa.",
+  "Also drawn in book(s)":
+    "Também desenhada no(s) livro(s)",
+  "not moved from here.":
+    "não é movida daqui.",
+  "Make non critical":
+    "Tornar não crítica",
+  "Make critical":
+    "Tornar crítica",
+  "Delete NER":
+    "Excluir NER",
+  "Open in the Drawing viewer":
+    "Abrir no Drawing viewer",
+  "Findings":
+    "Achados",
+  "Nothing found: every NER drawn on several sheets lands in one place, and no two NERs share a spot.":
+    "Nada encontrado: toda NER desenhada em várias folhas cai no mesmo lugar, e nenhuma NER divide o ponto com outra.",
+  "drawn":
+    "desenhada a",
+  "apart on two sheets":
+    "de distância entre duas folhas",
+  "apart — the same NER under two names?":
+    "de distância: a mesma NER com dois nomes?",
+  "drawn only on sheets left off the map":
+    "desenhada só em folhas que estão fora do mapa",
+  "Put back":
+    "Recolocar",
+  "Leave off":
+    "Tirar do mapa",
+  "Blue: confirmed by two measurements or by a neighbouring sheet. Orange: placed, not confirmed — check it against its neighbours. Red: the spaces it shares with a neighbour do not line up. A sheet left off is not drawn and its NERs are not shown.":
+    "Azul: confirmada por duas medições ou por uma folha vizinha. Laranja: posicionada, não confirmada; confira com as vizinhas. Vermelho: os espaços que ela divide com uma vizinha não se alinham. Uma folha tirada do mapa não é desenhada e as NERs dela não aparecem.",
+  "Composite map built":
+    "Mapa composto montado",
+  "map(s)":
+    "mapa(s)",
+  "Delete this composite map? Nothing on the sheets changes; build it again whenever you want.":
+    "Excluir este mapa composto? Nada muda nas folhas; monte de novo quando quiser.",
+  "The detail sheets of one level of one book laid on one map — never two series, never the key plan — with every NER, its reach and the Wi-Fi points already worked on the sheets. Built only when you ask for it, opened in a window of its own. On it you can move, delete and reclassify NERs; the analysis still measures every distance on its own sheet.":
+    "As folhas de detalhe de um nível de um livro montadas num mapa só (nunca duas séries, nunca o key plan), com cada NER, o alcance dela e os pontos Wi-Fi já trabalhados nas folhas. Montado só quando você pede e aberto numa janela própria. Nele você move, exclui e reclassifica NERs; a análise continua medindo cada distância na própria folha.",
+  "Build the maps of this book again":
+    "Montar os mapas deste livro de novo",
+  "Build the maps of this book":
+    "Montar os mapas deste livro",
+  "without a scale, left out":
+    "sem escala, deixada(s) de fora",
+  "book replaced — build again":
+    "livro substituído; monte de novo",
+  "Build":
+    "Montar",
+  "one sheet — nothing to lay out":
+    "uma folha só, nada para montar",
+  "One page per composite map built (Composite map card below): the sheets of a level as one map, every NER with its reach and the Wi-Fi points. The legend on the first page only.":
+    "Uma página por mapa composto montado (cartão Mapa composto abaixo): as folhas de um nível num mapa só, cada NER com o alcance dela e os pontos Wi-Fi. A legenda só na primeira página.",
+  "Composite map PDF":
+    "PDF do mapa composto",
+  "The composite map belongs to another project — open that project first.":
+    "O mapa composto é de outro projeto. Abra esse projeto primeiro.",
+  "no sheet of this map could be placed":
+    "nenhuma folha deste mapa pôde ser posicionada",
+  "that spot is on no sheet of this map":
+    "esse ponto não está em nenhuma folha deste mapa",
+  "no composite map is built yet — build one first":
+    "nenhum mapa composto foi montado ainda; monte um primeiro",
+  "this move was undone already":
+    "este movimento já foi desfeito",
+  "no such move on the composite map":
+    "esse movimento não existe no mapa composto",
+  "the NER is no longer in the register":
+    "a NER não está mais no registro",
+  "composite map not found":
+    "mapa composto não encontrado",
+  "this sheet could not be placed — it cannot be shown":
+    "esta folha não pôde ser posicionada; não dá para mostrá-la",
+  "a composite map of this project is being built — wait for it to finish (the progress bar shows it)":
+    "um mapa composto deste projeto está sendo montado; espere terminar (a barra de progresso mostra)",
+  "the composite map PDF is already being made":
+    "o PDF do mapa composto já está sendo gerado",
 };

@@ -240,6 +240,39 @@ class Element(Base):
         back_populates="occurrences", foreign_keys=[ner_asset_id])
 
 
+class CompositeMap(Base):
+    """One composite map (5.0.0): the detail sheets of one level of one book
+    laid on one plane — see ``domain/composite.py``. Built only when a person
+    asks for it; derived from the book, so a project package does not carry it
+    (the receiving computer builds it again) and a backup need not either."""
+
+    __tablename__ = "composite_maps"
+    __table_args__ = (UniqueConstraint("drawing_id", "group_key"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    drawing_id: Mapped[int] = mapped_column(ForeignKey("drawings.id", ondelete="CASCADE"), index=True)
+    #: The drawing-number prefix (``412``), else the level — one map per key.
+    group_key: Mapped[str] = mapped_column(String(80))
+    label: Mapped[str] = mapped_column(String(160), default="")
+    level: Mapped[Optional[str]] = mapped_column(String(80), default=None)
+    #: Metres per point of the map's frame (the group's most common scale).
+    mpu: Mapped[Optional[float]] = mapped_column(Float, default=None)
+    #: ``x0, y0, width, height`` of the frame, in points.
+    frame: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, default=None)
+    #: One dict per detail sheet: placement, method, state, ``excluded``.
+    sheets: Mapped[list] = mapped_column(JSON, default=list)
+    refine: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    no_scale: Mapped[list] = mapped_column(JSON, default=list)
+    #: The composed picture, a file in the project's composite folder.
+    base_file: Mapped[str] = mapped_column(String(300), default="")
+    #: The book it was built from — a map of an older upload is not shown as current.
+    drawing_sha: Mapped[str] = mapped_column(String(64), default="")
+    built_at: Mapped[_dt.datetime] = mapped_column(DateTime, default=_now)
+    built_by: Mapped[str] = mapped_column(String(120), default="")
+    app_version: Mapped[str] = mapped_column(String(20), default="")
+
+
 class DrawingSpace(Base):
     """A functional space read off a drawing."""
 
@@ -730,6 +763,12 @@ class NerAsset(Base):
     #: the kind of rack the venue is sent, so it is a column of the NERs sheet
     #: of the workbook. Said by the person; the drawing is never read for it.
     environment: Mapped[Optional[str]] = mapped_column(String(16), default=None)
+    #: Where a person took a drawing of this NER off a sheet (5.1.0, D25) —
+    #: a move on the composite map, or *Delete only this marker*. The room the
+    #: sheet prints there is still this NER: *Place NERs from the drawing*
+    #: reads it as this one and creates nothing. JSON list of
+    #: ``{"drawing_id", "page", "x", "y", "at", "why"}``; NULL = none.
+    released_spots: Mapped[Optional[list]] = mapped_column(JSON, default=None)
 
     #: canonical position — the one the coverage engine uses
     canonical_drawing_id: Mapped[Optional[int]] = mapped_column(

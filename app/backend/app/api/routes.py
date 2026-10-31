@@ -1289,6 +1289,13 @@ def delete_element(project_id: int, element_id: int, justification: str = "",
         if others is None:
             S.decline_wifi_space(db, p, e.space_key)
 
+    # The room the sheet prints there is still this NER (5.1.0, D25): the next
+    # Place NERs from the drawing reads it as this one instead of creating a
+    # new NER on the spot this marker held.
+    if asset is not None:
+        _sh = SH.for_project(db, project_id)
+        S.release_spot(asset, e, f"its drawing on {_sh.label(_sh.of(e))} was deleted by hand "
+                                 f"(Delete only this marker)")
     # Deleting the last drawing of a room must not leave the register holding a
     # NER nothing supports any more — but it must not silently drop it either.
     db.delete(e)

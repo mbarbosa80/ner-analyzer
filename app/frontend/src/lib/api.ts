@@ -277,6 +277,32 @@ export const api = {
     req<any>(`/projects/${id}/reports/${fmt}` +
              `?background=${background}&legend=${legend}&lines=${lines}`, { method: "POST" }),
   audit: (id: number) => req<any[]>(`/projects/${id}/audit`),
+
+  // --- the composite map (5.0.0) -------------------------------------------
+  //: Per book: the groups a build makes and the maps already built.
+  compositePlan: (id: number) => req<any>(`/projects/${id}/composite`),
+  buildComposite: (id: number, drawingId: number, groups?: string[]) =>
+    req<any>(`/projects/${id}/composite/build`, {
+      method: "POST", body: JSON.stringify({ drawing_id: drawingId, groups }),
+    }),
+  compositeMap: (id: number, mapId: number) => req<any>(`/projects/${id}/composite/${mapId}`),
+  deleteComposite: (id: number, mapId: number) =>
+    req<void>(`/projects/${id}/composite/${mapId}`, { method: "DELETE" }),
+  compositeTileUrl: (id: number, mapId: number, z: number, x: number, y: number, v: string) =>
+    `${BASE}/projects/${id}/composite/${mapId}/tiles/${z}/${x}/${y}.png?v=${encodeURIComponent(v)}`,
+  excludeCompositeSheet: (id: number, mapId: number, page: number, excluded: boolean) =>
+    req<any>(`/projects/${id}/composite/${mapId}/sheets/${page}/exclude`, {
+      method: "POST", body: JSON.stringify({ excluded }),
+    }),
+  moveNerOnMap: (id: number, mapId: number, body: { asset_id: number; x: number; y: number;
+                                                    justification?: string; preview?: boolean }) =>
+    req<any>(`/projects/${id}/composite/${mapId}/move-ner`, {
+      method: "POST", body: JSON.stringify(body),
+    }),
+  undoMapMove: (id: number, auditId: number) =>
+    req<any>(`/projects/${id}/composite/undo/${auditId}`, { method: "POST" }),
+  compositeReport: (id: number, legend = true) =>
+    req<any>(`/projects/${id}/composite-report?legend=${legend}`, { method: "POST" }),
   accountAudit: () => req<any[]>(`/admin/audit`),
   templates: () => req<any[]>(`/mapping-templates`),
 

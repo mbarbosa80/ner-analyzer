@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import Depends
 
 from .api.auth_routes import current_user, project_guard, router as auth_router
+from .api.composite_routes import router as composite_router
 from .api.criticality_routes import router as criticality_router
 from .api.ner_routes import router as ner_router
 from .api.routes import router
@@ -110,6 +111,8 @@ _guarded = [Depends(current_user), Depends(project_guard)]
 app.include_router(router, prefix="/api", dependencies=_guarded)
 app.include_router(ner_router, prefix="/api", dependencies=_guarded)
 app.include_router(criticality_router, prefix="/api", dependencies=_guarded)
+# 5.0.0: the composite map — one map per level of a book, built on request.
+app.include_router(composite_router, prefix="/api", dependencies=_guarded)
 
 
 @app.get("/healthz")

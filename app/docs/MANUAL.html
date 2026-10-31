@@ -416,7 +416,7 @@ kbd {
 <div class="wrap">
 <header class="masthead">
 <div class="id">
-<div class="eyebrow">NER Spatial Coverage Analyzer · version 4.8.1 · VDB / TEAP</div>
+<div class="eyebrow">NER Spatial Coverage Analyzer · version 5.1.1 · VDB / TEAP</div>
 <h1>User manual</h1>
 
 <p>How the application works, screen by screen. The interface is in English, so every control appears here under the literal label you see on screen, explained beside it. The version history is not in this manual: it is in the <code>CHANGELOG.md</code> file that ships with the application, and the project's record to date is in <code>docs\HISTORY.html</code>.</p>
@@ -444,6 +444,7 @@ kbd {
 <a href="#demand"><span class="step">6</span>Demand per space</a>
 <a href="#exceptions"><span class="step">7</span>Exceptions</a>
 <a href="#reports"><span class="step">8</span>Reports</a>
+<a href="#composite"><span class="step">↗</span>Composite map</a>
 <a href="#acesso"><span class="step">—</span>Account &amp; security</a>
 <div class="navgroup">Reference</div>
 <a href="#regras">The distance rules</a>
@@ -585,7 +586,8 @@ where that room appears in a document: file, page, coordinate, the text the extr
 <tr><td class="ctrl">5</td><td class="ctrl">TEAP × drawing</td><td>Match TEAP rows to drawing spaces, in demand order, and confirm them one by one. This is where the work actually happens.</td></tr>
 <tr><td class="ctrl">6</td><td class="ctrl">Demand per space</td><td>Run the analysis; port demand per space, the NER serving each one, the distance, the status and the load per NER.</td></tr>
 <tr><td class="ctrl">7</td><td class="ctrl">Exceptions</td><td>Every TEAP space that still needs you — pending, out of the limit, near the limit or not measured — with the NER changed on the row itself.</td></tr>
-<tr><td class="ctrl">8</td><td class="ctrl">Reports</td><td>Marked-up PDF, analysis workbook and CSV.</td></tr>
+<tr><td class="ctrl">8</td><td class="ctrl">Reports</td><td>Marked-up PDF, composite map PDF, analysis workbook and CSV.</td></tr>
+<tr><td class="ctrl">↗</td><td class="ctrl">Composite map</td><td>An option, built from the Reports screen when you ask for it: the detail sheets of a level on one map, in a window of its own, where NERs are moved, deleted and reclassified with their reach in view.</td></tr>
 <tr><td class="ctrl">—</td><td class="ctrl">Account &amp; security</td><td>Your password, the accounts on this installation (if you are an administrator), the open project's audit log, and the statement of where the data lives. It sits below a divider because it is not a step in the study.</td></tr>
 </tbody>
 </table>
@@ -601,7 +603,7 @@ where that room appears in a document: file, page, coordinate, the text the extr
 <li><code>PT-BR</code> / <code>EN</code> switches the interface language (see <a href="#idioma">Language</a>), and <code>Sign out</code> ends the session.</li>
 </ul>
 
-<p>In the sidebar, under the title, is the application's <strong>version</strong> (<code>version 4.8.1</code>) and, at the foot, the author credit and the licence.</p>
+<p>In the sidebar, under the title, is the application's <strong>version</strong> (<code>version 5.1.1</code>) and, at the foot, the author credit and the licence.</p>
 <h3>Notices</h3>
 
 <p>What an action did is said in a <strong>notice</strong> that appears at the top of the window, over the page, green when it worked and red when it did not. It does not push the screen down — in the Drawing viewer the sheet stays exactly where it was under the pointer — and it goes by itself after a few seconds; a click closes it sooner.</p>
@@ -752,7 +754,7 @@ where that room appears in a document: file, page, coordinate, the text the extr
 <li><strong>Where there is already a NER:</strong> a NER written on the drawing or drawn by you within 12 m of the room, on the same sheet, <strong>is that room</strong> — no second NER; the code is recorded on it, and if its criticality disagrees with the drawing's the row asks which is right. One existing NER may answer for several rooms near it (racks labelled side by side in one cabin, one NER drawn for them): no new NER is created near one that exists.</li>
 <li><strong>The same code on two sheets</strong> (two overlapping detail sheets) is one NER, with a marker on each sheet — when the code carries a room number (<code>TEC.020-003</code>). A bare class (<code>TEC.010</code>) printed on two sheets is two racks.</li>
 <li><strong>Name:</strong> in sequence, by the application's own rule — <code>NERc_01.1</code>, <code>NERc_02.1</code> … for a critical room, <code>NER_20.1</code>, <code>NER_21.1</code> … for a non-critical one (the critical series starts at 01.1, the non-critical at 20.1; the <code>.1</code> is the rack — a second rack beside it is <code>.2</code>, renamed by hand) — in reading order within each group — the annotations, then the coded rooms, then the labels, then the symbols — by page, then top to bottom; what the sheet printed (<code>TEC.003.01-05</code>, <em>Critical NER 8</em>) is kept as <em>printed as</em>. Rename them on the <a href="#ners">NERs</a> screen as you like.</li>
-<li><strong>Running it again</strong> adds only what is still missing: every candidate finds the NER already there — a NER you <strong>removed</strong> included: its markers still hold the spot, and the room is not created again. A duplicate that slips through is yours to delete in the <a href="#viewer">Drawing viewer</a> (<code>Delete only this marker</code> when the room is drawn on other pages too).</li>
+<li><strong>Running it again</strong> adds only what is still missing: every candidate finds the NER already there — a NER you <strong>removed</strong> included: its markers still hold the spot, and the room is not created again. A duplicate that slips through is yours to delete in the <a href="#viewer">Drawing viewer</a> (<code>Delete only this marker</code> when the room is drawn on other pages too). A NER whose drawing you take off a sheet - with <code>Delete only this marker</code> or by a move on the composite map - is <strong>not drawn back on that sheet</strong>, wherever the sheet prints its code; where the application knows only the sheet and not the spot, the whole sheet is kept off for that NER.</li>
 </ul>
 
 <p>Every NER created this way comes in <strong>not confirmed</strong>, with the origin <code>from the drawing</code> (an annotation) or <code>from the room label</code> (a room or a symbol) and, in its evidence, the label as printed — <em>NER</em> for a symbol — and how its position was found. The notice at the end of the import says how many annotations and rooms were read; the notice at the end of the placing step, how many NERs were placed.</p>
@@ -882,7 +884,7 @@ where that room appears in a document: file, page, coordinate, the text the extr
 <span class="tag">Erasing what you drew</span>
 
 <p>Everything this screen puts on the sheet comes off through this screen, three ways: <strong>select it and press <kbd>Delete</kbd></strong> (or <kbd>Backspace</kbd>) on the keyboard; select it and click <code>Delete</code> in the Inspector; or arm the <code>delete</code> tool and click what should go. It covers markers of every kind, wireless points, named areas, routes, shafts and measures. The key is ignored while you type in a box such as the <code>Name</code> field. Every removal goes to the audit log, and the numbers only change at the next <code>Run analysis</code> (here or on Demand per space). Deleting a wireless point, a route, a shaft or a named area brings a notice to re-run the analysis (<em>Re-run the analysis to see the effect</em>); deleting a TER, an IDF, a COW, a DIVA node or a reference only says it left the drawing.</p>
-<p><strong>Deleting a NER deletes the NER, not one drawing of it.</strong> A room is often drawn on several sheets — a level plan and two details — and the register holds it as one NER with those pages. <code>Delete</code> on any of its markers removes the room from <strong>all</strong> of them, from the NERs list, from the analysis and from the export, in one act (the saved analysis is out of date until the next run — <em>Demand per space</em> says <em>changed since the last run</em>, and an export made before that run runs the analysis again first), exactly as <code>Delete</code> on the <a href="#ners">NERs</a> screen does; the question says <em>Delete the NER …? It is also drawn on p. 12, p. 15</em>. The row and its markers are kept, hidden, under <code>Removed (n)</code> on the NERs screen, where <code>Restore</code> puts it back on every page. A removed NER also <strong>keeps its place on the sheet</strong>, and its code on every sheet and book: <code>Place NERs from the drawing</code> will not create a room there again, nor from the same code printed elsewhere, nor from the NER block symbol drawn in the same room — a room removed before its markers were kept (with no code to hold its place) included, by the position the NER list keeps for it. For the one case where only this drawing is wrong — the same room placed twice on one sheet — the Inspector offers <code>Delete only this marker</code> when the NER is on more than one page: that marker goes, the NER stays on its other pages (and is retired only if it was the last one).</p>
+<p><strong>Deleting a NER deletes the NER, not one drawing of it.</strong> A room is often drawn on several sheets — a level plan and two details — and the register holds it as one NER with those pages. <code>Delete</code> on any of its markers removes the room from <strong>all</strong> of them, from the NERs list, from the analysis and from the export, in one act (the saved analysis is out of date until the next run — <em>Demand per space</em> says <em>changed since the last run</em>, and an export made before that run runs the analysis again first), exactly as <code>Delete</code> on the <a href="#ners">NERs</a> screen does; the question says <em>Delete the NER …? It is also drawn on p. 12, p. 15</em>. The row and its markers are kept, hidden, under <code>Removed (n)</code> on the NERs screen, where <code>Restore</code> puts it back on every page. A removed NER also <strong>keeps its place on the sheet</strong>, and its code on every sheet and book: <code>Place NERs from the drawing</code> will not create a room there again, nor from the same code printed elsewhere, nor from the NER block symbol drawn in the same room — a room removed before its markers were kept (with no code to hold its place) included, by the position the NER list keeps for it. For the one case where only this drawing is wrong — the same room placed twice on one sheet — the Inspector offers <code>Delete only this marker</code> when the NER is on more than one page: that marker goes, the NER stays on its other pages (and is retired only if it was the last one). The spot that marker held stays the NER's: <code>Place NERs from the drawing</code> takes the room printed there as this NER — it creates no other NER there and does not draw this one back.</p>
 
 <p>A wireless point can also be deleted on <a href="#demand">Demand per space</a>, with the <code>Delete</code> button of the <em>Wireless points</em> table; a NER, also on the <a href="#ners">NERs</a> screen, where <code>Removed (n)</code> → <code>Restore</code> brings it back.</p>
 </div>
@@ -1193,6 +1195,7 @@ where that room appears in a document: file, page, coordinate, the text the extr
 <tr><td class="ctrl">Marked-up PDF</td><td>Every drawing book of the project, in the order they were uploaded, page by page in one file, with the markers, the areas coloured by status, the lines from each space to the NER serving it, the legend on the first page and the disclaimer on every page. It runs in the background — on a large venue it takes a minute or two; the bar names the page it is on.</td></tr>
 <tr><td class="ctrl">with legend<span class="ctrl-kind">checkbox</span></td><td>Turns the legend box on and off. On, the box is drawn on the <strong>first page of the file</strong> only (in a project with several books, the first book's first page); every other page carries the short footnote at its foot — the limits, the slack, the scale, the “no coverage analysis” warning (when it applies), the disclaimer and the version — and the line <em>Legend: see the first page of this file.</em> Off, there is no box anywhere and no colour swatches — <strong>not</strong> the statements: the footnote is on every page, without that line.</td></tr>
 <tr><td class="ctrl">with NER → space lines<span class="ctrl-kind">checkbox</span></td><td>Turns the dotted lines from each space to the NER serving it — with the distance written on the lines from spaces; a wireless point's line carries none — on and off. Off, nothing else changes: markers, area colours and legend stay as they are. A space served by a NER on <em>another page</em> has no line to draw — with the lines on, it says beside it which room serves it and on which page (<code>NER 19 (p. 12)</code>).</td></tr>
+<tr><td class="ctrl">Composite map PDF</td><td>One page per <a href="#composite">composite map</a> built: a level of a book on one map, every NER with its reach, the legend on the first page. Runs in the background.</td></tr>
 <tr><td class="ctrl">Analysis workbook (XLSX)</td><td>The full analysis as a workbook (sheets below). Immediate.</td></tr>
 <tr><td class="ctrl">Coverage CSV</td><td>The coverage as CSV, one row per space and per drawn Wi-Fi point (a Wi-Fi point always with 0 ports): key, name, page, demand type, ports, NER, the NER's internal id, who chose it (<code>you</code> / <code>the engine</code>), critical, distance, method, limit, margin, status and <code>needs_validation</code> (scale, route or match only; an assumed port count is flagged only in the workbook). Immediate.</td></tr>
 </tbody>
@@ -1209,7 +1212,7 @@ where that room appears in a document: file, page, coordinate, the text the extr
 <li><strong>The Wi-Fi points</strong>, with the Wi-Fi sign in light blue, the name (<code>WIFI-3</code>) under it in bold, at the NERs' size, in dark blue on a white tag so it reads over the linework, a disc in the status colour under the sign and — with the lines on — the line to the NER it is measured to (no port of its own: the port is its space's <code>DWISA</code> line).</li>
 <li><strong>A space measured on another page</strong> (the same space labelled on two sheets) is drawn on both: on the sheet the TEAP line is tied to, with the NER's name and page beside it; and on the NER's sheet, with the line, the distance and the note <em>TEAP line tied on p. N</em> (with several series, the sheet's drawing number).</li>
 <li><strong>The reach circles</strong> around every NER (and every NER reference), to the sheet's scale: dashed blue for the general limit and dotted purple for photographers, radius = limit ÷ slack. A sheet with no scale gets none. And the <strong>named areas</strong> and the key-plan <strong>references</strong>, as in the viewer.</li>
-<li><strong>The legend</strong>, at the top left of the <strong>first page</strong> of the file, with the limits, the slack, the scale, the disclaimer and <em>NER Spatial Coverage Analyzer 4.8.1</em>; its wireless row reads <em>Wi-Fi - space with wireless</em>. Every other page carries the same statements as small lines along the foot of the sheet, with <em>Legend: see the first page of this file.</em> With <code>with legend</code> off, every page carries the footnote and none carries the box.</li>
+<li><strong>The legend</strong>, at the top left of the <strong>first page</strong> of the file, with the limits, the slack, the scale, the disclaimer and <em>NER Spatial Coverage Analyzer 5.1.1</em>; its wireless row reads <em>Wi-Fi - space with wireless</em>. Every other page carries the same statements as small lines along the foot of the sheet, with <em>Legend: see the first page of this file.</em> With <code>with legend</code> off, every page carries the footnote and none carries the box.</li>
 </ul>
 
 <p>Two different documents come out of the same button, at two different moments. Late in a study it is the analysis: rooms, coverage, distances. Early on it is the drawing — <em>“here are the racks I am proposing, put them in front of the design team”</em> — and at that point there may be no TEAP and no matching. When the project has no analysis at all yet, the sheet <strong>says so</strong>, in the legend or the footnote, in amber: <em>No coverage analysis on this sheet…</em> (a decision per project: a key plan with no space analysed on it, in a project that already has an analysis, gets no note). Silence there would be read as “everything is covered”. Only the PDF does this: the workbook and the CSV always carry an analysis — with none saved, or with one that something changed after (a NER deleted, moved or renamed, a match decided, a TEAP imported), they run it first and save it, and the notice at the end says so (<em>the analysis was run again first: n change(s) after the last run</em>). Without a TEAP they return the error.</p>
@@ -1257,6 +1260,90 @@ where that room appears in a document: file, page, coordinate, the text the extr
 <h3>"Positions outside the page"</h3>
 
 <p>If the panel shows that warning with a table (<code>Kind</code>, <code>Label</code>, <code>Page</code>, <code>X</code>, <code>Y</code>, <code>Page size</code>), the drawing holds coordinates outside the sheet — which happens when a PDF with an unusual page rotation was imported by an older reader. The items are marked where they are stored, not moved — a marker that vanishes from an export with no explanation is worse than one visibly in the wrong place — but the fix is to re-import the VDB.</p>
+</section>
+<hr class="rule"/>
+<!-- ================================================================== -->
+<section id="composite">
+<div class="screen-step">Step 8 · an option</div>
+<h2>Composite map</h2>
+
+<p class="lede">The detail sheets of one level of one book laid on one map, in a window of its own, with everything already worked on the sheets — every NER and its reach, the Wi-Fi points, the TER, IDF, COW and DIVA markers. A sheet is the continuation of its neighbour; on one map the NERs of a level, their reach and the gaps between them read at a glance. It is built only when you ask for it, and the Drawing viewer is not touched by it.</p>
+
+<h3>What goes on a map</h3>
+<ul>
+<li><strong>One map per level of one book.</strong> The sheets are grouped by the level part of their drawing number (<code>412</code> in <code>VVV-412A1-XXX-OP</code>), or by the level in the title block when the drawing number does not say it. Two series are never mixed: a project with the 400 and the 600 books has maps of the 400 book and maps of the 600 book.</li>
+<li><strong>Never the key plan.</strong> Key plans (ticked on the <a href="#scale">Scale</a> screen) are not drawn: the map is laid out <em>against</em> them, as the reference, and is made of detail sheets only.</li>
+<li><strong>Only sheets with a scale.</strong> A sheet with no scale is listed under its group as <em>without a scale, left out</em>.</li>
+<li>A level drawn on <strong>one sheet</strong> has nothing to lay out and gets no map.</li>
+</ul>
+
+<h3>How the sheets are placed</h3>
+<p>Every sheet is placed by two independent measurements, and the two check each other:</p>
+<ul>
+<li><strong>Match lines.</strong> The heavy dashed lines a sheet prints where it continues, read against the grid the key plan draws with the same lines and the sheet's zone (<code>A1</code> in <code>412A1</code>). Exact when the book follows that pattern.</li>
+<li><strong>Correlation with the key plan.</strong> The linework of the sheet compared with the key plan around the label the key plan prints for it (<code>412A1-XXX-OP</code>, or the zone letter). Works on any book whose key plan shows the linework.</li>
+</ul>
+<p>When the two disagree by more than 2 m the correlation is kept — the match lines assume a regular grid, and the books that break it are the ones where they disagree. Then every pair of sheets that overlap is compared directly, within 4 m of where they were put: a pair that lines up confirms both sheets and corrects a few metres at most; a sheet is never moved farther than that by its neighbours.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Sheet state</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">confirmed · blue outline</td><td>The two measurements agree within 1 m, or a neighbouring sheet lines up with it, or a space code it shares with a neighbour lands in the same place.</td></tr>
+<tr><td class="ctrl">not confirmed · orange outline</td><td>Placed by one measurement, with nothing to confirm it. Usually right; check it against its neighbours before deciding on it.</td></tr>
+<tr><td class="ctrl">contradicted · red outline</td><td>Two or more space codes it shares with a neighbouring sheet do not line up: the sheet is probably in the wrong place. Leave it off the map.</td></tr>
+<tr><td class="ctrl">not placed</td><td>Neither measurement could place it (no match line and no label for it on the key plan). Listed, never drawn.</td></tr>
+</tbody>
+</table></div>
+
+<h3>Building and opening</h3>
+<p>On the <a href="#reports">Reports</a> screen, the <strong>Composite map</strong> card lists every book and its levels.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Control</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">Build the maps of this book</td><td>Places the sheets of every level of the book and composes one picture per level. It runs in the background; a book of sixty sheets takes a minute or two. Building again replaces the maps of the book and keeps the sheets you left off.</td></tr>
+<tr><td class="ctrl">Build</td><td>The same, for one level only.</td></tr>
+<tr><td class="ctrl">Open ↗</td><td>Opens the map in a window of its own. Several maps of the project open in the same window: choose another level in the list at the top.</td></tr>
+<tr><td class="ctrl">Delete</td><td>Deletes the map — the picture, nothing else. Nothing on the sheets changes.</td></tr>
+</tbody>
+</table></div>
+<p>The map is a picture of the book: it is not in a backup and not in a project package. On another computer, or after a book is replaced (the card says <em>book replaced — build again</em>), build it again.</p>
+
+<h3>The map window</h3>
+<p>Scroll to zoom around the pointer, drag the background to move. The picture comes in pieces as you zoom, sharp at every scale; on top of it the application draws, as on the sheets:</p>
+<ul>
+<li><strong>Every NER</strong> in its colour with its name, and its reach: the general limit as a dashed circle and the photographers' limit as a dotted one, straight line, to the map's scale. A NER drawn on two neighbouring sheets is one NER on the map; when its two drawings do not land in one place, both are shown, joined by a dashed line.</li>
+<li><strong>The Wi-Fi points</strong> as light-blue dots, and the <strong>TER, IDF, COW and DIVA</strong> markers as small squares with their names.</li>
+<li><strong>The outline of every sheet</strong> in the colour of its state, with its drawing number. <code>Spaces</code> shows the space codes when zoomed in.</li>
+</ul>
+<p>The boxes at the top turn each layer on and off. On the right:</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Part</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">Findings</td><td>What only one plane shows: a NER drawn on two sheets whose drawings land more than 1 m apart (<em>drawn 10.2 m apart on two sheets</em>); two different NERs less than 2 m apart (<em>the same NER under two names?</em>); a NER drawn only on sheets left off the map. Click one to select the NER and centre the map on it.</td></tr>
+<tr><td class="ctrl">Sheets</td><td>Every sheet of the level with its state. Click the drawing number to centre the map on it; <code>Open</code> opens it in the Drawing viewer of the main window; <code>Leave off</code> takes it off the map (it is not drawn and its NERs are not shown) and <code>Put back</code> returns it.</td></tr>
+<tr><td class="ctrl">Build this map again</td><td>Places the sheets of this level again, after the scales or the key plan changed.</td></tr>
+</tbody>
+</table></div>
+
+<h3>Deciding on the map</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>Action</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td class="ctrl">Drag a NER</td><td>Before anything changes, the question says <strong>how far</strong> the NER goes, in metres, and which sheets it <strong>moves on</strong>, is <strong>taken off</strong> or is <strong>drawn on</strong> — at the zoom that shows the whole level a short drag is a long way. After you confirm, the NER moves on <strong>every sheet of the level that shows the new spot</strong>; a sheet that no longer shows it loses that drawing of the NER; and when none of the sheets it was drawn on shows the spot, it is drawn on the sheet that does. Its drawings in another book are not moved (the notice names the book). Every change is in the audit log as a move, and the analysis is out of date until it runs again. A drawing taken off a sheet leaves its spot to the NER: <code>Place NERs from the drawing</code> reads the room printed there as this NER — it creates no new NER there and does not draw this one back on that sheet — not even where the sheet prints the NER's code somewhere else. A NER whose drawings land <strong>more than 1 m apart</strong> on the map (the <em>drawn … apart</em> finding: its sheets disagree, one of them is probably misplaced) is <strong>not moved</strong>: the notice names the sheets — check them, leave the misplaced one off the map, or move the NER on each sheet in the Drawing viewer. When the two drawings are on the <strong>same sheet</strong>, the notice says the NER is drawn twice there: delete the extra one with <code>Delete only this marker</code> in the Drawing viewer, then move it. A locked NER does not move.</td></tr>
+<tr><td class="ctrl">Undo</td><td>In the notice after a move, and as <code>Undo the last move</code> on the right: every drawing of the NER goes back where it was, the ones taken off included. Refused when the NER was changed again after the move — move it back by hand. A sheet where the NER is drawn again at that spot is not given a second drawing of it; the notice names the sheet.</td></tr>
+<tr><td class="ctrl">Click a NER</td><td>Selects it: its criticality, whether it is locked, the sheets it is drawn on and the other books.</td></tr>
+<tr><td class="ctrl">Make critical / Make non critical</td><td>The same as changing the kind in the Drawing viewer: on the NER, on every drawing of it, confirmed.</td></tr>
+<tr><td class="ctrl">Delete NER</td><td>The same as deleting it in the Drawing viewer: the NER leaves the register — every sheet, every book, the NERs list and the analysis. <code>Restore</code> on the <a href="#ners">NERs</a> screen brings it back.</td></tr>
+<tr><td class="ctrl">Open in the Drawing viewer</td><td>One button per sheet the NER is drawn on: the main window opens that sheet centred on it.</td></tr>
+</tbody>
+</table></div>
+
+<div class="note">
+<span class="tag">What a move changes</span>
+<p>Building a map, leaving a sheet off, putting it back and deleting a map change no number: they are pictures of the book. <strong>Moving a NER is not a picture</strong>: it changes where the NER is drawn on the sheets, so after the next analysis its distances, the statuses of the spaces it serves and the workbook change; until then the analysis is marked out of date (<em>changed since the last run</em>) and an export runs it again first. Every distance in the analysis is still measured on its own sheet, to that sheet's scale; the circles on the map are straight-line reach for the eye. A sheet placed by the application can be off by some decimetres when confirmed, and by more when not — decide on the orange ones only after checking them against their neighbours, and on a red one (contradicted) not before it is checked.</p>
+</div>
+
+<h3>Composite map PDF</h3>
+<p><code>Composite map PDF</code>, beside <code>Marked-up PDF</code> on the Exports card, writes one page per map built — the sheets as placed, each outlined by its state so that it reads without the colour — <em>confirmed</em>: blue dashed line; <em>not confirmed</em>: orange dotted line with <strong>NOT CONFIRMED</strong> beside the sheet number; <em>contradicted</em>: thicker red dash-dot line with <strong>CONTRADICTED</strong> — every NER with its name and its two reach circles, the Wi-Fi points and the other markers — with the legend — NERs, the two reaches, Wi-Fi, TER, IDF, COW, DIVA and the three sheet states — on the first page only (<code>with legend</code> off: no legend). A map larger than 200 inches is scaled to fit, the largest a PDF page may be. It does not replace the marked-up PDF, which stays the document of each sheet with the coverage.</p>
 </section>
 <hr class="rule"/>
 <!-- ================================================================== -->
@@ -1473,8 +1560,8 @@ where that room appears in a document: file, page, coordinate, the text the extr
 <thead><tr><th>Limitation</th><th>What it means in practice</th></tr></thead>
 <tbody>
 <tr>
-<td class="ctrl">The sheets of one level are not stitched together</td>
-<td>Distance is only measured <strong>within one page</strong>. A space that appears on a sheet with a NER is measured there (see <a href="#demand">The same space on more than one page</a>). But a space that exists <strong>only</strong> on a sheet with no NER, with the NER on the neighbouring sheet of the same level, comes back <em>No NER reaches it</em> — the way out is to choose the room under <code>Served by</code>: the choice counts the ports and reports the distance as not measured. The overall level plans cannot act as a common reference: they print no space codes.</td>
+<td class="ctrl">Distances are not measured across sheets</td>
+<td>The <a href="#composite">composite map</a> lays the sheets of a level on one map, but it is a picture to decide on: distance is still only measured <strong>within one page</strong>. A space that appears on a sheet with a NER is measured there (see <a href="#demand">The same space on more than one page</a>). But a space that exists <strong>only</strong> on a sheet with no NER, with the NER on the neighbouring sheet of the same level, comes back <em>No NER reaches it</em> — the way out is to choose the room under <code>Served by</code>: the choice counts the ports and reports the distance as not measured. The overall level plans cannot act as a common reference: they print no space codes.</td>
 </tr>
 <tr>
 <td class="ctrl">Wired connection with no port in the TEAP</td>
@@ -1605,14 +1692,14 @@ manual    start.bat   ·   stop.bat   ·   tools\server-start.cmd   ·   tools\s
 <p>To move <strong>one project</strong> — not the application — to another computer, use <code>Export</code> and <em>Import a project package</em> on the <a href="#projects">Projects</a> screen.</p>
 <p class="lede">One .zip file, a few clicks at the other end, no administrator rights needed, and no internet connection. The full walkthrough — prerequisites, installation, first sign-in, updating, backup, uninstalling and common problems — is in the <strong>installation manual</strong>, <code>docs\INSTALL.html</code>, which ships with the package.</p>
 
-<p>In short: on the source machine, <code>build_package.bat</code> writes <code>dist\ner-analyzer-4.8.1-windows.zip</code> with the application, the compiled screens, the manuals, the tests, every Python package and Python itself — and <strong>no data</strong>: no projects, no drawings, no accounts. On the target machine there is nothing to install first: unzip anywhere, right-click <code>setup.bat</code> → <em>Run as administrator</em> (a double-click asks Windows for the rights itself) — or, where administrator rights cannot be granted, double-click <code>setup-noadmin.bat</code>, which installs for that account only — and create the first account. <code>setup.bat</code> installs into <code>%LOCALAPPDATA%\Programs\ner-analyzer</code> for the person signed in, registers the sign-in task and the watchdog, starts the server, opens the browser, puts an <strong>NER Analyzer</strong> shortcut on the desktop and deletes the installation files, leaving only the application. An existing installation is backed up and replaced: its data is kept, and the old version is moved aside to <code>ner-analyzer.previous</code>. Opening <code>install.bat</code> in the package hands over to <code>setup.bat</code>.</p>
-<p><strong>On a Mac</strong> (Apple Silicon — M1 or later — macOS 11 or later) the package is <code>ner-analyzer-4.8.1-macos-arm64.zip</code>, built with <code>python tools/make_package.py --platform mac</code>. It carries its own Python 3.12 and the same pinned packages as the Windows one, and needs no administrator password: <code>setup.command</code> installs into <code>~/Applications/ner-analyzer</code>, registers a launch agent for that account (the server starts at sign-in and again if it stops — what the watchdog does on Windows), starts the server, opens the browser, puts an <strong>NER Analyzer</strong> link on the Desktop and removes the installation files. An existing installation is backed up and replaced, its <code>data</code> kept. The <code>mac</code> folder of the installation holds <code>start</code>, <code>stop</code>, <code>backup</code>, <code>run-tests</code>, <code>autostart</code> and <code>uninstall</code>, each a <code>.command</code>. The steps, and what to do when macOS says it cannot verify the developer, are in the installation manual.</p>
+<p>In short: on the source machine, <code>build_package.bat</code> writes <code>dist\ner-analyzer-5.1.1-windows.zip</code> with the application, the compiled screens, the manuals, the tests, every Python package and Python itself — and <strong>no data</strong>: no projects, no drawings, no accounts. On the target machine there is nothing to install first: unzip anywhere, right-click <code>setup.bat</code> → <em>Run as administrator</em> (a double-click asks Windows for the rights itself) — or, where administrator rights cannot be granted, double-click <code>setup-noadmin.bat</code>, which installs for that account only — and create the first account. <code>setup.bat</code> installs into <code>%LOCALAPPDATA%\Programs\ner-analyzer</code> for the person signed in, registers the sign-in task and the watchdog, starts the server, opens the browser, puts an <strong>NER Analyzer</strong> shortcut on the desktop and deletes the installation files, leaving only the application. An existing installation is backed up and replaced: its data is kept, and the old version is moved aside to <code>ner-analyzer.previous</code>. Opening <code>install.bat</code> in the package hands over to <code>setup.bat</code>.</p>
+<p><strong>On a Mac</strong> (Apple Silicon — M1 or later — macOS 11 or later) the package is <code>ner-analyzer-5.1.1-macos-arm64.zip</code>, built with <code>python tools/make_package.py --platform mac</code>. It carries its own Python 3.12 and the same pinned packages as the Windows one, and needs no administrator password: <code>setup.command</code> installs into <code>~/Applications/ner-analyzer</code>, registers a launch agent for that account (the server starts at sign-in and again if it stops — what the watchdog does on Windows), starts the server, opens the browser, puts an <strong>NER Analyzer</strong> link on the Desktop and removes the installation files. An existing installation is backed up and replaced, its <code>data</code> kept. The <code>mac</code> folder of the installation holds <code>start</code>, <code>stop</code>, <code>backup</code>, <code>run-tests</code>, <code>autostart</code> and <code>uninstall</code>, each a <code>.command</code>. The steps, and what to do when macOS says it cannot verify the developer, are in the installation manual.</p>
 </section>
 <!-- ================================================================== -->
 <section id="sobre">
 <h2>Version and licence</h2>
 
-<p>This manual describes <strong>version 4.8.1</strong> of the NER Spatial Coverage Analyzer. The installed version appears on the sign-in screen, in the sidebar under the title, at <code>http://127.0.0.1:8000/healthz</code>, on the <em>Summary</em> sheet of every exported workbook (<em>Generated by</em>) and on every marked-up PDF (at the end of the legend on the first page, and in the footnote of every other page). The <code>CHANGELOG.md</code> file that ships with the application says what changed in each version and how versions are numbered.</p>
+<p>This manual describes <strong>version 5.1.1</strong> of the NER Spatial Coverage Analyzer. The installed version appears on the sign-in screen, in the sidebar under the title, at <code>http://127.0.0.1:8000/healthz</code>, on the <em>Summary</em> sheet of every exported workbook (<em>Generated by</em>) and on every marked-up PDF (at the end of the legend on the first page, and in the footnote of every other page). The <code>CHANGELOG.md</code> file that ships with the application says what changed in each version and how versions are numbered.</p>
 
 <p>There is no artificial intelligence inside this application. Nothing in this folder calls out to any model, service or account; you can prove it by turning the network off and using the application as usual.</p>
 

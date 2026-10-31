@@ -41,6 +41,144 @@ package.
 
 ---
 
+## 5.1.1 — 2026-10-31
+
+PATCH: what the complementary QA of 5.1.0 found (31 Oct 2026). No screen and no file
+shape changes; the first start writes one more pass (below).
+
+- **D34 (medium) - a drawing taken off a sheet came back by its code.** *Place NERs
+  from the drawing* draws a NER whose TEC code it reads on another sheet there too.
+  5.1.0 held only the spot a drawing was taken from (12 m), so the same code printed
+  elsewhere on that sheet drew the NER back; and a drawing deleted with *Delete only
+  this marker* before 5.1.0 had no spot at all - on an aquatics project the NER deleted
+  by hand on two sheets of the 600 series on 20 Oct was drawn back on both. Now a NER
+  is never drawn back by its code on a sheet its drawing was taken off. A start-up pass
+  (`released_sheets_511`) reads the old *Delete only this marker* lines of the audit log
+  and keeps those sheets whole on the NER - only where exactly one NER carries the name,
+  it existed then and it is not drawn on that sheet now; running it again changes
+  nothing. Held by `tests/test_qa_fixes_511.py`.
+- **D32 (low) - the refusal to move a NER drawn twice on one sheet.** The notice said
+  the sheets disagree and advised leaving a sheet off the map; it now says the NER is
+  drawn twice on that sheet and to delete the extra marker with *Delete only this
+  marker*. Nothing else changes: the move is still refused and nothing is written.
+- **D33 (low, tests) - the 5.1.0 tests depended on their order.** Four D25 tests shared
+  one project and the Undo test put the drawing back for the ones after it. Each test
+  now has its own project; the file passes in any order.
+
+## 5.1.0 — 2026-10-31
+
+MINOR: the defects the QA pass of 5.0.0 found (31 Oct 2026, D25—D31), every one
+reproduced on a copy of the work laptop's sixteen projects and held by a test in
+`tests/test_qa_fixes_510.py` that fails on 5.0.0. Screens and the composite map PDF
+change; the database gains one column (`ner_assets.released_spots`), added on the
+first start.
+
+- **D25 (high) - a drawing taken off a sheet came back as a new NER.** A move on the
+  composite map that left a sheet, or *Delete only this marker*, deleted the marker
+  and with it the only record that the room the sheet prints there is that NER. The
+  next *Place NERs from the drawing* created a new NER on it (NER_38.1 and NER_43.1
+  on a port project and an arena project, 0.0 m from where NER_21.1 and NER_35.1 had been drawn), or,
+  for a room with a TEC code, drew the NER back on the sheet it was taken off
+  (a stadium project). The NER now keeps those spots (`released_spots`, both where the
+  marker was and where it was first put); *Place NERs* takes a room or a team
+  annotation read there as that NER: nothing created, nothing drawn back; a removed
+  NER's spots keep it removed. Undo forgets the spot it puts a drawing back on. On
+  the first start, the spots of the moves still in force are read back from the audit
+  log, and a NER *Place NERs* created on such a spot afterwards gets a validation
+  naming the other NER - nothing is removed or consolidated. A marker deleted with
+  *Delete only this marker* before 5.1.0 cannot be read back: its audit line has no
+  position (13 such lines on the work laptop; no NER was created on any of them).
+- **D26 (medium) - the confirm of a move said nothing of how far.** An 80-pixel drag
+  at the zoom that fits the level moved a NER about 170 m onto another sheet. The
+  window now asks the server first (`move-ner` with `preview: true`, nothing
+  changed) and the question gives the distance in metres and the sheets the NER
+  moves on, is taken off and is drawn on; the result of a move carries `distance_m`.
+- **D27 (medium) - the PDF printed a contradicted sheet like a not-confirmed one.**
+  Each state now has the window's colour, a line pattern of its own and, when not
+  confirmed, its name beside the sheet number: confirmed blue dashed, not confirmed
+  orange dotted + NOT CONFIRMED, contradicted thicker red dash-dot + CONTRADICTED;
+  the heading counts the three.
+- **D28 (low) - the PDF legend left out what the page draws.** It now lists TER,
+  IDF, COW and DIVA and the three sheet states.
+- **D29 (high) - a small drag collapsed a NER whose sheets disagree.** The window
+  draws such a NER at the middle of its drawings; dropping it 0.5 m away moved one
+  drawing 38.9 m on its own confirmed sheet and took the other off (NER_29.1,
+  77 m apart), or took both off (NERc_10.1, 353 m apart), and the finding that
+  showed the disagreement was gone (a golf project). A NER drawn more than 1 m apart on the map is
+  now refused, with the sheets named.
+- **D30 (low) - tiles asked at once composed the missing picture once each.** Six
+  copies of one map's picture on the work laptop, five never referenced (about
+  38 MB). The row is read again inside the lock. Copies already made are left where
+  they are.
+- **D31 (medium) - Undo could give a NER two drawings on one sheet** when it had been
+  drawn there again after the move (NER_21.1 and NER_35.1 on a stadium project). A drawing
+  is not put back where the NER is drawn again; the result names the sheet.
+- **Manual (M1, M2, M3).** "The map changes no number" replaced by what a move
+  changes; the released spot and the refusal described; the PDF states spelled out.
+
+## 5.0.0 — 2026-10-30
+
+MAJOR, by Marcelo's call: the composite map, a new way of working on a level.
+Every project, export and workflow of 4.8.1 stays valid; the database gains
+one table (`composite_maps`), created on the first start. Installed on his
+computer only, for testing, before it goes anywhere else.
+
+Marcelo, 30 Oct 2026: lay the detail sheets of one level of a book on one
+map — never two series, never the key plan — as an option generated when he
+decides, in a window of its own and not in the Drawing viewer, carrying
+everything already worked on the sheets; on it, move, delete and reclassify
+NERs; print it as one PDF beside the marked-up one. The feasibility test the
+same day, on the sixteen 400 books of the work laptop, placed 28 of 34
+multi-sheet levels automatically, at 0.05 to 0.3 m on the seams.
+
+- **Placing the sheets** (`domain/composite.py`): one group per level by the
+  drawing-number prefix (`412` in `VVV-412A1-XXX-OP`), else the title-block
+  level; two independent measurements per sheet — the match lines against the
+  key plan's grid, and the sheet's linework correlated with the key plan
+  around its label — with the correlation kept when they disagree by more
+  than 2 m; then a neighbour check that compares every overlapping pair within
+  4 m of where it was put, corrects a few metres at most and never relocates a
+  sheet. A wider search was tried first and dragged good sheets 7 to 11 m on
+  the test book. Each sheet says how sure it is: confirmed, not confirmed,
+  contradicted (two shared space codes that do not line up) or not placed.
+- **Building** (`composite_service.py`, `POST /projects/{id}/composite/build`):
+  a job, in the child interpreter like the book reader; one picture (vector
+  PDF) per level under `data\composite\project_<id>\`; a sheet left off stays
+  off when the map is built again. Not in a backup, not in a project package:
+  it is derived from the book and built again on demand.
+- **The map window** (`?composite=<project>&map=<id>`): tiles cut by the
+  server and cached on disk; NERs with the general and photographer reach
+  circles, Wi-Fi points, TER/IDF/COW/DIVA markers, sheet outlines by state,
+  space codes on demand; findings (a NER whose drawings land more than 1 m
+  apart, two NERs less than 2 m apart, a NER only on sheets left off); the
+  sheet list with Leave off / Put back; a sheet or a NER opened in the Drawing
+  viewer of the main window.
+- **Deciding on the map**: dragging a NER moves its marker on every sheet of
+  the level that shows the new spot, takes it off the sheets that no longer
+  show it, draws it on the sheet that does when none of its sheets shows the
+  spot, and keeps the register's position on the right sheet; audited as
+  `ner.moved` / `element.deleted` / `element.created` under one
+  `composite.ner_moved`, which **Undo** reverses while nothing else touched
+  the NER. Delete and Make critical / non critical use the Drawing viewer's
+  own requests.
+- **Composite map PDF** on the Reports screen: one page per map, the legend
+  on the first page only, scaled to 200 inches when larger.
+- A level drawn on one sheet gets no map (nothing to lay out). Where sheets
+  overlap, the surest are drawn on top, so a misplaced sheet never hides a
+  placed one.
+- Building, leaving a sheet off and deleting a map are neutral to the
+  analysis; a move on the map is not.
+- QA before installing, on a copy of the work laptop's projects (the sixteen
+  400 books, 34 levels of more than one sheet, 422 sheets): 325 sheets
+  confirmed, 62 not confirmed, 32 contradicted, 3 not placed; 20 levels with
+  80 % or more confirmed and none contradicted, 9 with half or more, 5 to be
+  checked sheet by sheet. The findings named 5 pairs of NERs under two names
+  less than 0.15 m apart and 22 NERs whose drawings on two sheets land 1 to
+  350 m apart. A book takes 20 s to 4 min to build.
+- Tests: `tests/test_composite_map_500.py` (20) on an invented book whose true
+  layout is known (`tests/composite_book.py`), flat and rotated, with and
+  without match lines, with an irregular grid.
+
 ## 4.8.1 — 2026-10-28
 
 PATCH: what the replay of the QA scripts on a copy of the work laptop's

@@ -163,6 +163,9 @@ ADDED_COLUMNS: list[tuple[str, str, str]] = [
     ("elements", "origin_y", "FLOAT"),
     # 4.8.0. The TEAP spaces whose Wi-Fi point a person deleted (JSON list).
     ("projects", "wifi_declined", "TEXT"),
+    # 5.1.0. Where a person took a drawing of a NER off a sheet (JSON list):
+    # the room printed there stays that NER for Place NERs (D25).
+    ("ner_assets", "released_spots", "TEXT"),
 ]
 
 
@@ -705,6 +708,171 @@ def flag_resurrected_ners(db: Session, project: Project) -> dict:
             a.pending_validations = keep
     db.commit()
     return {"resurrected_ners_flagged": flagged}
+
+
+_RELEASED_PREFIX = "position: created where another NER's drawing was taken off this sheet"
+
+
+def released_spots_510(db: Session, project: Project) -> dict:
+    """5.1.0 (D25). A move on the composite map (5.0.0) that took a NER's
+    drawing off a sheet left nothing on that spot, and the next *Place NERs
+    from the drawing* created a new NER on the room printed there.
+
+    1. The spots of the moves still in force (not undone) are kept on the
+       moved NER (``released_spots``) — read back from the audit log, which
+       holds every marker a move took off. A marker deleted with *Delete only
+       this marker* before 5.1.0 cannot be recovered this way: its audit line
+       has no position.
+    2. A NER that Place NERs created afterwards within the same-place distance
+       of such a spot — undone or not — gets a validation naming the other
+       NER. Nothing is removed or consolidated: it may be the same room, and
+       the person decides (consolidate, or remove this one)."""
+    import math
+    from . import services as S
+    from .models import AuditLog
+    from .sheets import for_project
+    logs = list(db.execute(select(AuditLog).where(
+        AuditLog.project_id == project.id,
+        AuditLog.action.in_(("composite.ner_moved", "composite.ner_move_undone")))
+        .order_by(AuditLog.id)).scalars())
+    if not logs:
+        return {}
+    undone = {(l.payload or {}).get("undo_of") for l in logs
+              if l.action == "composite.ner_move_undone"}
+    sh = for_project(db, project.id)
+    first = sh.drawing_ids[0] if sh.drawing_ids else None
+    scales = S.scale_map(db, project.id)
+    restored = flagged = 0
+    taken: list[tuple] = []          # (drawing, page, x, y, asset, at)
+    for l in logs:
+        if l.action != "composite.ner_moved":
+            continue
+        p = l.payload or {}
+        a = db.get(NerAsset, p.get("asset_id"))
+        if a is None:
+            continue
+        for r in p.get("removed", []):
+            row = r.get("row") or {}
+            if row.get("x") is None:
+                continue
+            spots = [(row["x"], row["y"])]
+            if row.get("origin_x") is not None:
+                spots.append((row["origin_x"], row["origin_y"]))
+            for x, y in spots:
+                taken.append((row.get("drawing_id") or first, row.get("page"), x, y, a, l.at))
+            if l.id in undone:
+                continue
+            have = list(a.released_spots or [])
+            for x, y in spots:
+                if any(s.get("page") == row.get("page")
+                       and (s.get("drawing_id") or first) == (row.get("drawing_id") or first)
+                       and s.get("x") is not None
+                       and math.dist((s["x"], s["y"]), (x, y)) < 0.5 for s in have):
+                    continue
+                # A marker of it is back on that spot (moved there later): not released.
+                if any(o.page == row.get("page") and (o.drawing_id or first) == (row.get("drawing_id") or first)
+                       and o.scenario_id is None and o.kind in ("NER_CRITICAL", "NER_NONCRITICAL")
+                       and any(math.dist(q, (x, y)) < 0.5 for q in S.marker_spots(o))
+                       for o in a.occurrences or []):
+                    continue
+                have.append({"drawing_id": row.get("drawing_id"), "page": row.get("page"),
+                             "x": round(x, 2), "y": round(y, 2), "at": f"{l.at:%Y-%m-%dT%H:%M:%S}",
+                             "why": "its drawing was taken off this sheet by a move on the "
+                                    "composite map (read back from the audit log by 5.1.0)"})
+                restored += 1
+            if have != list(a.released_spots or []):
+                a.released_spots = have
+    for b in db.execute(select(NerAsset).where(
+            NerAsset.project_id == project.id, NerAsset.deleted_at.is_(None),
+            NerAsset.merged_into_id.is_(None))).scalars():
+        keep = [v for v in (b.pending_validations or []) if not v.startswith(_RELEASED_PREFIX)]
+        if b.origin == "drawing_room" and b.created_at is not None:
+            for (d, pg, x, y, a, at) in taken:
+                if a.id == b.id or _naive(at) >= _naive(b.created_at):
+                    continue
+                hit = False
+                for o in b.occurrences or []:
+                    if o.scenario_id is not None or o.page != pg or (o.drawing_id or first) != d:
+                        continue
+                    sc = scales.get(sh.key(d, pg))
+                    limit = S.DRAWN_ROOM_SAME_PLACE_M / sc.metres_per_unit if sc else S.DRAWN_ROOM_SAME_PLACE_PT
+                    if any(math.dist(q, (x, y)) <= limit for q in S.marker_spots(o)):
+                        hit = True
+                        break
+                if hit:
+                    keep.append(f"{_RELEASED_PREFIX} — {a.display_name}'s drawing on "
+                                f"{sh.label(sh.key(d, pg))} was taken off by a move on the "
+                                f"composite map on {at:%Y-%m-%d} and this NER was created there "
+                                f"afterwards by Place NERs from the drawing; if it is the same "
+                                f"room, consolidate it into {a.display_name} or remove it")
+                    flagged += 1
+                    break
+        if keep != list(b.pending_validations or []):
+            b.pending_validations = keep
+    db.commit()
+    return {"released_spots_restored": restored, "released_spot_ners_flagged": flagged}
+
+
+def released_sheets_511(db: Session, project: Project) -> dict:
+    """5.1.1 (D34). A NER marker deleted with *Delete only this marker* before
+    5.1.0 left an audit line with the NER's name and the sheet, and no
+    position. *Place NERs from the drawing* read the NER's code on that sheet
+    and drew it back there (an aquatics project: NERc_09.1 on two sheets of
+    the 600 series, deleted by hand on 20 Oct 2026, drawn back by 5.1.0).
+
+    The sheet is kept whole on the NER (``released_spots`` entry with no
+    ``x``/``y``): the code printed anywhere on it does not draw the NER back.
+    Only where the evidence is unambiguous — exactly one NER, live or
+    removed, carries that name now; it existed when the line was written; it
+    has no drawing on that sheet now (a drawing put back on purpose wins);
+    the sheet is not already kept. Running again changes nothing."""
+    from .models import AuditLog
+    from .sheets import for_project
+    logs = [l for l in db.execute(select(AuditLog).where(
+        AuditLog.project_id == project.id, AuditLog.action == "element.deleted")
+        .order_by(AuditLog.id)).scalars()
+        if (l.payload or {}).get("scope") == "marker"
+        and (l.payload or {}).get("kind") in (None, "NER_CRITICAL", "NER_NONCRITICAL")
+        and (l.payload or {}).get("label") and (l.payload or {}).get("page")]
+    if not logs:
+        return {}
+    sh = for_project(db, project.id)
+    first = sh.drawing_ids[0] if sh.drawing_ids else None
+    by_name: dict[str, list] = {}
+    for a in db.execute(select(NerAsset).where(
+            NerAsset.project_id == project.id, NerAsset.merged_into_id.is_(None))).scalars():
+        by_name.setdefault(a.display_name, []).append(a)
+    kept = 0
+    for l in logs:
+        p = l.payload
+        cands = by_name.get(p["label"], [])
+        if len(cands) != 1:
+            continue
+        a = cands[0]
+        if a.created_at is not None and _naive(a.created_at) > _naive(l.at):
+            continue                          # the name was given to a later NER
+        try:
+            drawing_id, page = sh.split(p["page"])
+        except Exception:                     # noqa: BLE001 — a book removed since
+            continue
+        if drawing_id is None or not page:
+            continue
+        if any(o.scenario_id is None and o.page == page and (o.drawing_id or first) == drawing_id
+               for o in a.occurrences or []):
+            continue
+        have = list(a.released_spots or [])
+        if any(s.get("page") == page and (s.get("drawing_id") or first) == drawing_id for s in have):
+            continue
+        have.append({"drawing_id": drawing_id, "page": page, "x": None, "y": None,
+                     "at": f"{l.at:%Y-%m-%dT%H:%M:%S}",
+                     "why": f"its drawing on {sh.label(p['page'])} was deleted by hand "
+                            f"(Delete only this marker) before 5.1.0 kept where; the whole "
+                            f"sheet is kept off (5.1.1)"})
+        a.released_spots = have
+        kept += 1
+    if kept:
+        db.commit()
+    return {"released_sheets_kept": kept} if kept else {}
 
 
 _SAME_NAME_PREFIX = "name: another NER has the same name"
@@ -1621,6 +1789,16 @@ def run(engine: Engine, session_factory) -> dict:
             except Exception as exc:                  # noqa: BLE001 — never keep the app from starting
                 db.rollback()
                 log.warning("4.2.1 resurrected-NER pass stopped on project %s: %s", project.id, exc)
+            try:
+                row.update(released_spots_510(db, project))
+            except Exception as exc:                  # noqa: BLE001 — never keep the app from starting
+                db.rollback()
+                log.warning("5.1.0 released-spot pass stopped on project %s: %s", project.id, exc)
+            try:
+                row.update(released_sheets_511(db, project))
+            except Exception as exc:                  # noqa: BLE001 — never keep the app from starting
+                db.rollback()
+                log.warning("5.1.1 released-sheet pass stopped on project %s: %s", project.id, exc)
             report["projects"].append(row)
     finally:
         db.close()

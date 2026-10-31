@@ -479,3 +479,43 @@ button.linkish.page-link.pill:hover { border-color: var(--accent, #4c8dff); }
 tr.row-decided td { opacity: 0.72; }
 .sidebar:not(.rail) h1 { margin-right: 44px; }
 .env-select { min-width: 110px; }
+
+/* --- The composite map (5.0.0): a window of its own ------------------------ */
+.composite-window { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.composite-top {
+  display: flex; align-items: center; gap: 12px; padding: 8px 12px;
+  background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap;
+}
+.composite-top .toggles { display: flex; gap: 12px; flex-wrap: wrap; }
+.composite-top .toggles label {
+  display: flex; gap: 5px; align-items: center; margin: 0; color: var(--text); font-size: 12px;
+}
+.composite-body { flex: 1; display: flex; min-height: 0; }
+.composite-map {
+  flex: 1; position: relative; overflow: hidden; background: #3a3f4b; cursor: grab;
+  touch-action: none; user-select: none;
+}
+.composite-map:active { cursor: grabbing; }
+.composite-paper { position: absolute; background: #fff; box-shadow: 0 0 0 1px #000; overflow: hidden; }
+.composite-tile { position: absolute; image-rendering: auto; pointer-events: none; }
+.composite-svg { position: absolute; left: 0; top: 0; }
+.composite-text { font-family: "Segoe UI", system-ui, sans-serif; pointer-events: none; }
+.composite-text.halo { paint-order: stroke; stroke: #fff; stroke-width: 3px;
+  vector-effect: non-scaling-stroke; }
+.composite-scale {
+  position: absolute; left: 12px; bottom: 10px; background: rgba(255,255,255,0.9);
+  color: #111; padding: 3px 8px; border-radius: 4px; display: flex; gap: 6px; align-items: center;
+}
+.composite-scale .bar { height: 6px; border: 1px solid #111; border-top: none; }
+.composite-side {
+  width: 340px; flex: 0 0 340px; overflow-y: auto; background: var(--panel);
+  border-left: 1px solid var(--line); padding: 10px 12px;
+}
+.composite-side section { margin-bottom: 16px; }
+.composite-side h3 { font-size: 13px; margin: 0 0 6px; display: flex; gap: 6px; align-items: center; }
+.composite-list { list-style: none; padding: 0; margin: 0; }
+.composite-list li { padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 12px; overflow: hidden; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  border: 1px solid #000; margin-right: 5px; vertical-align: middle; }
+.composite-window .toast { position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
+  z-index: 20; max-width: 70vw; cursor: pointer; }

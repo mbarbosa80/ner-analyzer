@@ -34,7 +34,7 @@ DICT = ROOT / "frontend" / "src" / "lib" / "strings.pt.ts"
 # in the dictionary is interface copy and lives entirely in the frontend.
 RAISE = re.compile(
     r"(?:HTTPException\(\s*\d+\s*,\s*|AuthError\(\s*|InsufficientMemory\(\s*"
-    r"|ValidationError\(\s*)"
+    r"|ValidationError\(\s*|CompositeError\(\s*)"
     r"((?:\"[^\"]*\"|'[^']*')(?:\s*(?:\"[^\"]*\"|'[^']*'))*)"
 )
 #: A message kept in a module-level constant so it can be raised from one place
@@ -97,6 +97,13 @@ def test_every_translated_server_message_still_exists_on_the_server():
 # Interface copy that happens to start lower case. Listed explicitly so the
 # test above stays strict about everything else.
 _INTERFACE_LOWER_CASE = {
+    # 5.0.0 — the composite map window and its card
+    "here? Its marker moves on every sheet of this level that shows the spot; a sheet that does not show it any more loses the marker. You can undo it.",
+    "drawn on", "not moved in book(s)", "is back where it was", "not placed", "left off",
+    "criticality not confirmed", "apart on the map.", "not moved from here.",
+    "apart on two sheets", "apart — the same NER under two names?",
+    "drawn only on sheets left off the map", "without a scale, left out",
+    "book replaced — build again", "one sheet — nothing to lay out",
     # 4.8.0 — the Wi-Fi card of the Scale screen
     "no Wi-Fi point sits on top of another one",
     "point(s) in",

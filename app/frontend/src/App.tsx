@@ -13,6 +13,8 @@ import {
 import { AccountPanel, LoginGate } from "./pages/Access";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { NersPanel } from "./pages/Ners";
+import { VIEWER_REQUEST_KEY } from "./pages/Composite";
+import { openViewerAt } from "./pages/panels";
 import { Viewer } from "./pages/Viewer";
 import { getLang, onLangChange, setLang, t } from "./lib/i18n";
 
@@ -85,6 +87,7 @@ export default function App() {
     return next;
   });
   const [msg, setMsg] = useState<{ text: string; kind: "ok" | "err" } | null>(null);
+  const [viewerNonce, setViewerNonce] = useState(0);
 
   const reload = useCallback(async () => {
     if (projectId == null) {
@@ -185,6 +188,29 @@ export default function App() {
     }),
     [projectId, project, reload],
   );
+
+  // The composite map window asks this one to open a sheet (5.0.0): it writes
+  // the request to the browser's storage, which tells every other window.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== VIEWER_REQUEST_KEY || !e.newValue) return;
+      try {
+        const r = JSON.parse(e.newValue);
+        if (!r || r.projectId == null || r.page == null) return;
+        if (projectId !== r.projectId) {
+          ctx.notify(t("The composite map belongs to another project — open that project first."), "err");
+          return;
+        }
+        openViewerAt(ctx, r.page, r.x, r.y);
+        // The viewer reads the hand-off when it opens: open it afresh even
+        // when it is the screen already on.
+        setViewerNonce((n) => n + 1);
+        window.focus();
+      } catch { /* not ours */ }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [ctx, projectId]);
 
   if (!authLoaded) return null;
   if (!auth?.authenticated) {
@@ -338,7 +364,7 @@ export default function App() {
           {tab === "projects" && <ProjectsPanel ctx={ctx} />}
           {tab === "setup" && <SetupPanel ctx={ctx} />}
           {tab === "scale" && <ScalePanel ctx={ctx} />}
-          {tab === "viewer" && <Viewer ctx={ctx} />}
+          {tab === "viewer" && <Viewer key={viewerNonce} ctx={ctx} />}
           {tab === "ners" && <NersPanel ctx={ctx} />}
           {tab === "matching" && <MatchingPanel ctx={ctx} />}
           {tab === "demand" && <DemandPanel ctx={ctx} />}

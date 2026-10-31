@@ -10,6 +10,7 @@ import {
 import { useJob } from "../lib/useJob";
 import { t } from "../lib/i18n";
 import { useSort } from "../components/useSort";
+import { CompositeCard } from "./Composite";
 
 const CANONICAL_FIELDS = [
   "venue_code", "venue_name", "building", "level", "zone", "fa_code",
@@ -2659,6 +2660,17 @@ export function ReportsPanel({ ctx }: { ctx: Ctx }) {
     } catch (e: any) { ctx.notify(e.message, "err"); }
   };
 
+  //: The composite map PDF (5.0.0), beside the marked-up one, never instead.
+  const makeComposite = async () => {
+    try {
+      await reportJob.start(() => api.compositeReport(p.id, legend), async (j) => {
+        if (j.state === "error") { ctx.notify(j.error, "err"); return; }
+        if (j.state !== "done") return;
+        await finish(j.result, "pdf");
+      });
+    } catch (e: any) { ctx.notify(e.message, "err"); }
+  };
+
   return (
     <>
       <div className="card">
@@ -2685,6 +2697,9 @@ export function ReportsPanel({ ctx }: { ctx: Ctx }) {
                    onChange={(e) => setLines(e.target.checked)} />
             {t("with NER → space lines")}
           </label>
+          <button disabled={reportJob.busy}
+                  title={t("One page per composite map built (Composite map card below): the sheets of a level as one map, every NER with its reach and the Wi-Fi points. The legend on the first page only.")}
+                  onClick={() => void makeComposite()}>{t("Composite map PDF")}</button>
           <button disabled={reportJob.busy}
                   onClick={() => make("xlsx")}>{t("Analysis workbook (XLSX)")}</button>
           <button disabled={reportJob.busy}
@@ -2729,6 +2744,8 @@ export function ReportsPanel({ ctx }: { ctx: Ctx }) {
           </div>
         )}
       </div>
+
+      <CompositeCard ctx={ctx} />
 
       {/* The audit log used to be printed here, under the exports. It is the
           record of who changed what and why — an administration matter, not a
